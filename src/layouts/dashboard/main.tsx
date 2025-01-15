@@ -5,12 +5,32 @@ import type { ContainerProps } from '@mui/material/Container';
 import Box from '@mui/material/Box';
 import { useTheme } from '@mui/material/styles';
 import Container from '@mui/material/Container';
-
+import { useEffect } from 'react';
+import { useRouter } from 'src/routes/hooks';
+import jwtDecode from 'jwt-decode';
 import { layoutClasses } from 'src/layouts/classes';
 
 // ----------------------------------------------------------------------
 
 export function Main({ children, sx, ...other }: BoxProps) {
+  const router = useRouter();
+
+  // Verificar se o usuário está logado
+  useEffect(() => {
+    const accessToken = localStorage.getItem('accessToken');
+    if (!accessToken) {
+      router.push('/sign-in'); // Redireciona para a página de login se não houver token
+    } else {
+      try {
+        const decodedToken = jwtDecode(accessToken);
+        if (!decodedToken) {
+          router.push('/sign-in'); // Redireciona se o token for inválido
+        }
+      } catch (error) {
+        router.push('/sign-in'); // Redireciona em caso de erro ao decodificar o token
+      }
+    }
+  }, [router]);
   return (
     <Box
       component="main"

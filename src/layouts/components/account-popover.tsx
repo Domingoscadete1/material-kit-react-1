@@ -29,6 +29,31 @@ export type AccountPopoverProps = IconButtonProps & {
 
 export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps) {
   const router = useRouter();
+// Função para deslogar o usuário
+const signOut = async (): Promise<{ error?: string }> => {
+  localStorage.removeItem('custom-auth-token');
+  localStorage.removeItem('userData');
+  localStorage.removeItem('refreshToken');
+  localStorage.removeItem('accessToken');
+  return {};
+};
+
+// Função de logout
+const handleSignOut = useCallback(async (): Promise<void> => {
+  try {
+    const { error } = await signOut();
+
+    if (error) {
+      console.error('Sign out error', error);
+      return;
+    }
+
+    // Após o logout, redireciona o usuário para a página de login ou a inicial
+    router.push('/sign-in');
+  } catch (err) {
+    console.error('Sign out error', err);
+  }
+}, [router]);
 
   const pathname = usePathname();
 
@@ -129,7 +154,7 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
         <Divider sx={{ borderStyle: 'dashed' }} />
 
         <Box sx={{ p: 1 }}>
-          <Button fullWidth color="error" size="medium" variant="text">
+          <Button fullWidth color="error" size="medium" variant="text"  onClick={handleSignOut}>
             Logout
           </Button>
         </Box>
