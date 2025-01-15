@@ -10,6 +10,6 @@ export type ConfigValue = {
 // ----------------------------------------------------------------------
 
 export const CONFIG: ConfigValue = {
-  appName: 'Minimal UI',
+  appName: 'Délcio & Domingos',
   appVersion: packageJson.version,
 };

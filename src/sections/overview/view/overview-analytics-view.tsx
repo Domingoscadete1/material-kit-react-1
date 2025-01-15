@@ -19,9 +19,9 @@ import { AnalyticsConversionRates } from '../analytics-conversion-rates';
 export function OverviewAnalyticsView() {
   return (
     <DashboardContent maxWidth="xl">
-      <Typography variant="h4" sx={{ mb: { xs: 3, md: 5 } }}>
+      {/* <Typography variant="h4" sx={{ mb: { xs: 3, md: 5 } }}>
         Hi, Welcome back 👋
-      </Typography>
+      </Typography> */}
 
       <Grid container spacing={3}>
         <Grid xs={12} sm={6} md={3}>
@@ -41,7 +41,7 @@ export function OverviewAnalyticsView() {
           <AnalyticsWidgetSummary
             title="New users"
             percent={-0.1}
-            total={1352831}
+            total={131}
             color="secondary"
             icon={<img alt="icon" src="/assets/icons/glass/ic-glass-users.svg" />}
             chart={{
@@ -79,7 +79,7 @@ export function OverviewAnalyticsView() {
           />
         </Grid>
 
-        <Grid xs={12} md={6} lg={4}>
+        {/* <Grid xs={12} md={6} lg={4}>
           <AnalyticsCurrentVisits
             title="Current visits"
             chart={{
@@ -91,9 +91,9 @@ export function OverviewAnalyticsView() {
               ],
             }}
           />
-        </Grid>
+        </Grid> */}
 
-        <Grid xs={12} md={6} lg={8}>
+        <Grid xs={12} md={6} lg={7}>
           <AnalyticsWebsiteVisits
             title="Website visits"
             subheader="(+43%) than last year"
@@ -107,7 +107,7 @@ export function OverviewAnalyticsView() {
           />
         </Grid>
 
-        <Grid xs={12} md={6} lg={8}>
+        {/* <Grid xs={12} md={6} lg={5}>
           <AnalyticsConversionRates
             title="Conversion rates"
             subheader="(+43%) than last year"
@@ -119,9 +119,9 @@ export function OverviewAnalyticsView() {
               ],
             }}
           />
-        </Grid>
+        </Grid> */}
 
-        <Grid xs={12} md={6} lg={4}>
+        <Grid xs={12} md={6} lg={5}>
           <AnalyticsCurrentSubject
             title="Current subject"
             chart={{
@@ -136,14 +136,14 @@ export function OverviewAnalyticsView() {
         </Grid>
 
         <Grid xs={12} md={6} lg={8}>
-          <AnalyticsNews title="News" list={_posts.slice(0, 5)} />
+          <AnalyticsNews title="Recentemente Divulgados" list={_posts.slice(0, 5)} />
         </Grid>
 
         <Grid xs={12} md={6} lg={4}>
           <AnalyticsOrderTimeline title="Order timeline" list={_timeline} />
         </Grid>
 
-        <Grid xs={12} md={6} lg={4}>
+        {/* <Grid xs={12} md={6} lg={4}>
           <AnalyticsTrafficBySite
             title="Traffic by site"
             list={[
@@ -153,9 +153,9 @@ export function OverviewAnalyticsView() {
               { value: 'twitter', label: 'Twitter', total: 443232 },
             ]}
           />
-        </Grid>
+        </Grid> */}
 
-        <Grid xs={12} md={6} lg={8}>
+        <Grid xs={12} md={6} lg={12}>
           <AnalyticsTasks title="Tasks" list={_tasks} />
         </Grid>
       </Grid>

@@ -119,11 +119,14 @@ export function NavContent({ data, slots, workspaces, sx }: NavContentProps) {
 
   return (
     <>
-      <Logo />
+      {/* <Logo /> */}
 
       {slots?.topArea}
 
-      <WorkspacesPopover data={workspaces} sx={{ my: 2 }} />
+      <Box sx={{ my: 2, textAlign: 'left', fontWeight: 'bold', fontSize: '35' }}>
+        Yeboo
+      </Box>
+
 
       <Scrollbar fillContent>
         <Box component="nav" display="flex" flex="1 1 auto" flexDirection="column" sx={sx}>

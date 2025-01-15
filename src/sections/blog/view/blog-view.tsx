@@ -28,15 +28,15 @@ export function BlogView() {
     <DashboardContent>
       <Box display="flex" alignItems="center" mb={5}>
         <Typography variant="h4" flexGrow={1}>
-          Blog
+          Explore
         </Typography>
-        <Button
+        {/* <Button
           variant="contained"
           color="inherit"
           startIcon={<Iconify icon="mingcute:add-line" />}
         >
           New post
-        </Button>
+        </Button> */}
       </Box>
 
       <Box display="flex" alignItems="center" justifyContent="space-between" sx={{ mb: 5 }}>
@@ -47,7 +47,7 @@ export function BlogView() {
           options={[
             { value: 'latest', label: 'Latest' },
             { value: 'popular', label: 'Popular' },
-            { value: 'oldest', label: 'Oldest' },
+            // { value: 'oldest', label: 'Oldest' },
           ]}
         />
       </Box>

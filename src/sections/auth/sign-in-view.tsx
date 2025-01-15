@@ -77,7 +77,7 @@ export function SignInView() {
         console.log("Iniciando requisição para buscar dados do usuário...");
       
         try {
-          const response = await axios.get(`http://localhost:8000/api/user/`, {
+          const response = await axios.get(`${baseUrl}/api/user/`, {
             headers: {
               'Authorization': `Bearer ${token}`,
             },
@@ -151,12 +151,12 @@ export function SignInView() {
 
   return (
     <Box gap={1.5} display="flex" flexDirection="column" alignItems="center" sx={{ mb: 5 }}>
-      <Typography variant="h5">Sign in</Typography>
+      <Typography variant="h4">Sign in</Typography>
       <Typography variant="body2" color="text.secondary">
-        Don’t have an account?
-        <Link variant="subtitle2" sx={{ ml: 0.5 }}>
+        Welcome, again!!
+        {/* <Link variant="subtitle2" sx={{ ml: 0.5 }}>
           Get started
-        </Link>
+        </Link> */}
       </Typography>
 
       <Box component="form" onSubmit={handleSubmit(onSubmit)} display="flex" flexDirection="column">
@@ -170,7 +170,7 @@ export function SignInView() {
               label="Username"
               error={!!errors.username}
               helperText={errors.username?.message}
-              sx={{ mb: 3 }}
+              sx={{ mb: 2 }}
             />
           )}
         />
@@ -212,7 +212,7 @@ export function SignInView() {
         </LoadingButton>
       </Box>
 
-      <Divider sx={{ my: 3, '&::before, &::after': { borderTopStyle: 'dashed' } }}>
+      <Divider sx={{ my: 1, '&::before, &::after': { borderTopStyle: 'dashed' } }}>
         <Typography
           variant="overline"
           sx={{ color: 'text.secondary', fontWeight: 'fontWeightMedium' }}

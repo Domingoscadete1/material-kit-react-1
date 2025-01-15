@@ -1,11 +1,11 @@
 export default class Config {
-  static API_URL = 'https://2cac-41-63-175-141.ngrok-free.app/';
+  static API_URL = 'https://4014-41-63-175-141.ngrok-free.app/';
   
   static APP_NAME = 'MeuApp';
   
-  static API_URL_WS = '2cac-41-63-175-141.ngrok-free.app';
+  static API_URL_WS = '4014-41-63-175-141.ngrok-free.app';
   
-  static API_MEDIA_URL = 'https://2cac-41-63-175-141.ngrok-free.app';
+  static API_MEDIA_URL = 'https://4014-41-63-175-141.ngrok-free.app';
   
   static getApiUrlMedia() {
     return this.API_MEDIA_URL;

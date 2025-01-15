@@ -49,17 +49,17 @@ export function AuthLayout({ sx, children, header }: AuthLayoutProps) {
                 This is an info Alert.
               </Alert>
             ),
-            leftArea: <Logo />,
-            rightArea: (
-              <Link
-                component={RouterLink}
-                href="#"
-                color="inherit"
-                sx={{ typography: 'subtitle2' }}
-              >
-                Need help?
-              </Link>
-            ),
+            // leftArea: <Logo />,
+            // rightArea: (
+            //   <Link
+            //     component={RouterLink}
+            //     href="#"
+            //     color="inherit"
+            //     sx={{ typography: 'subtitle2' }}
+            //   >
+            //     Need help?
+            //   </Link>
+            // ),
           }}
         />
       }
@@ -70,7 +70,7 @@ export function AuthLayout({ sx, children, header }: AuthLayoutProps) {
       /** **************************************
        * Style
        *************************************** */
-      cssVars={{ '--layout-auth-content-width': '420px' }}
+      cssVars={{ '--layout-auth-content-width': '410px' }}
       sx={{
         '&::before': {
           width: 1,

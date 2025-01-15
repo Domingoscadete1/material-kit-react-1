@@ -1,8 +1,7 @@
 import * as jwtDecode from 'jwt-decode';
-import Config from './Config';
+import Config from '../Config';
 
-const baseUrl = 'http://localhost:8000/'; // Garantir a barra no final
-  // Garantir a barra no final
+const baseUrl = 'https://4014-41-63-175-141.ngrok-free.app/'; 
 
 /**
  * Verifica se o token JWT está expirado.

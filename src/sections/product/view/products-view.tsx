@@ -4,7 +4,6 @@ import Grid from '@mui/material/Unstable_Grid2';
 import Pagination from '@mui/material/Pagination';
 import Typography from '@mui/material/Typography';
 import {
-  
   TextField,
   Modal,
   Select,
@@ -120,7 +119,7 @@ export function ProductsView() {
       }
     }
   }, []); // Mantenha vazio se `empresaId` não mudar
-  
+
   useEffect(() => {
     if (empresaId) {
       console.log(empresaId);
@@ -143,19 +142,19 @@ export function ProductsView() {
     } finally {
       setLoading(false);
     }
-  }, [empresaId,baseUrl]);
+  }, [empresaId, baseUrl]);
 
-  
+
 
   useEffect(() => {
     if (empresaId) {
       fetchProducts();
     }
   }, [empresaId, fetchProducts]);
-  
+
   const handleCreateProduct = async () => {
     const formData = new FormData();
-  
+
     formData.append('nome', newProduct.nome);
     formData.append('descricao', newProduct.descricao);
     formData.append('categoria', newProduct.categoria);
@@ -164,17 +163,17 @@ export function ProductsView() {
     formData.append('localizacao', newProduct.localizacao);
     formData.append('quantidade', String(newProduct.quantidade));
     formData.append('empresa_id', empresaId || '');
-  
+
     // Adicionar até 5 imagens ao FormData
     newProduct.images.slice(0, 5).forEach((image, index) => {
       formData.append(`imagem${index + 1}`, image);
     });
-  
+
     try {
       const response = await axios.post(`${baseUrl}api/produto/create/`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
-          
+
         },
       });
       console.log('Produto criado com sucesso:', response.data);
@@ -184,7 +183,7 @@ export function ProductsView() {
       console.error('Erro ao criar produto:', error);
     }
   };
-  
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setNewProduct((prev) => ({ ...prev, [name]: value }));
@@ -204,12 +203,10 @@ export function ProductsView() {
   return (
     <DashboardContent>
       <Typography variant="h4" sx={{ mb: 5 }}>
-        Products
+        Produtos
       </Typography>
       <Box display="flex" alignItems="center" mb={5}>
-        <Typography variant="h4" flexGrow={1}>
-          Produtos
-        </Typography>
+
         <Button
           variant="contained"
           color="inherit"
