@@ -133,7 +133,7 @@ export function ProductsView() {
     }
     try {
       setLoading(true);
-      const response = await axios.get(`${baseUrl}api/produtos/empresa/${empresaId}/`);
+      const response = await axios.get(`http://127.0.0.1:8000/api/produtos/empresa/${empresaId}/`);
       console.log('Produtos recebidos:', response.data.produtos);
 
       setProducts(response.data.produtos);
@@ -142,7 +142,7 @@ export function ProductsView() {
     } finally {
       setLoading(false);
     }
-  }, [empresaId, baseUrl]);
+  }, [empresaId]);
 
 
 
