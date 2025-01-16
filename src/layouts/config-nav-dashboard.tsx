@@ -38,6 +38,11 @@ export const navData = [
   //   path: '/404',
   //   icon: icon('ic-disabled'),
   // },
+  {
+    title: 'Mensagens',
+    path: '/listasms',
+    icon: icon('ic-disabled'),
+  },
   // {
   //   title: 'Sign in',
   //   path: '/sign-in',

@@ -5,9 +5,13 @@ import type { ContainerProps } from '@mui/material/Container';
 import Box from '@mui/material/Box';
 import { useTheme } from '@mui/material/styles';
 import Container from '@mui/material/Container';
+
 import { useEffect } from 'react';
+
 import { useRouter } from 'src/routes/hooks';
+
 import jwtDecode from 'jwt-decode';
+
 import { layoutClasses } from 'src/layouts/classes';
 
 // ----------------------------------------------------------------------

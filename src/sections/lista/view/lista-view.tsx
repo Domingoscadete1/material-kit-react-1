@@ -14,11 +14,17 @@ import { Iconify } from 'src/components/iconify';
 
 // ----------------------------------------------------------------------
 
-export function BlogView() {
+export function ListaView() {
 
   return (
     <DashboardContent>
+      
+      <Typography variant="h4" flexGrow={1}>
+          Dp
+      </Typography>
+
       <Pagination count={10} color="primary" sx={{ mt: 8, mx: 'auto' }} />
+
     </DashboardContent>
   );
 }

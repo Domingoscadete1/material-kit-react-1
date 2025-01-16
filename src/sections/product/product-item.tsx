@@ -137,7 +137,7 @@ export function ProductItem({ product }: { product: ProductItemProps }) {
           <Box
             component="img"
             alt={product.nome}
-            src={`http://localhost:8000${product.imagens[0]?.imagem}`}
+            src={`${baseUrl}${product.imagens[0]?.imagem}`}
             sx={{
               top: 0,
               width: 1,
@@ -229,7 +229,7 @@ export function ProductItem({ product }: { product: ProductItemProps }) {
               <Box key={image.id} sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
                 <Box
                   component="img"
-                  src={`http://localhost:8000${image.imagem}`}
+                  src={`${baseUrl}${image.imagem}`}
                   alt="Produto"
                   sx={{ width: 50, height: 50, objectFit: 'cover', mr: 2 }}
                 />
