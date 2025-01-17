@@ -7,6 +7,10 @@ import LinearProgress, { linearProgressClasses } from '@mui/material/LinearProgr
 import { varAlpha } from 'src/theme/styles';
 import { AuthLayout } from 'src/layouts/auth';
 import { DashboardLayout } from 'src/layouts/dashboard';
+import { Chart } from 'src/components/chart';
+import { ChatView } from 'src/sections/chat/view';
+import { PerfilView } from 'src/sections/perfil/view';
+import { RelatorioView } from 'src/sections/relatorio/view';
 
 // ----------------------------------------------------------------------
 
@@ -49,6 +53,9 @@ export function Router() {
         { path: 'products', element: <ProductsPage /> },
         { path: 'blog', element: <BlogPage /> },
         { path: 'listasms', element: <Lista /> },
+        { path: 'chat', element: <ChatView /> },
+        { path: 'perfil', element: <PerfilView /> },
+        { path: 'relatorio', element: <RelatorioView /> },
       ],
     },
     {

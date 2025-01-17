@@ -2,7 +2,7 @@ import { Helmet } from 'react-helmet-async';
 
 import { CONFIG } from 'src/config-global';
 
-import { ChatView } from 'src/sections/chat/view';
+import { RelatorioView } from 'src/sections/relatorio/view';
 
 // ----------------------------------------------------------------------
 
@@ -10,10 +10,10 @@ export default function Page() {
   return (
     <>
       <Helmet>
-        <title> {`Mensagens `}</title>
+        <title> {`Relatório `}</title>
       </Helmet>
 
-      < ChatView />
+      <RelatorioView />
     </>
   );
 }

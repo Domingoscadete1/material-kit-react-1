@@ -44,6 +44,21 @@ export const navData = [
     icon: icon('ic-disabled'),
   },
   // {
+  //   title: 'Chat',
+  //   path: '/chat',
+  //   icon: icon('ic-disabled'),
+  // },
+  {
+    title: 'Perfil',
+    path: '/perfil',
+    icon: icon('ic-user'),
+  },
+  {
+    title: 'Relatório',
+    path: '/relatorio',
+    icon: icon('ic-disabled'),
+  },
+  // {
   //   title: 'Sign in',
   //   path: '/sign-in',
   //   icon: icon('ic-lock'),
