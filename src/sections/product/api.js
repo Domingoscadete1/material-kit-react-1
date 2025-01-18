@@ -1,7 +1,7 @@
 import * as jwtDecode from 'jwt-decode';
 import Config from '../Config';
 
-const baseUrl = 'https://4014-41-63-175-141.ngrok-free.app/'; 
+const baseUrl = 'https://3778-105-168-86-161.ngrok-free.app/'; 
 
 /**
  * Verifica se o token JWT está expirado.

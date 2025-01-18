@@ -30,6 +30,7 @@ export function ProductItem({ product }: { product: ProductItemProps }) {
   const [imagensParaRemover, setImagensParaRemover] = useState<number[]>([]);
   const [newImages, setNewImages] = useState<File[]>([]);  // Novo estado para as imagens
   const baseUrl = Config.getApiUrl();
+  const mediaUrl=Config.getApiUrlMedia();
 
   const handleOpenUpdateModal = () => setOpenUpdateModal(true);
   const handleCloseUpdateModal = () => setOpenUpdateModal(false);
@@ -137,7 +138,7 @@ export function ProductItem({ product }: { product: ProductItemProps }) {
           <Box
             component="img"
             alt={product.nome}
-            src={`${baseUrl}${product.imagens[0]?.imagem}`}
+            src={`http://localhost:8000${product.imagens[0]?.imagem}`}
             sx={{
               top: 0,
               width: 1,
@@ -229,7 +230,7 @@ export function ProductItem({ product }: { product: ProductItemProps }) {
               <Box key={image.id} sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
                 <Box
                   component="img"
-                  src={`${baseUrl}${image.imagem}`}
+                  src={`http://localhost:8000${image.imagem}`}
                   alt="Produto"
                   sx={{ width: 50, height: 50, objectFit: 'cover', mr: 2 }}
                 />

@@ -8,12 +8,13 @@ import TableBody from '@mui/material/TableBody';
 import Typography from '@mui/material/Typography';
 import TableContainer from '@mui/material/TableContainer';
 import TablePagination from '@mui/material/TablePagination';
-
 import { _users } from 'src/_mock';
 import { DashboardContent } from 'src/layouts/dashboard';
 
 import { Iconify } from 'src/components/iconify';
 import { Scrollbar } from 'src/components/scrollbar';
+
+import AddPostoModal from './postomodal';
 
 import { TableNoData } from '../table-no-data';
 import { UserTableRow } from '../user-table-row';
@@ -30,6 +31,7 @@ export function UserView() {
   const table = useTable();
 
   const [filterName, setFilterName] = useState('');
+  const [modalOpen, setModalOpen] = useState(false);
 
   const dataFiltered: UserProps[] = applyFilter({
     inputData: _users,
@@ -43,15 +45,17 @@ export function UserView() {
     <DashboardContent>
       <Box display="flex" alignItems="center" mb={5}>
         <Typography variant="h4" flexGrow={1}>
-          Users
+          Postos
         </Typography>
         <Button
           variant="contained"
           color="inherit"
           startIcon={<Iconify icon="mingcute:add-line" />}
+          onClick={() => setModalOpen(true)}
         >
-          New user
+          Adionar Posto
         </Button>
+        <AddPostoModal open={modalOpen} onClose={() => setModalOpen(false)} />
       </Box>
 
       <Card>
