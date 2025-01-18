@@ -170,8 +170,8 @@ export function UserTableRow({ row, selected, onSelectRow }: UserTableRowProps) 
 
             <TableCell component="th" scope="row">
               <Box gap={2} display="flex" alignItems="center">
-                <Avatar alt={empresa.nome} src={empresa.imagens[0]?.url} />
-                {empresa.nome}
+                <Avatar alt={posto.nome} src={`http://localhost:8000${posto.imagem}`} />
+                {posto.nome}
               </Box>
             </TableCell>
 
