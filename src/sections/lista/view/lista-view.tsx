@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Box, Typography, Paper, Avatar, TextField, Button, IconButton } from '@mui/material';
 
-// Dados fictícios para mensagens e conversas
+// Dados fictícios para mensagens 
 const fakeConversations = [
   { id: 1, name: 'Khalid Hasan Zibon', lastMessage: 'Sup man! How is it going?', time: '8:30pm', avatar: 'https://via.placeholder.com/50' },
   { id: 2, name: 'PewDiePie', lastMessage: 'Subscribe to my channel', time: '6:30pm', avatar: 'https://via.placeholder.com/50' },
@@ -18,6 +18,7 @@ const fakeMessages = [
 ];
 
 export function ListaView() {
+  
   const [activeConversation, setActiveConversation] = useState(fakeConversations[0]);
   const [messages, setMessages] = useState(fakeMessages);
   const [newMessage, setNewMessage] = useState('');

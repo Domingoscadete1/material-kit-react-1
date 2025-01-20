@@ -1,7 +1,5 @@
 import { Helmet } from 'react-helmet-async';
 
-import { CONFIG } from 'src/config-global';
-
 import { ListaView } from 'src/sections/lista/view';
 
 // ----------------------------------------------------------------------
