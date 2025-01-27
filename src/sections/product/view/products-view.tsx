@@ -76,8 +76,9 @@ export function ProductsView() {
   const [page, setPage] = useState(1); // Para controle de paginação
   const [openFilter, setOpenFilter] = useState(false);
   const [empresaId, setEmpresaId] = React.useState<string | null>(null);
-  const baseUrl = "https://747e-105-168-86-161.ngrok-free.app/";
+  const baseUrl = "https://8125-105-168-51-155.ngrok-free.app";
   const [openModal, setOpenModal] = useState(false);
+  const [categories, setCategories] = useState<any[]>([]); // Armazenar categorias da API
   const token2 = localStorage.getItem('refreshToken'); // Token salvo ao logar
 
   const [newProduct, setNewProduct] = useState({
@@ -113,18 +114,28 @@ export function ProductsView() {
     const token = localStorage.getItem('userData');
     if (token) {
       const userData = JSON.parse(token);
-      const postoId = userData.empresa;
+      const postoId = userData.empresa.id;
       if (postoId) {
         setEmpresaId(postoId);
       }
     }
   }, []); // Mantenha vazio se `empresaId` não mudar
+  const fetchCategories = useCallback(async () => {
+    try {
+      const response = await axios.get('http://localhost:8000/api/categorias/'); // Substitua pela URL da API
+      setCategories(response.data);
+    } catch (error) {
+      console.error('Erro ao buscar categorias:', error);
+    }
+  }, []);
+
 
   useEffect(() => {
+    fetchCategories();
     if (empresaId) {
       console.log(empresaId);
     }
-  }, [empresaId]); // Adicione empresaId como dependência
+  }, [empresaId,fetchCategories]); // Adicione empresaId como dependência
 
   const fetchProducts = useCallback(async () => {
     if (!empresaId) {
@@ -170,7 +181,7 @@ export function ProductsView() {
     });
 
     try {
-      const response = await axios.post(`${baseUrl}api/produto/create/`, formData, {
+      const response = await axios.post(`${baseUrl}/api/produto/create/`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
 
@@ -257,9 +268,11 @@ export function ProductsView() {
               value={newProduct.categoria}
               onChange={handleSelectChange}
             >
-              <MenuItem value="Tecnologia">Tecnologia</MenuItem>
-              <MenuItem value="Moda">Moda</MenuItem>
-              <MenuItem value="Alimentos">Alimentos</MenuItem>
+              {categories.map((category) => (
+                <MenuItem key={category.id} value={category.nome}>
+                  {category.nome}
+                </MenuItem>
+              ))}
             </Select>
           </FormControl>
           <TextField

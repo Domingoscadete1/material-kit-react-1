@@ -55,7 +55,7 @@ export function Router() {
         { path: 'products', element: <ProductsPage /> },
         { path: 'blog', element: <BlogPage /> },
         { path: 'listasms', element: <Lista /> },
-        { path: 'chat', element: <ChatView /> },
+        { path: 'chat', element: <ChatView  /> },
         { path: 'perfil', element: <PerfilView /> },
         { path: 'relatorio', element: <RelatorioView /> },
       ],

@@ -9,9 +9,30 @@ import Switch from '@mui/material/Switch';
 
 import { DashboardContent } from 'src/layouts/dashboard';
 
+import React,{ useState, useEffect, useRef } from 'react';
+import axios from 'axios';
+
+
 // ----------------------------------------------------------------------
 
 export function PerfilView() {
+  const [empresaId, setEmpresaId] = React.useState<string | null>(null);
+  const empresa = JSON.parse(localStorage.getItem('userData') || '{}'); // Parse para garantir que seja um objeto
+
+  const [loadingMessages, setLoadingMessages] = useState(false); // Estado de carregamento das mensagens
+  const socketRef = useRef<WebSocket | null>(null);
+
+  // Recupera o ID da empresa do localStorage
+  useEffect(() => {
+    const token = localStorage.getItem('userData');
+    if (token) {
+      const userData = JSON.parse(token);
+      const postoId = userData.empresa;
+      if (postoId) {
+        setEmpresaId(postoId);
+      }
+    }
+  }, []);
   return (
     <DashboardContent>
       {/* Header */}
@@ -25,18 +46,21 @@ export function PerfilView() {
           <Paper elevation={4} sx={{ p: 4, textAlign: 'center' }}>
             {/* Profile Picture */}
             <Avatar
-              src="https://via.placeholder.com/150"
+              src={`http://localhost:8000${empresa.nome}`}
               alt="Profile"
               sx={{ width: 120, height: 120, mx: 'auto', mb: 2 }}
             />
             <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
-              Sami Rahman
+            {empresa.empresa.nome}
             </Typography>
             <Typography variant="body2" sx={{ color: 'text.secondary', mb: 1 }}>
-              +1-555-555-1234
+              Saldo empresa:{empresa.empresa.saldo}
+            </Typography>
+            <Typography variant="body2" sx={{ color: 'text.secondary', mb: 1 }}>
+            {empresa.empresa.telefone1}
             </Typography>
             <Typography variant="body2" sx={{ color: 'text.secondary', mb: 3 }}>
-              sami.rahman002@gmail.com
+            {empresa.empresa.email}
             </Typography>
             {/* SMS Activation */}
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>

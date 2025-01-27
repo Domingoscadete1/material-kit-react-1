@@ -1,4 +1,5 @@
-import { useState, useCallback } from 'react';
+import React,{ useState, useCallback,useEffect,useRef } from 'react';
+import axios from 'axios';
 
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -8,6 +9,7 @@ import Pagination from '@mui/material/Pagination';
 
 import { _posts } from 'src/_mock';
 import { DashboardContent } from 'src/layouts/dashboard';
+import CircularProgress from '@mui/material/CircularProgress';
 
 import { Iconify } from 'src/components/iconify';
 
@@ -19,6 +21,51 @@ import { PostSearch } from '../post-search';
 
 export function BlogView() {
   const [sortBy, setSortBy] = useState('latest');
+  const [empresaId, setEmpresaId] = React.useState<string | null>(null);
+  const empresa = JSON.parse(localStorage.getItem('userData') || '{}'); // Parse para garantir que seja um objeto
+  const [products, setProducts] = useState<any[]>([]); // Armazenar produtos da API
+  const [loading, setLoading] = useState(true); // Para gerenciar o estado de carregamento
+  const [loadingMessages, setLoadingMessages] = useState(false); // Estado de carregamento das mensagens
+  const socketRef = useRef<WebSocket | null>(null);
+
+  // Recupera o ID da empresa do localStorage
+  useEffect(() => {
+    const token = localStorage.getItem('userData');
+    if (token) {
+      const userData = JSON.parse(token);
+      const postoId = userData.empresa.id;
+      if (postoId) {
+        setEmpresaId(postoId);
+      }
+    }
+  }, []);
+
+  const fetchProducts = useCallback(async () => {
+    if (!empresaId) {
+      console.error('ID da empresa não definido.');
+      return;
+    }
+    try {
+      setLoading(true);
+      const response = await axios.get(`http://localhost:8000/api/produtos-search/bussiness/${empresaId}/`);
+      console.log('Produtos recebidos:', response.data.produtos);
+
+      setProducts(response.data.produtos);
+    } catch (error) {
+      console.error('Erro ao buscar produtos:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [empresaId]);
+
+
+
+  useEffect(() => {
+    if (empresaId) {
+      fetchProducts();
+    }
+  }, [empresaId, fetchProducts]);
+
 
   const handleSort = useCallback((newSort: string) => {
     setSortBy(newSort);
@@ -40,7 +87,7 @@ export function BlogView() {
       </Box>
 
       <Box display="flex" alignItems="center" justifyContent="space-between" sx={{ mb: 5 }}>
-        <PostSearch posts={_posts} />
+        <PostSearch posts={products} />
         <PostSort
           sortBy={sortBy}
           onSort={handleSort}
@@ -52,18 +99,30 @@ export function BlogView() {
         />
       </Box>
 
-      <Grid container spacing={3}>
-        {_posts.map((post, index) => {
-          const latestPostLarge = index === 0;
-          const latestPost = index === 1 || index === 2;
+      {loading ? (
+        <Box display="flex" justifyContent="center" alignItems="center" height="200px">
+          <CircularProgress />
+        </Box>
+      ) : (
+        <Grid container spacing={3}>
+          {products.length > 0 ? (
+            products.map((product, index) => {
+              const latestPostLarge = index === 0;
+              const latestPost = index === 1 || index === 2;
 
-          return (
-            <Grid key={post.id} xs={12} sm={latestPostLarge ? 12 : 6} md={latestPostLarge ? 6 : 3}>
-              <PostItem post={post} latestPost={latestPost} latestPostLarge={latestPostLarge} />
-            </Grid>
-          );
-        })}
-      </Grid>
+              return (
+                <Grid key={product.id} xs={12} sm={latestPostLarge ? 12 : 6} md={latestPostLarge ? 6 : 3}>
+                  <PostItem post={product} latestPost={latestPost} latestPostLarge={latestPostLarge} />
+                </Grid>
+              );
+            })
+          ) : (
+            <Typography variant="h6" align="center" sx={{ width: '100%', mt: 4 }}>
+              Nenhum produto encontrado.
+            </Typography>
+          )}
+        </Grid>
+      )}
 
       <Pagination count={10} color="primary" sx={{ mt: 8, mx: 'auto' }} />
     </DashboardContent>

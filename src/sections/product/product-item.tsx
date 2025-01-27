@@ -12,6 +12,7 @@ import Config from '../Config';
 
 export type ProductItemProps = {
   id: number;
+  quantidade:number;
   nome: string;
   preco: number;
   status: string;
@@ -50,6 +51,7 @@ export function ProductItem({ product }: { product: ProductItemProps }) {
     formDataToSend.append('status', formData.status);
     formDataToSend.append('localizacao', formData.localizacao);
     formDataToSend.append('categoria', formData.categoria.nome);
+    formDataToSend.append('quantidade', formData.quantidade.toString());
 
     // Adiciona as imagens novas
     newImages.forEach((image, index) => {
@@ -161,6 +163,9 @@ export function ProductItem({ product }: { product: ProductItemProps }) {
           <Box display="flex" alignItems="center" justifyContent="space-between">
             {renderPrice}
           </Box>
+          <Typography variant="body2" color="text.secondary">
+            quantidade: {product.quantidade}
+          </Typography>
 
           <Typography variant="body2" color="text.secondary">
             Localização: {product.localizacao}
@@ -203,6 +208,15 @@ export function ProductItem({ product }: { product: ProductItemProps }) {
             label="Preço"
             type="number"
             value={formData.preco}
+            onChange={handleInputChange}
+            fullWidth
+            sx={{ mt: 2 }}
+          />
+          <TextField
+            name="quantidade"
+            label="Quantidade"
+            type="number"
+            value={formData.quantidade}
             onChange={handleInputChange}
             fullWidth
             sx={{ mt: 2 }}

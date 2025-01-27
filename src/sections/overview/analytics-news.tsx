@@ -67,20 +67,20 @@ function PostItem({ sx, item, ...other }: BoxProps & { item: Props['list'][numbe
     >
       <Avatar
         variant="rounded"
-        alt={item.title}
-        src={item.coverUrl}
+        alt={item.nome}
+        src={item.imagens[0].imagem}
         sx={{ width: 48, height: 48, flexShrink: 0 }}
       />
 
       <ListItemText
-        primary={item.title}
-        secondary={item.description}
+        primary={item.nome}
+        secondary={item.preco}
         primaryTypographyProps={{ noWrap: true, typography: 'subtitle2' }}
         secondaryTypographyProps={{ mt: 0.5, noWrap: true, component: 'span' }}
       />
 
       <Box sx={{ flexShrink: 0, color: 'text.disabled', typography: 'caption' }}>
-        {fToNow(item.postedAt)}
+        {fToNow(item.created_at)}
       </Box>
     </Box>
   );

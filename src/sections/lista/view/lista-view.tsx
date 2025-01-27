@@ -1,31 +1,213 @@
-import { useState } from 'react';
-import { Box, Typography, Paper, Avatar, TextField, Button, IconButton } from '@mui/material';
+import { useState, useEffect, useRef } from 'react';
+import axios from 'axios';
+import { Box, Typography, Paper, Avatar, TextField, Button, CircularProgress } from '@mui/material';
 
-// Dados fictícios para mensagens 
-const fakeConversations = [
-  { id: 1, name: 'Khalid Hasan Zibon', lastMessage: 'Sup man! How is it going?', time: '8:30pm', avatar: 'https://via.placeholder.com/50' },
-  { id: 2, name: 'PewDiePie', lastMessage: 'Subscribe to my channel', time: '6:30pm', avatar: 'https://via.placeholder.com/50' },
-  { id: 3, name: 'Marzia Mithila', lastMessage: 'I love you too', time: '3:00pm', avatar: 'https://via.placeholder.com/50' },
-  { id: 4, name: 'Rasel Ahmed', lastMessage: 'Link: http://...', time: '11:00am', avatar: 'https://via.placeholder.com/50' },
-  { id: 5, name: 'Maidul Islam Saad', lastMessage: 'Vai kothodin tore dekhlam', time: '10:25pm', avatar: 'https://via.placeholder.com/50' },
-];
 
-const fakeMessages = [
-  { id: 1, sender: 'me', text: 'Hi, What’s going on?' },
-  { id: 2, sender: 'other', text: 'Hey, What about you?' },
-  { id: 3, sender: 'me', text: 'Lorem ipsum dolor sit amet.' },
-  { id: 4, sender: 'other', text: 'Consectetur adipiscing elit.' },
-];
+// Defina o tipo para as mensagens
+// Representação de um produto
+export interface Produto {
+  id: number;
+  nome: string;
+  descricao: string;
+  categoria: string;
+  condicao: string;
+  preco: number;
+  data_publicacao: string;
+  status: string;
+  quantidade?: number;
+  localizacao: string;
+  indisponivel?: boolean;
+  vendido?: boolean;
+  created_at: string;
+  updated_at?: string;
+  deleted?: boolean;
+  empresa?: Empresa;
+  usuario?: Usuario;
+}
+export interface Imagem{
+  imagem:string;
+}
+
+// Representação de um usuário
+export interface Usuario {
+  id: number;
+  nome: string;
+  email: string;
+  numero_telefone: string;
+  endereco: string;
+  foto?: string;
+  data_de_registro: string;
+  data_nascimento?: string;
+  verificacao_de_identidade: boolean;
+  status: "ativo" | "desativado" | "suspenso";
+  stripe_account_id?: string;
+  saldo?: number;
+  created_at: string;
+  updated_at?: string;
+  deleted?: boolean;
+  imagens:Imagem[];
+}
+
+// Representação de uma empresa
+export interface Empresa {
+  id: number;
+  nome: string;
+  email: string;
+  telefone1: string;
+  telefone2: string;
+  endereco: string;
+  categoria: "moda" | "tecnologia" | "cosmeticos";
+  descricao: string;
+  alvara_comercial?: string;
+  verificada: boolean;
+  saldo?: number;
+  created_at: string;
+  updated_at?: string;
+  deleted?: boolean;
+  imagens:Imagem[];
+}
+
+// Representação de uma sala de chat (ChatRoom)
+export interface ChatRoom {
+  id: number;
+  produto: Produto;
+  empresa?: Empresa;
+  comprador?: Usuario;
+  vendedor?: Usuario;
+  criado_em: string;
+  created_at: string;
+  updated_at?: string;
+  deleted?: boolean;
+}
+
+// Representação de uma mensagem (Mensagem)
+export interface Mensagem {
+  id: number;
+  chat_room: ChatRoom;
+  remetente?: Usuario;
+  empresa?: Empresa;
+  conteudo: string;
+  audio?: string;
+  created_at: string;
+  updated_at?: string;
+  deleted?: boolean;
+  remetente_id: number;
+
+}
 
 export function ListaView() {
-  
-  const [activeConversation, setActiveConversation] = useState(fakeConversations[0]);
-  const [messages, setMessages] = useState(fakeMessages);
-  const [newMessage, setNewMessage] = useState('');
+  const baseUrl = 'http://127.0.0.1:8000';
+  const baseWsUrl = 'ws://127.0.0.1:8000'; // Substitua pelo URL correto
 
-  const handleSendMessage = () => {
-    if (newMessage.trim()) {
-      setMessages([...messages, { id: Date.now(), sender: 'me', text: newMessage }]);
+  const [conversations, setConversations] = useState<ChatRoom[]>([]); // Tipo aplicado
+  const [activeConversation, setActiveConversation] = useState<ChatRoom | null>(null); // Tipo aplicado
+
+  const [messages, setMessages] = useState<Mensagem[]>([]);   const [newMessage, setNewMessage] = useState(''); // Nova mensagem
+  const [empresaId, setEmpresaId] = useState(''); // ID da empresa
+  const [loadingMessages, setLoadingMessages] = useState(false); // Estado de carregamento das mensagens
+  const socketRef = useRef<WebSocket | null>(null);
+
+  // Recupera o ID da empresa do localStorage
+  useEffect(() => {
+    const token = localStorage.getItem('userData');
+    if (token) {
+      const userData = JSON.parse(token);
+      const postoId = userData.empresa.id;
+      if (postoId) {
+        setEmpresaId(postoId);
+      }
+    }
+  }, []);
+
+  // Busca as conversas relacionadas à empresa
+  useEffect(() => {
+    const fetchConversations = async () => {
+      if (!empresaId) return;
+
+      try {
+        const response = await axios.get(`${baseUrl}/api/chatrooms/empresa-list/${empresaId}/`);
+        const { chats } = response.data;
+        setConversations(chats);
+
+        // Define a primeira conversa como ativa (opcional)
+        if (chats.length > 0) {
+          setActiveConversation(chats[0]);
+        }
+      } catch (error) {
+        console.error('Erro ao buscar conversas:', error);
+      }
+    };
+
+    fetchConversations();
+  }, [empresaId]);
+
+  // Configuração do WebSocket e mensagens em tempo real
+  useEffect(() => {
+    if (!activeConversation) return;
+
+    const socket = new WebSocket(`${baseWsUrl}/ws/chat/${activeConversation.id}/`);
+    socketRef.current = socket;
+
+    socket.onopen = () => {
+      console.log('Conectado ao WebSocket');
+    };
+
+    socket.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      const { message, remetente_id } = data;
+
+      // Adiciona a nova mensagem ao estado
+      setMessages((prevMessages) => [
+        ...prevMessages,
+        {id: Math.random(), // Um ID temporário até a API retornar um real
+          remetente_id,
+          conteudo: message,
+          created_at: new Date().toISOString(), // Ajuste o nome se necessário
+          chat_room: activeConversation, // Confirme se activeConversation.id está corret 
+          },
+      ]);
+    };
+
+    
+// eslint-disable-next-line consistent-return
+    return () => {
+      socket.close();
+    };
+  }, [activeConversation]);
+
+  // Busca as mensagens do chat ativo
+  useEffect(() => {
+    const fetchMessages = async () => {
+      if (!activeConversation) return;
+
+      setLoadingMessages(true);
+      try {
+        const response = await axios.get(`${baseUrl}/api/chatrooms/messages/${activeConversation.id}/`);
+        const { mensagens } = response.data;
+        setMessages(mensagens);
+      } catch (error) {
+        console.error('Erro ao buscar mensagens:', error);
+      } finally {
+        setLoadingMessages(false);
+      }
+    };
+
+    fetchMessages();
+  }, [activeConversation]);
+
+  // Envia uma nova mensagem
+  const handleSendMessage = async () => {
+    if (newMessage.trim() && activeConversation && socketRef.current) {
+      const messageData = {
+        mensagem: newMessage,
+        chatroom_id: activeConversation.id,
+        empresa_id: empresaId,
+      };
+
+      // Envia a mensagem via WebSocket
+      if (socketRef.current instanceof WebSocket) {
+        socketRef.current.send(JSON.stringify(messageData));
+      }
       setNewMessage('');
     }
   };
@@ -42,14 +224,11 @@ export function ListaView() {
         flexDirection="column"
         justifyContent="space-between"
       >
-        {/* Cabeçalho da lista */}
-        <Box display="flex" justifyContent="space-between" alignItems="center" mb={2} mt={2} ml={2}>
+        <Box mb={2}>
           <Typography variant="h5">Mensagens</Typography>
-       
         </Box>
-        {/* Conversas */}
         <Box flexGrow={1} overflow="auto">
-          {fakeConversations.map((conversation) => (
+          {conversations.map((conversation) => (
             <Paper
               key={conversation.id}
               sx={{
@@ -57,80 +236,90 @@ export function ListaView() {
                 p: 2,
                 display: 'flex',
                 alignItems: 'center',
-                bgcolor: conversation.id === activeConversation.id ? '#7986cb' : 'transparent',
+                bgcolor: activeConversation?.id === conversation.id ? '#7986cb' : 'transparent',
                 cursor: 'pointer',
               }}
               onClick={() => setActiveConversation(conversation)}
             >
-              <Avatar src={conversation.avatar} sx={{ width: 48, height: 48, mr: 2 }} />
+              <Avatar
+                src={`${baseUrl}${conversation.comprador?.foto}` || 'https://via.placeholder.com/50'}
+                sx={{ width: 48, height: 48, mr: 2 }}
+              />
               <Box>
-                <Typography variant="body1">{conversation.name}</Typography>
+                <Typography variant="body1">{conversation.produto?.nome || 'Produto não definido'}</Typography>
                 <Typography variant="body2" color="gray">
-                  {conversation.lastMessage}
+                  {conversation.comprador?.nome || 'Comprador desconhecido'}
                 </Typography>
               </Box>
-              <Typography variant="caption" ml="auto">
-                {conversation.time}
-              </Typography>
             </Paper>
           ))}
         </Box>
       </Box>
 
-      {/* Área de Chat */}
+      {/* Área do Chat */}
       <Box flexGrow={1} display="flex" flexDirection="column" bgcolor="white">
-        {/* Cabeçalho do chat */}
-        <Box
-          display="flex"
-          alignItems="center"
-          justifyContent="space-between"
-          p={2}
-          borderBottom="1px solid #e0e0e0"
-        >
-          <Box display="flex" alignItems="center">
-            <Avatar src={activeConversation.avatar} sx={{ width: 38, height: 38, mr: 2 }} />
-            <Typography variant="h6">{activeConversation.name}</Typography>
-          </Box>
-          
-        </Box>
-
-        {/* Mensagens */}
-        <Box flexGrow={1} p={1} overflow="auto">
-          {messages.map((message) => (
+        {activeConversation && (
+          <>
+            {/* Cabeçalho do Chat */}
             <Box
-              key={message.id}
               display="flex"
-              justifyContent={message.sender === 'me' ? 'flex-end' : 'flex-start'}
-              mb={1}
+              alignItems="center"
+              justifyContent="space-between"
+              p={2}
+              borderBottom="1px solid #e0e0e0"
             >
-              <Box
-                sx={{
-                  p: 2,
-                  bgcolor: message.sender === 'me' ? '#3f51b5' : '#f0f0f0',
-                  color: message.sender === 'me' ? 'white' : 'black',
-                  borderRadius: '10px',
-                  maxWidth: '70%',
-                }}
-              >
-                {message.text}
+              <Box display="flex" alignItems="center">
+                <Avatar
+                  src={`${baseUrl}${ activeConversation.comprador?.foto}` || 'https://via.placeholder.com/50'}
+                  sx={{ width: 38, height: 38, mr: 2 }}
+                />
+                <Typography variant="h6">{activeConversation.vendedor?.nome}</Typography>
               </Box>
             </Box>
-          ))}
-        </Box>
 
-        {/* Campo de Mensagem */}
-        <Box display="flex" p={2} borderTop="1px solid #e0e0e0">
-          <TextField
-            fullWidth
-            placeholder="Escreva uma mensagem.."
-            value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
-            sx={{ mr: 2 }}
-          />
-          <Button variant="contained" onClick={handleSendMessage}>
-            Enviar
-          </Button>
-        </Box>
+            {/* Mensagens */}
+            <Box flexGrow={1} p={2} overflow="auto">
+              {loadingMessages ? (
+                <CircularProgress />
+              ) : (
+                messages.map((message, index) => (
+                  <Box
+                    key={index}
+                    display="flex"
+                    justifyContent={message.empresa?.id === Number(empresaId) ? 'flex-end' : 'flex-start'}
+                    mb={2}
+                  >
+                     <Box
+    sx={{
+      p: 2,
+      bgcolor: message.empresa?.id === Number(empresaId) ? "#3f51b5" : "#f0f0f0",
+      color: message.empresa?.id === Number(empresaId) ? "white" : "black",
+      borderRadius: "10px",
+      maxWidth: "70%",
+    }}
+  >
+                      <Typography variant="body1">{message.conteudo}</Typography>
+                    </Box>
+                  </Box>
+                ))
+              )}
+            </Box>
+
+            {/* Campo de Nova Mensagem */}
+            <Box display="flex" p={2} borderTop="1px solid #e0e0e0">
+              <TextField
+                fullWidth
+                placeholder="Escreva uma mensagem..."
+                value={newMessage}
+                onChange={(e) => setNewMessage(e.target.value)}
+                sx={{ mr: 2 }}
+              />
+              <Button variant="contained" onClick={handleSendMessage}>
+                Enviar
+              </Button>
+            </Box>
+          </>
+        )}
       </Box>
     </Box>
   );

@@ -1,3 +1,6 @@
+import React,{ useState, useCallback,useEffect,useRef } from 'react';
+import axios from 'axios';
+
 import Grid from '@mui/material/Unstable_Grid2';
 import Typography from '@mui/material/Typography';
 
@@ -17,6 +20,41 @@ import { AnalyticsConversionRates } from '../analytics-conversion-rates';
 // ----------------------------------------------------------------------
 
 export function OverviewAnalyticsView() {
+  const [products, setProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [empresaId, setEmpresaId] = React.useState<string | null>(null);
+  const empresa = JSON.parse(localStorage.getItem('userData') || '{}'); // Parse para garantir que seja um objeto
+  
+  const [loadingMessages, setLoadingMessages] = useState(false); // Estado de carregamento das mensagens
+  const socketRef = useRef<WebSocket | null>(null);
+
+  // Recupera o ID da empresa do localStorage
+  useEffect(() => {
+    const token = localStorage.getItem('userData');
+    if (token) {
+      const userData = JSON.parse(token);
+      const postoId = userData.empresa.id;
+      if (postoId) {
+        setEmpresaId(postoId);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        const response = await axios.get(`http://localhost:8000/api/produtos-search/bussiness/${empresaId}/`);
+        setProducts(response.data.produtos || []);
+      } catch (error) {
+        console.error('Erro ao buscar produtos:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, [empresaId]);
   return (
     <DashboardContent maxWidth="xl">
       {/* <Typography variant="h4" sx={{ mb: { xs: 3, md: 5 } }}>
@@ -136,7 +174,7 @@ export function OverviewAnalyticsView() {
         </Grid>
 
         <Grid xs={12} md={6} lg={8}>
-          <AnalyticsNews title="Recentemente Divulgados" list={_posts.slice(0, 5)} />
+          <AnalyticsNews title="Recentemente Divulgados" list={products.slice(0, 5)} />
         </Grid>
 
         <Grid xs={12} md={6} lg={4}>
