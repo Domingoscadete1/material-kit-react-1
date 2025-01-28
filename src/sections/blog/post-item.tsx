@@ -20,19 +20,19 @@ import { SvgColor } from 'src/components/svg-color';
 
 export type PostItemProps = {
   id: number;
-  quantidade:number;
+  quantidade: number;
   nome: string;
   preco: number;
   status: string;
   descricao: string;
-  created_at:Date;
+  created_at: Date;
   localizacao: string;
   imagens: { id: number; imagem: string }[];
   precoVenda: number | null;
   categoria: { nome: string }; // Adicionando categoria
-  usuario:{
-    nome:string;
-    foto:string;
+  usuario: {
+    nome: string;
+    foto: string;
   }
 };
 
@@ -52,6 +52,7 @@ export function PostItem({
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
+
   const renderAvatar = (
     <Avatar
       alt={post.usuario.nome}
@@ -73,7 +74,6 @@ export function PostItem({
       color="inherit"
       variant="subtitle2"
       underline="hover"
-      onClick={handleOpen}
       sx={{
         height: 44,
         overflow: 'hidden',
@@ -126,6 +126,7 @@ export function PostItem({
   const renderCover = (
     <Box
       component="img"
+      onClick={handleOpen}
       alt={post.nome}
       src={`http://localhost:8000${post.imagens[0].imagem}`}
       sx={{
@@ -173,107 +174,107 @@ export function PostItem({
 
   return (
     <>
-    <Card sx={sx} {...other}>
-      <Box
-        sx={(theme) => ({
-          position: 'relative',
-          pt: 'calc(100% * 3 / 4)',
-          ...((latestPostLarge || latestPost) && {
-            pt: 'calc(100% * 4 / 3)',
-            '&:after': {
-              top: 0,
-              content: "''",
-              width: '100%',
-              height: '100%',
+      <Card sx={sx} {...other}>
+        <Box
+          sx={(theme) => ({
+            position: 'relative',
+            pt: 'calc(100% * 3 / 4)',
+            ...((latestPostLarge || latestPost) && {
+              pt: 'calc(100% * 4 / 3)',
+              '&:after': {
+                top: 0,
+                content: "''",
+                width: '100%',
+                height: '100%',
+                position: 'absolute',
+                bgcolor: varAlpha(theme.palette.grey['900Channel'], 0.72),
+              },
+            }),
+            ...(latestPostLarge && {
+              pt: {
+                xs: 'calc(100% * 4 / 3)',
+                sm: 'calc(100% * 3 / 4.66)',
+              },
+            }),
+          })}
+        >
+          {renderShape}
+          {renderAvatar}
+          {renderCover}
+        </Box>
+
+        <Box
+          sx={(theme) => ({
+            p: theme.spacing(6, 3, 3, 3),
+            ...((latestPostLarge || latestPost) && {
+              width: 1,
+              bottom: 0,
               position: 'absolute',
-              bgcolor: varAlpha(theme.palette.grey['900Channel'], 0.72),
-            },
-          }),
-          ...(latestPostLarge && {
-            pt: {
-              xs: 'calc(100% * 4 / 3)',
-              sm: 'calc(100% * 3 / 4.66)',
-            },
-          }),
-        })}
-      >
-        {renderShape}
-        {renderAvatar}
-        {renderCover}
-      </Box>
-
-      <Box
-        sx={(theme) => ({
-          p: theme.spacing(6, 3, 3, 3),
-          ...((latestPostLarge || latestPost) && {
-            width: 1,
-            bottom: 0,
+            }),
+          })}
+        >
+          {renderDate}
+          {renderTitle}
+          {renderInfo}
+        </Box>
+      </Card>
+      <Modal open={open} onClose={handleClose}>
+        <Box
+          sx={{
             position: 'absolute',
-          }),
-        })}
-      >
-        {renderDate}
-        {renderTitle}
-        {renderInfo}
-      </Box>
-    </Card>
-    <Modal open={open} onClose={handleClose}>
-    <Box
-      sx={{
-        position: 'absolute',
-        top: '50%',
-        left: '50%',
-        transform: 'translate(-50%, -50%)',
-        width: 600,
-        bgcolor: 'background.paper',
-        boxShadow: 24,
-        p: 4,
-        borderRadius: 2,
-      }}
-    >
-      <IconButton
-        onClick={handleClose}
-        sx={{ position: 'absolute', top: 8, right: 8 }}
-      >
-        <Iconify icon="mdi:close" width={24} />
-      </IconButton>
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: 600,
+            bgcolor: 'background.paper',
+            boxShadow: 24,
+            p: 4,
+            borderRadius: 2,
+          }}
+        >
+          <IconButton
+            onClick={handleClose}
+            sx={{ position: 'absolute', top: 8, right: 8 }}
+          >
+            <Iconify icon="mdi:close" width={24} />
+          </IconButton>
 
-      <Typography variant="h5" sx={{ mb: 2 }}>
-        {post.nome}
-      </Typography>
+          <Typography variant="h5" sx={{ mb: 2 }}>
+            {post.nome}
+          </Typography>
 
-      <Typography variant="body1" sx={{ mb: 2 }}>
-        {post.descricao}
-      </Typography>
+          <Typography variant="body1" sx={{ mb: 2 }}>
+            {post.descricao}
+          </Typography>
 
-      <Typography variant="subtitle1" sx={{ color: 'text.secondary', mb: 2 }}>
-        Preço: {post.preco.toFixed(2)} KZ
-      </Typography>
+          <Typography variant="subtitle1" sx={{ color: 'text.secondary', mb: 2 }}>
+            Preço: {post.preco.toFixed(2)} KZ
+          </Typography>
 
-      <Typography variant="subtitle2" sx={{ color: 'text.secondary', mb: 2 }}>
-        Categoria: {post.categoria.nome}
-      </Typography>
+          <Typography variant="subtitle2" sx={{ color: 'text.secondary', mb: 2 }}>
+            Categoria: {post.categoria.nome}
+          </Typography>
 
-      {/* GALERIA DE IMAGENS */}
-      <Box
-        sx={{
-          display: 'flex',
-          overflowX: 'auto',
-          gap: 2,
-        }}
-      >
-        {post.imagens.map((img) => (
+          {/* GALERIA DE IMAGENS */}
           <Box
-            key={img.id}
-            component="img"
-            src={`http://localhost:8000${img.imagem}`}
-            alt={post.nome}
-            sx={{ width: 120, height: 120, borderRadius: 1, objectFit: 'cover' }}
-          />
-        ))}
-      </Box>
-    </Box>
-  </Modal>
-  </>
+            sx={{
+              display: 'flex',
+              overflowX: 'auto',
+              gap: 2,
+            }}
+          >
+            {post.imagens.map((img) => (
+              <Box
+                key={img.id}
+                component="img"
+                src={`http://localhost:8000${img.imagem}`}
+                alt={post.nome}
+                sx={{ width: 120, height: 120, borderRadius: 1, objectFit: 'cover' }}
+              />
+            ))}
+          </Box>
+        </Box>
+      </Modal>
+    </>
   );
 }
