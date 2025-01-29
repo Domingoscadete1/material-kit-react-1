@@ -84,10 +84,10 @@ export function UserView() {
                   )
                 }
                 headLabel={[
-                  { id: 'name', label: 'Name' },
-                  { id: 'company', label: 'Company' },
-                  { id: 'role', label: 'Role' },
-                  { id: 'isVerified', label: 'Verified', align: 'center' },
+                  { id: 'name', label: 'Nome' },
+                  { id: 'company', label: 'Capacidade' },
+                  { id: 'role', label: 'Horário' },
+                  { id: 'isVerified', label: 'Verificada', align: 'center' },
                   { id: 'status', label: 'Status' },
                   { id: '' },
                 ]}

@@ -25,13 +25,22 @@ export type UserProps = {
   avatarUrl: string;
   isVerified: boolean;
 };
-type PostoProps = {
-  id: string;
+interface Posto {
+  id: number;
   nome: string;
-  avatarUrl: string;
-  capacidade: string;
+  capacidade: number;
   horario: string;
   status: string;
+  imagem:string;
+}
+type PostoProps = {
+  id: number;
+  empresa: {
+    id: number;
+    nome: string;
+  };
+  posto: Posto;
+  indisponivel:Boolean;
 };
 
 type UserTableRowProps = {
@@ -43,7 +52,7 @@ type UserTableRowProps = {
 export function UserTableRow({ row, selected, onSelectRow }: UserTableRowProps) {
   const [openPopover, setOpenPopover] = useState<HTMLButtonElement | null>(null);
   const [empresaId, setEmpresaId] = useState<string | null>(null);
-  const baseUrl = "https://747e-105-168-86-161.ngrok-free.app/";
+  const baseUrl = "http://127.0.0.1:8000/";
   const [loading, setLoading] = useState(true);
   const [postos, setPostos] = useState<PostoProps[]>([]); // Armazenar produtos da API
   const [postoAtual, setPostoAtual] = useState<PostoProps | null>(null);
@@ -65,7 +74,7 @@ export function UserTableRow({ row, selected, onSelectRow }: UserTableRowProps) 
     const token = localStorage.getItem('userData');
     if (token) {
       const userData = JSON.parse(token);
-      const postoId = userData.empresa;
+      const postoId = userData.empresa.id;
       if (postoId) {
         setEmpresaId(postoId);
       }
@@ -81,19 +90,21 @@ export function UserTableRow({ row, selected, onSelectRow }: UserTableRowProps) 
       setLoading(true);
       const response = await axios.get(`http://localhost:8000/api/postos/empresa/${empresaId}/`);
       console.log('Postos recebidos:', response.data.postos);
-
-      // Filtra duplicados com base no ID do posto
-      const uniquePostos = response.data.postos.filter(
-        (posto: PostoProps) => !postos.some((existingPosto) => existingPosto.id === posto.id)
-      );
-
-      setPostos((prevPostos) => [...prevPostos, ...uniquePostos]);
+  
+      // Evita a duplicação armazenando IDs únicos
+      setPostos((prevPostos) => {
+        const postosMap = new Map(prevPostos.map((p) => [p.id, p]));
+        response.data.postos.forEach((posto: PostoProps) => {
+          postosMap.set(posto.id, posto);
+        });
+        return Array.from(postosMap.values()); // Retorna apenas valores únicos
+      });
     } catch (error) {
       console.error('Erro ao buscar postos:', error);
     } finally {
       setLoading(false);
     }
-  }, [empresaId, postos]);
+  }, [empresaId]); 
 
   useEffect(() => {
     if (empresaId) {
@@ -138,7 +149,7 @@ export function UserTableRow({ row, selected, onSelectRow }: UserTableRowProps) 
         },
         body: JSON.stringify({
           empresa_id: empresaId,
-          posto_id: postoAtual.id,
+          posto_id: postoAtual.posto.id,
         }),
       });
 
@@ -157,42 +168,47 @@ export function UserTableRow({ row, selected, onSelectRow }: UserTableRowProps) 
 
   return (
     <>
-      {postos.map((posto) => (
-        <TableRow hover tabIndex={-1} role="checkbox" selected={selected} key={posto.id}>
-          <TableCell padding="checkbox">
-            <Checkbox disableRipple checked={selected} onChange={onSelectRow} />
-          </TableCell>
+      {postos.map((postoAceite) => (
+  <TableRow hover tabIndex={-1} role="checkbox" selected={selected} key={postoAceite.id}>
+    <TableCell padding="checkbox">
+      <Checkbox disableRipple checked={selected} onChange={onSelectRow} />
+    </TableCell>
 
-          <TableCell component="th" scope="row">
-            <Box gap={2} display="flex" alignItems="center">
-              <Avatar alt={posto.nome} src={`http://localhost:8000${posto.avatarUrl}`} />
-              {posto.nome}
-            </Box>
-          </TableCell>
+    <TableCell component="th" scope="row">
+      <Box gap={2} display="flex" alignItems="center">
+        <Avatar
+          alt={postoAceite.posto?.nome}
+          src={`http://localhost:8000${postoAceite.posto?.imagem}`}
+        />
+        {postoAceite.posto?.nome}
+      </Box>
+    </TableCell>
 
-          <TableCell>{posto.capacidade}</TableCell>
+    <TableCell>{postoAceite.posto?.capacidade}</TableCell>
 
-          <TableCell>{posto.horario}</TableCell>
+    <TableCell>{postoAceite.posto?.horario}</TableCell>
 
-          <TableCell align="center">
-            {posto.status === 'ativo' ? (
-              <Iconify width={22} icon="solar:check-circle-bold" sx={{ color: 'success.main' }} />
-            ) : (
-              '-'
-            )}
-          </TableCell>
+    <TableCell align="center">
+      {postoAceite.indisponivel === false ? (
+        <Iconify width={22} icon="solar:check-circle-bold" sx={{ color: 'success.main' }} />
+      ) : (
+        '-'
+      )}
+    </TableCell>
 
-          <TableCell>
-            <Label color={(posto.status === 'inativo' && 'error') || 'success'}>{posto.status}</Label>
-          </TableCell>
+    <TableCell>
+      <Label color={postoAceite.indisponivel === true ? 'error' : 'success'}>
+        {postoAceite.posto?.status}
+      </Label>
+    </TableCell>
 
-          <TableCell align="right">
-            <IconButton onClick={(e) => handleOpenPopover(e, posto)}>
-              <Iconify icon="eva:more-vertical-fill" />
-            </IconButton>
-          </TableCell>
-        </TableRow>
-      ))}
+    <TableCell align="right">
+      <IconButton onClick={(e) => handleOpenPopover(e,  postoAceite)}>
+        <Iconify icon="eva:more-vertical-fill" />
+      </IconButton>
+    </TableCell>
+  </TableRow>
+))}
       <Popover
         open={!!openPopover}
         anchorEl={openPopover}

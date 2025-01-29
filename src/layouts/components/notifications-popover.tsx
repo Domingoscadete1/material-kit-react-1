@@ -36,6 +36,12 @@ export type NotificationItemProps = {
   createdAt: string;
   updatedAt: string | null;
   deleted: boolean;
+  usuario:{
+    foto:string;
+  };
+  remetente:{
+    foto:string;
+  }
 };
 
 export type NotificationsPopoverProps = IconButtonProps & {
@@ -52,7 +58,7 @@ export function NotificationsPopover({ data = [], sx, ...other }: NotificationsP
     const token = localStorage.getItem('userData');
     if (token) {
       const userData = JSON.parse(token);
-      setEmpresaId(userData.empresa || null);
+      setEmpresaId(userData.empresa.id || null);
     }
   }, []);
 
@@ -72,7 +78,7 @@ export function NotificationsPopover({ data = [], sx, ...other }: NotificationsP
         title: notificacao.mensagem, // Ajuste conforme necessário
         isUnRead: !notificacao.lida,
         description: notificacao.mensagem,
-        avatarUrl: notificacao.remetente?.avatar || null,
+        avatarUrl: notificacao.remetente?.foto || null,
         postedAt: notificacao.criado_em,
         chatRoomId: notificacao.chat_room || null,
         senderName: notificacao.remetente?.nome || "Desconhecido",
@@ -160,12 +166,13 @@ export function NotificationsPopover({ data = [], sx, ...other }: NotificationsP
 }
 
 function NotificationItem({ notification }: { notification: NotificationItemProps }) {
-  const { avatarUrl, title } = renderContent(notification);
+  const {  title } = renderContent(notification);
+  const avatarUrl=notification?.remetente?.foto
 
   return (
     <ListItemButton sx={{ py: 1.5, px: 2.5, mt: '1px', bgcolor: notification.lida ? 'transparent' : 'action.selected' }}>
       <ListItemAvatar>
-        <Avatar src={avatarUrl || ''} sx={{ bgcolor: 'background.neutral' }} />
+        <Avatar src={`http://localhost:8000${avatarUrl}`} sx={{ bgcolor: 'background.neutral' }} />
       </ListItemAvatar>
       <ListItemText
         primary={title}
