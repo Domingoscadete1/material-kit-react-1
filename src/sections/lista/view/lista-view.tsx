@@ -154,19 +154,38 @@ export function ListaView() {
 
     socket.onmessage = (event) => {
       const data = JSON.parse(event.data);
-      const { message, remetente_id } = data;
-
-      // Adiciona a nova mensagem ao estado
-      setMessages((prevMessages) => [
-        ...prevMessages,
-        {id: Math.random(), // Um ID temporário até a API retornar um real
-          remetente_id,
-          conteudo: message,
-          created_at: new Date().toISOString(), // Ajuste o nome se necessário
-          chat_room: activeConversation, // Confirme se activeConversation.id está corret 
+    
+      // Se for um array de mensagens (exemplo: histórico de mensagens)
+      if (Array.isArray(data.messages)) {
+        setMessages((prevMessages) => [
+          ...prevMessages,
+          ...data.messages.map((msg:Mensagem) => ({
+            id: msg.id,
+            conteudo: msg.conteudo,
+            remetente_id: msg.remetente_id, // Corrigindo nome do campo
+            created_at: msg.created_at,
+            chat_room: msg.chat_room, // Garantindo que inclui o chat_room
+          })),
+        ]);
+      }
+    
+      // Se for uma nova mensagem recebida
+      if (data.message) {
+        setMessages((prevMessages) => [
+          ...prevMessages,
+          {
+            id: data.mensagem_id || prevMessages.length + 1,
+            conteudo: data.message,
+            remetente_id: data.remetente_id || data.remetente,
+            created_at: data.created_at || new Date().toISOString(),
+            chat_room: activeConversation, // Garante a referência ao chat
+            remetente: activeConversation?.comprador || activeConversation?.vendedor, // Evita erros
           },
-      ]);
+        ]);
+      }
+      
     };
+    
 
     
 // eslint-disable-next-line consistent-return
@@ -180,19 +199,22 @@ export function ListaView() {
     const fetchMessages = async () => {
       if (!activeConversation) return;
 
-      setLoadingMessages(true);
       try {
         const response = await axios.get(`${baseUrl}/api/chatrooms/messages/${activeConversation.id}/`);
         const { mensagens } = response.data;
         setMessages(mensagens);
       } catch (error) {
         console.error('Erro ao buscar mensagens:', error);
-      } finally {
-        setLoadingMessages(false);
       }
     };
 
+    // Chamada inicial
     fetchMessages();
+
+    // Define um intervalo para buscar mensagens a cada 3 segundos
+    const interval = setInterval(fetchMessages, 3000);
+
+    return () => clearInterval(interval);
   }, [activeConversation]);
 
   // Envia uma nova mensagem
@@ -242,8 +264,13 @@ export function ListaView() {
               onClick={() => setActiveConversation(conversation)}
             >
               <Avatar
-                src={`${baseUrl}${conversation.comprador?.foto}` || 'https://via.placeholder.com/50'}
-                sx={{ width: 48, height: 48, mr: 2 }}
+              src={
+                conversation.comprador?.foto
+                  ? `${baseUrl}${conversation.comprador.foto}`
+                  : conversation.empresa?.imagens?.[0]?.imagem
+                  ? `${baseUrl}${conversation.empresa.imagens[0].imagem}`
+                  : "https://via.placeholder.com/50"
+              }                sx={{ width: 48, height: 48, mr: 2 }}
               />
               <Box>
                 <Typography variant="body1">{conversation.produto?.nome || 'Produto não definido'}</Typography>
@@ -270,7 +297,13 @@ export function ListaView() {
             >
               <Box display="flex" alignItems="center">
                 <Avatar
-                  src={`${baseUrl}${ activeConversation.comprador?.foto}` || 'https://via.placeholder.com/50'}
+                   src={
+                    activeConversation.comprador?.foto
+                      ? `${baseUrl}${activeConversation.comprador.foto}`
+                      : activeConversation.empresa?.imagens?.[0]?.imagem
+                      ? `${baseUrl}${activeConversation.empresa.imagens[0].imagem}`
+                      : "https://via.placeholder.com/50"
+                  }
                   sx={{ width: 38, height: 38, mr: 2 }}
                 />
                 <Typography variant="h6">{activeConversation.vendedor?.nome}</Typography>

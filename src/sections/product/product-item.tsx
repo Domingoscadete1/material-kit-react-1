@@ -29,7 +29,7 @@ export function ProductItem({ product }: { product: ProductItemProps }) {
   const [formData, setFormData] = useState({ ...product });
   const [selectedImages, setSelectedImages] = useState(product.imagens);
   const [imagensParaRemover, setImagensParaRemover] = useState<number[]>([]);
-  const [newImages, setNewImages] = useState<File[]>([]);  // Novo estado para as imagens
+  const [newImages, setNewImages] = useState<File[]>([]);  
   const baseUrl = Config.getApiUrl();
   const mediaUrl=Config.getApiUrlMedia();
 

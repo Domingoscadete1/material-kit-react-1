@@ -1,15 +1,23 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import type { CardProps } from '@mui/material/Card';
 
-import Box from '@mui/material/Box';
-import Link from '@mui/material/Link';
-import Card from '@mui/material/Card';
-import Avatar from '@mui/material/Avatar';
-import Typography from '@mui/material/Typography';
-import Modal from '@mui/material/Modal';
-import IconButton from '@mui/material/IconButton';
+import axios from 'axios';
+import {
+  Box,
+  Link,
+  Card,
+  Avatar,
+  Typography,
+  Modal,
+  IconButton,
+  CircularProgress,
+  Button,
+  TextField
+} from '@mui/material';
 import { fDate } from 'src/utils/format-time';
 import { fShortenNumber } from 'src/utils/format-number';
+
+
 
 import { varAlpha } from 'src/theme/styles';
 
@@ -33,8 +41,31 @@ export type PostItemProps = {
   usuario: {
     nome: string;
     foto: string;
-  }
+  };
+  empresa: {
+    nome: string;
+    foto: string;
+    imagens: { id: number; imagem: string }[];
+    id: number;
+  };
 };
+
+type Message = {
+  id: number;
+  conteudo: string;
+  remetente: string;
+  created_at: string;
+};
+type Posto={
+  nome:string;
+  localizacao:string;
+  id:number;
+  posto:{
+  nome:string;
+  localizacao:string;
+  id:number;
+  }
+}
 
 export function PostItem({
   sx,
@@ -47,16 +78,165 @@ export function PostItem({
   latestPost: boolean;
   latestPostLarge: boolean;
 }) {
-
   const [open, setOpen] = useState(false);
-
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
+  const [openMessageModal, setOpenMessageModal] = useState(false);
+  const handleOpenMessageModal = () => setOpenMessageModal(true);
+  const handleCloseMessageModal = () => setOpenMessageModal(false);
+
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [websocket, setWebSocket] = useState<WebSocket | null>(null);
+  const [userData, setUserData] = useState(JSON.parse(localStorage.getItem('userData') || '{}'));
+  const [message, setMessage] = useState('');
+
+  const sendMessage = () => {
+    if (!message.trim()) {
+      alert('Digite uma mensagem');
+      return;
+    }
+
+    const data = {
+      produto_id: post.id,
+      mensagem: message,
+      empresa_id: userData?.empresa.id,
+    };
+
+    if (websocket && websocket.readyState === WebSocket.OPEN) {
+      websocket.send(JSON.stringify(data));
+      setMessage('');
+    } else {
+      alert('O WebSocket não está conectado.');
+    }
+  };
+
+  // Abre a conexão WebSocket quando o modal de mensagens é aberto
+  // Abre a conexão WebSocket quando o modal de mensagens é aberto
+  useEffect(() => {
+    if (!openMessageModal) {
+      return undefined; // Retorno explícito para evitar erro do ESLint
+    }
+  
+    const wsUrl = `wss://ef49-154-71-159-172.ngrok-free.app/ws/new_chat/${userData?.id}/`;
+    const ws = new WebSocket(wsUrl);
+    setWebSocket(ws);
+  
+    ws.onopen = () => {
+      console.log("Conectado ao WebSocket");
+    };
+  
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      if (Array.isArray(data.messages)) {
+        setMessages((prevMessages) => [
+          ...prevMessages,
+          ...data.messages.map((msg: Message) => ({
+            id: msg.id,
+            conteudo: msg.conteudo,
+            remetente: msg.remetente,
+            created_at: msg.created_at,
+          })),
+        ]);
+      }
+      if (data.message) {
+        const timestamp = new Date().toLocaleString();
+        setMessages((prevMessages) => [
+          ...prevMessages,
+          { 
+            id: prevMessages.length + 1, 
+            conteudo: data.message, 
+            remetente: data.remetente, 
+            created_at: timestamp 
+          },
+        ]);
+      }
+    };
+  
+    ws.onerror = (error) => {
+      console.error("Erro no WebSocket:", error);
+      alert("Erro no WebSocket.");
+    };
+  
+    ws.onclose = (e) => {
+      console.log("Desconectado do WebSocket", e.code, e.reason);
+    };
+  
+    // Retorna a função de cleanup para fechar o WebSocket
+    return () => {
+      ws.close();
+    };
+  }, [openMessageModal, userData?.id]);
+
+const [openPaymentModal, setOpenPaymentModal] = useState(false);
+const [postos, setPostos] = useState<Posto[]>([]);
+const [selectedPosto, setSelectedPosto] = useState<number | null>(null);
+const [checkoutUrl, setCheckoutUrl] = useState(null);
+const [postoDisponivel, setPostoDisponivel] = useState(false);
+const [quantidade, setQuantidade] = useState('1');
+const [loading, setLoading] = useState(false);
+
+const handleOpenPaymentModal = () => setOpenPaymentModal(true);
+const handleClosePaymentModal = () => setOpenPaymentModal(false);
+
+useEffect(() => {
+  const fetchPostos = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get(`http://127.0.0.1:8000/api/postos/empresa/${post.empresa.id}/`);
+      setPostos(response.data.postos || []);
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (openPaymentModal) {
+    fetchPostos();
+  }
+}, [openPaymentModal, post.empresa.id]);
+
+const checkPostoAvailability = async (postoId:number) => {
+  try {
+    const response = await axios.get(`http://127.0.0.1:8000/api/posto/available/${postoId}/`);
+    setPostoDisponivel(response.status === 200);
+    if (response.status === 303) alert('Não há espaço neste posto.');
+  } catch {
+    alert('Erro ao verificar disponibilidade do posto');
+  }
+};
+
+const initiatePayment = async () => {
+  if (!selectedPosto) {
+    alert( 'Por favor, selecione um posto antes de prosseguir.');
+    return;
+  }
+  setLoading(true);
+  try {
+    const response = await axios.post('http://127.0.0.1:8000/api/stripe/create-payment/bussiness-bussiness/', {
+      produto_id: post.id,
+      empresa_id: userData?.empresa?.id,
+      posto_id: selectedPosto,
+      descricao: post.descricao,
+      currency: 'AOA',
+      quantidade,
+    });
+    setCheckoutUrl(response.data.checkout_url);
+  } catch (error) {
+    alert('Erro ao iniciar pagamento');
+  } finally {
+    setLoading(false);
+  }
+};
+  
+  
+
+
   const renderAvatar = (
     <Avatar
-      alt={post.usuario.nome}
-      src={`http://localhost:8000${post.usuario.foto}`}
+      alt={post.empresa.nome}
+      src={`http://localhost:8000${post.empresa?.imagens[0]?.imagem}`}
       sx={{
         left: 24,
         zIndex: 9,
@@ -102,9 +282,10 @@ export function PostItem({
       }}
     >
       {[
-        { number: post.quantidade, icon: 'solar:chat-round-dots-bold' },
-        { number: post.quantidade, icon: 'solar:eye-bold' },
-        { number: post.quantidade, icon: 'solar:share-bold' },
+        { icon: 'solar:chat-round-dots-bold', onClick: handleOpenMessageModal },
+        { number: post.quantidade, icon: 'mdi:package-variant' },
+        // { number: post.quantidade, icon: 'solar:share-bold' },
+        { icon: 'mdi:credit-card-outline', onClick: handleOpenPaymentModal }, // 
       ].map((info, _index) => (
         <Box
           key={_index}
@@ -115,6 +296,7 @@ export function PostItem({
               color: 'common.white',
             }),
           }}
+          onClick={info.onClick}
         >
           <Iconify width={16} icon={info.icon} sx={{ mr: 0.5 }} />
           <Typography variant="caption">{fShortenNumber(info.number)}</Typography>
@@ -128,7 +310,7 @@ export function PostItem({
       component="img"
       onClick={handleOpen}
       alt={post.nome}
-      src={`http://localhost:8000${post.imagens[0].imagem}`}
+      src={`http://localhost:8000${post.imagens[0]?.imagem}`}
       sx={{
         top: 0,
         width: 1,
@@ -170,6 +352,33 @@ export function PostItem({
         ...((latestPostLarge || latestPost) && { display: 'none' }),
       }}
     />
+  );
+
+  const renderProductInfo = (
+    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 8, border: '1px solid #000' }}>
+      <Box>
+        <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+          {post.nome}
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          Preço: {post.preco.toFixed(2)} KZ
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          Quantidade disponível: {post.quantidade}
+        </Typography>
+      </Box>
+      <Box
+        component="img"
+        src={`http://localhost:8000${post.imagens[0]?.imagem}`}
+        alt={post.nome}
+        sx={{
+          width: 80,
+          height: 80,
+          objectFit: 'cover',
+          borderRadius: 1,
+        }}
+      />
+    </Box>
   );
 
   return (
@@ -218,6 +427,7 @@ export function PostItem({
           {renderInfo}
         </Box>
       </Card>
+
       <Modal open={open} onClose={handleClose}>
         <Box
           sx={{
@@ -232,10 +442,7 @@ export function PostItem({
             borderRadius: 2,
           }}
         >
-          <IconButton
-            onClick={handleClose}
-            sx={{ position: 'absolute', top: 8, right: 8 }}
-          >
+          <IconButton onClick={handleClose} sx={{ position: 'absolute', top: 8, right: 8 }}>
             <Iconify icon="mdi:close" width={24} />
           </IconButton>
 
@@ -263,7 +470,7 @@ export function PostItem({
               gap: 2,
             }}
           >
-            {post.imagens.map((img) => (
+            {post.imagens && Array.isArray(post.imagens) && post.imagens.map((img) => (
               <Box
                 key={img.id}
                 component="img"
@@ -275,6 +482,171 @@ export function PostItem({
           </Box>
         </Box>
       </Modal>
+
+      {/* Modal de Enviar Mensagem */}
+      <Modal open={openMessageModal} onClose={handleCloseMessageModal}>
+        <Box
+          sx={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: 600,
+            bgcolor: 'background.paper',
+            boxShadow: 24,
+            p: 4,
+            borderRadius: 2,
+            display: 'flex',
+            flexDirection: 'column',
+          }}
+        >
+          <IconButton onClick={handleCloseMessageModal} sx={{ position: 'absolute', top: 8, right: 8 }}>
+            <Iconify icon="mdi:close" width={24} />
+          </IconButton>
+
+          {renderAvatar}
+          {renderProductInfo}
+
+          <Box component="form" sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 4 }}  onSubmit={(event) => {
+    event.preventDefault(); // Evita o reload da página
+    sendMessage();
+  }}>
+            <textarea
+              rows={2}
+              placeholder="Digite sua mensagem..."
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '8px',
+                borderRadius: '4px',
+                border: '1px solid #ccc',
+                marginBottom: '16px',
+                resize: 'none',
+              }}
+            />
+            <IconButton
+              type="submit"
+              // onClick={sendMessage}
+              sx={{
+                backgroundColor: '#1976d2',
+                color: '#fff',
+                borderRadius: '50%',
+                width: 48,
+                height: 48,
+                alignSelf: 'flex-end',
+                '&:hover': {
+                  backgroundColor: '#1565c0',
+                },
+              }}
+            >
+              <Iconify icon="mdi:telegram" width={24} />
+            </IconButton>
+          </Box>
+        </Box>
+      </Modal>
+      {/* modal de pagamento */}
+
+
+      <Modal open={openPaymentModal} onClose={handleClosePaymentModal}>
+  <Box
+    sx={{
+      position: 'absolute',
+      top: '50%',
+      left: '50%',
+      transform: 'translate(-50%, -50%)',
+      width: 600,
+      bgcolor: 'background.paper',
+      boxShadow: 24,
+      p: 4,
+      borderRadius: 2,
+      display: 'flex',
+      flexDirection: 'column',
+    }}
+  >
+    <IconButton onClick={handleClosePaymentModal} sx={{ position: 'absolute', top: 8, right: 8 }}>
+      <Iconify icon="mdi:close" width={24} />
+    </IconButton>
+
+    <Typography variant="h5" sx={{ mb: 2 }}>
+      Selecionar Posto para Pagamento
+    </Typography>
+
+    {loading ? (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 100 }}>
+        <CircularProgress />
+      </Box>
+    ) : (
+      <>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          {postos.map((posto) => (
+            <Box
+            key={posto.posto.id}
+            sx={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              p: 2,
+              border: '1px solid #ccc',
+              borderRadius: 1,
+              cursor: 'pointer',
+              backgroundColor: selectedPosto === posto.posto.id ? '#f0f0f0' : 'transparent',
+            }}
+            onClick={() => {
+              setSelectedPosto(posto.posto.id);
+              checkPostoAvailability(posto.posto.id);
+            }}
+          >
+            <Typography>{posto.posto.nome}</Typography>
+            <Typography>{posto.posto.localizacao}</Typography>
+            {selectedPosto === posto.posto.id && (
+              <Iconify
+                icon={postoDisponivel ? "mdi:check-circle" : "mdi:alert-circle"}
+                width={24}
+                color={postoDisponivel ? "green" : "red"}
+              />
+            )}
+          </Box>
+          ))}
+        </Box>
+
+        {postoDisponivel && (
+          <Box sx={{ mt: 2 }}>
+            <TextField
+              label="Quantidade"
+              type="number"
+              value={quantidade}
+              onChange={(e) => setQuantidade(e.target.value)}
+              fullWidth
+              sx={{ mb: 2 }}
+            />
+            <Button
+              variant="contained"
+              onClick={initiatePayment}
+              disabled={loading}
+              fullWidth
+            >
+              Gerar Link de Pagamento
+            </Button>
+          </Box>
+        )}
+
+        {checkoutUrl && (
+          <Box sx={{ mt: 2 }}>
+            <Button
+              variant="contained"
+              color="success"
+              onClick={() => window.open(checkoutUrl, '_blank')}
+              fullWidth
+            >
+              Ir para Pagamento
+            </Button>
+          </Box>
+        )}
+      </>
+    )}
+  </Box>
+</Modal>
     </>
   );
 }

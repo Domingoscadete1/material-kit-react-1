@@ -37,7 +37,7 @@ const  AddPostoModal: React.FC<AddPostoModalProps> = ({ open, onClose }) => {
     }
 
     const userData = JSON.parse(token);
-    const empresaId = userData.empresa;
+    const empresaId = userData.empresa.id;
 
     if (!selectedPosto) {
       alert('Selecione um posto.');

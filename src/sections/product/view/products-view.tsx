@@ -76,7 +76,7 @@ export function ProductsView() {
   const [page, setPage] = useState(1); // Para controle de paginação
   const [openFilter, setOpenFilter] = useState(false);
   const [empresaId, setEmpresaId] = React.useState<string | null>(null);
-  const baseUrl = "https://8125-105-168-51-155.ngrok-free.app";
+  const baseUrl = "https://4762-154-71-159-172.ngrok-free.app";
   const [openModal, setOpenModal] = useState(false);
   const [categories, setCategories] = useState<any[]>([]); // Armazenar categorias da API
   const token2 = localStorage.getItem('refreshToken'); // Token salvo ao logar
@@ -181,7 +181,7 @@ export function ProductsView() {
     });
 
     try {
-      const response = await axios.post(`${baseUrl}/api/produto/create/`, formData, {
+      const response = await axios.post(`http://localhost:8000/api/produto/create/`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
 
