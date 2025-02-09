@@ -20,12 +20,17 @@ import Button from '@mui/material/Button';
 import { _products } from 'src/_mock';
 import { DashboardContent } from 'src/layouts/dashboard';
 import axios from 'axios';
+import L from 'leaflet';
+import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
+
 import Config from '../Config';
 import { ProductItem } from '../product-item';
 import { ProductSort } from '../product-sort';
 import { CartIcon } from '../product-cart-widget';
 import { ProductFilters } from '../product-filters';
 import type { FiltersProps } from '../product-filters';
+
+import 'leaflet/dist/leaflet.css';
 
 // ----------------------------------------------------------------------
 
@@ -80,7 +85,8 @@ export function ProductsView() {
   const [openModal, setOpenModal] = useState(false);
   const [categories, setCategories] = useState<any[]>([]); // Armazenar categorias da API
   const token2 = localStorage.getItem('refreshToken'); // Token salvo ao logar
-
+  const [location, setLocation] = useState<{ lat: number; lng: number }>({ lat: 0, lng: 0 });
+  const [openMapModal, setOpenMapModal] = useState(false);
   const [newProduct, setNewProduct] = useState({
     nome: '',
     descricao: '',
@@ -92,6 +98,53 @@ export function ProductsView() {
     images: [] as File[], // Para permitir múltiplas imagens
 
   });
+  function LocationMarker() {
+    const map = useMapEvents({
+      click(e) {
+        setLocation({ lat: e.latlng.lat, lng: e.latlng.lng });
+      },
+    });
+  
+    return location ? (
+      <Marker position={[location.lat, location.lng]} icon={L.icon({
+        iconUrl: 'https://leafletjs.com/examples/custom-icons/leaf-red.png',
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+      })} />
+    ) : null;
+  }
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          setLocation({ lat: latitude, lng: longitude });
+        },
+        (error) => {
+          console.error('Erro ao obter localização:', error);
+        }
+      );
+    }
+  }, []);
+  
+  
+  const handleGetCurrentLocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          setLocation({ lat: latitude, lng: longitude });
+          setNewProduct((prev) => ({ ...prev, localizacao: `${latitude}, ${longitude}` }));
+        },
+        (error) => {
+          console.error('Erro ao obter localização:', error);
+        }
+      );
+    } else {
+      alert('Geolocalização não é suportada pelo seu navegador.');
+    }
+  };
+  
 
   const [filters, setFilters] = useState<FiltersProps>(defaultFilters);
 
@@ -210,7 +263,23 @@ export function ProductsView() {
   const canReset = Object.keys(filters).some(
     (key) => filters[key as keyof FiltersProps] !== defaultFilters[key as keyof FiltersProps]
   );
-
+  const handleOpenMapModal = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setLocation({ lat: position.coords.latitude, lng: position.coords.longitude });
+          setOpenMapModal(true);
+        },
+        (error) => {
+          console.error('Erro ao obter localização:', error);
+          setOpenMapModal(true);
+        }
+      );
+    } else {
+      setOpenMapModal(true);
+    }
+  };
+  
   return (
     <DashboardContent>
       <Typography variant="h4" sx={{ mb: 5 }}>
@@ -284,6 +353,13 @@ export function ProductsView() {
             margin="normal"
             type="number"
           />
+          <Button variant="outlined" onClick={handleGetCurrentLocation} sx={{ mt: 1, mr: 1 }}>
+            Usar Minha Localização
+          </Button>
+
+          <Button variant="outlined" onClick={handleOpenMapModal} sx={{ mt: 1 }}>
+            Escolher no Mapa
+          </Button>
           <TextField
             fullWidth
             label="Localização"
@@ -324,6 +400,34 @@ export function ProductsView() {
           </Button>
         </Box>
       </Modal>
+
+
+      <Modal open={openMapModal} onClose={() => setOpenMapModal(false)}>
+        <Box
+          sx={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: 500,
+            height: 400,
+            bgcolor: 'background.paper',
+            boxShadow: 24,
+            p: 2,
+            borderRadius: 1,
+          }}
+        >
+          <Typography variant="h6">Escolha a Localização</Typography>
+          <MapContainer center={location} zoom={13} style={{ height: '300px', width: '100%' }}>
+          <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+            <LocationMarker />
+          </MapContainer>
+          <Button variant="contained" onClick={() => setOpenMapModal(false)} sx={{ mt: 2 }}>
+            Confirmar Localização
+          </Button>
+        </Box>
+      </Modal>
+
 
       <Box
         display="flex"
