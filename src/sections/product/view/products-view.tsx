@@ -422,7 +422,13 @@ export function ProductsView() {
           <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
             <LocationMarker />
           </MapContainer>
-          <Button variant="contained" onClick={() => setOpenMapModal(false)} sx={{ mt: 2 }}>
+          <Button variant="contained" onClick={() => {
+          setNewProduct((prev) => ({
+            ...prev,
+            localizacao: `${location.lat}, ${location.lng}`,
+          }));
+          setOpenMapModal(false);
+        }} sx={{ mt: 2 }}>
             Confirmar Localização
           </Button>
         </Box>
