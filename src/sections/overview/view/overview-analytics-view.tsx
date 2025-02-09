@@ -20,6 +20,12 @@ import { AnalyticsConversionRates } from '../analytics-conversion-rates';
 // ----------------------------------------------------------------------
 
 export function OverviewAnalyticsView() {
+  const [analyticsData, setAnalyticsData] = useState({
+    vendas: 0,
+    usuarios: 0,
+    compras: 0,
+    chats: 0,
+  });
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [empresaId, setEmpresaId] = React.useState<string | null>(null);
@@ -55,18 +61,35 @@ export function OverviewAnalyticsView() {
 
     fetchProducts();
   }, [empresaId]);
+  useEffect(() => {
+    if (!empresaId) return;
+
+    const fetchAnalytics = async () => {
+      try {
+        setLoading(true);
+        const response = await axios.get(`http://localhost:8000/api/empresa/analytics/${empresaId}/`);
+        setAnalyticsData(response.data);
+      } catch (error) {
+        console.error('Erro ao buscar dados analíticos:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAnalytics();
+  }, [empresaId]);
   return (
     <DashboardContent maxWidth="xl">
-      {/* <Typography variant="h4" sx={{ mb: { xs: 3, md: 5 } }}>
+      <Typography variant="h4" sx={{ mb: { xs: 3, md: 5 } }}>
         Hi, Welcome back 👋
-      </Typography> */}
+      </Typography>
 
       <Grid container spacing={3}>
         <Grid xs={12} sm={6} md={3}>
           <AnalyticsWidgetSummary
-            title="Weekly sales"
+            title="Vendas"
             percent={2.6}
-            total={714000}
+            total={analyticsData.vendas}
             icon={<img alt="icon" src="/assets/icons/glass/ic-glass-bag.svg" />}
             chart={{
               categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'],
@@ -77,9 +100,9 @@ export function OverviewAnalyticsView() {
 
         <Grid xs={12} sm={6} md={3}>
           <AnalyticsWidgetSummary
-            title="New users"
+            title="Usuários"
             percent={-0.1}
-            total={131}
+            total={analyticsData.usuarios}
             color="secondary"
             icon={<img alt="icon" src="/assets/icons/glass/ic-glass-users.svg" />}
             chart={{
@@ -91,9 +114,9 @@ export function OverviewAnalyticsView() {
 
         <Grid xs={12} sm={6} md={3}>
           <AnalyticsWidgetSummary
-            title="Purchase orders"
+            title="Compras"
             percent={2.8}
-            total={1723315}
+            total={analyticsData.compras}
             color="warning"
             icon={<img alt="icon" src="/assets/icons/glass/ic-glass-buy.svg" />}
             chart={{
@@ -105,9 +128,9 @@ export function OverviewAnalyticsView() {
 
         <Grid xs={12} sm={6} md={3}>
           <AnalyticsWidgetSummary
-            title="Messages"
+            title="Mensagens"
             percent={3.6}
-            total={234}
+            total={analyticsData.chats}
             color="error"
             icon={<img alt="icon" src="/assets/icons/glass/ic-glass-message.svg" />}
             chart={{
@@ -145,7 +168,7 @@ export function OverviewAnalyticsView() {
           />
         </Grid>
 
-        {/* <Grid xs={12} md={6} lg={5}>
+        <Grid xs={12} md={6} lg={5}>
           <AnalyticsConversionRates
             title="Conversion rates"
             subheader="(+43%) than last year"
@@ -157,9 +180,9 @@ export function OverviewAnalyticsView() {
               ],
             }}
           />
-        </Grid> */}
+        </Grid>
 
-        <Grid xs={12} md={6} lg={5}>
+        {/* <Grid xs={12} md={6} lg={5}>
           <AnalyticsCurrentSubject
             title="Current subject"
             chart={{
@@ -171,7 +194,7 @@ export function OverviewAnalyticsView() {
               ],
             }}
           />
-        </Grid>
+        </Grid> */}
 
         <Grid xs={12} md={6} lg={8}>
           <AnalyticsNews title="Recentemente Divulgados" list={products.slice(0, 5)} />

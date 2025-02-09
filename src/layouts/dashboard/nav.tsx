@@ -124,7 +124,7 @@ export function NavContent({ data, slots, workspaces, sx }: NavContentProps) {
       {slots?.topArea}
 
       <Box sx={{ my: 2, textAlign: 'left', fontWeight: 'bold', fontSize: '35' }}>
-        Yeboo
+        DDStore
       </Box>
 
       <Scrollbar fillContent>

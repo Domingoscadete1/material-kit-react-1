@@ -162,7 +162,7 @@ export function RelatorioView() {
                     onClick={(event) => handleMenuOpen(event, report.id)}
                     sx={{ position: 'absolute', top: 10, right: 10 }}
                   >
-                    <Iconify icon="mdi:dots-vertical" width={24} height={24} color={iconeCor} />
+                  <Iconify icon="mdi:dots-vertical" width={24} height={24} color='black' />
                   </IconButton>
                   
 

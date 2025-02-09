@@ -54,9 +54,9 @@ export const navData = [
     icon: icon('ic-user'),
   },
   {
-    title: 'Relatório',
+    title: 'Transações',
     path: '/relatorio',
-    icon: icon('ic-disabled'),
+    icon: icon('ic-lock'),
   },
   // {
   //   title: 'Sign in',
