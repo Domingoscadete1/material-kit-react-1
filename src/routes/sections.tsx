@@ -11,12 +11,14 @@ import { DashboardLayout } from 'src/layouts/dashboard';
 import { ChatView } from 'src/sections/chat/view';
 import { PerfilView } from 'src/sections/perfil/view';
 import { RelatorioView } from 'src/sections/relatorio/view';
+import { FuncionarioView } from 'src/sections/funcionario/view';
 
 // ----------------------------------------------------------------------
 
 export const HomePage = lazy(() => import('src/pages/home'));
 export const BlogPage = lazy(() => import('src/pages/blog'));
 export const UserPage = lazy(() => import('src/pages/user'));
+export const Funcionário = lazy(() => import('src/pages/funcionario'));
 export const SignInPage = lazy(() => import('src/pages/sign-in'));
 export const ProductsPage = lazy(() => import('src/pages/products'));
 export const Page404 = lazy(() => import('src/pages/page-not-found'));
@@ -52,6 +54,7 @@ export function Router() {
       children: [
         { element: <HomePage />, index: true },
         { path: 'user', element: <UserPage /> },
+        { path: 'funcionario', element: <FuncionarioView /> },
         { path: 'products', element: <ProductsPage /> },
         { path: 'blog', element: <BlogPage /> },
         { path: 'listasms', element: <Lista /> },

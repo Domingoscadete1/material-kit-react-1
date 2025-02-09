@@ -22,6 +22,7 @@ const isTokenExpired = (token) => {
 /**
  * Renova o token de acesso usando o refresh token.
  */
+
 const refreshAccessToken = async () => {
   try {
     const refreshToken = localStorage.getItem('refreshToken');
@@ -58,6 +59,7 @@ const refreshAccessToken = async () => {
 /**
  * Faz requisições com token JWT, tentando renovar automaticamente se necessário.
  */
+
 export const fetchWithToken = async (url, options = {}) => {
   let accessToken = localStorage.getItem('accessToken');
 
