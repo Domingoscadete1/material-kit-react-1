@@ -29,6 +29,8 @@ export type AccountPopoverProps = IconButtonProps & {
 
 export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps) {
   const router = useRouter();
+  const usuario = JSON.parse(localStorage.getItem('userData') || '{}'); // Parse para garantir que seja um objeto
+
 // Função para deslogar o usuário
 const signOut = async (): Promise<{ error?: string }> => {
   localStorage.removeItem('custom-auth-token');
@@ -89,8 +91,8 @@ const handleSignOut = useCallback(async (): Promise<void> => {
         }}
         {...other}
       >
-        <Avatar src={_myAccount.photoURL} alt={_myAccount.displayName} sx={{ width: 1, height: 1 }}>
-          {_myAccount.displayName.charAt(0).toUpperCase()}
+        <Avatar src={`http://127.0.0.1:8000${usuario.foto}`} alt={usuario.usuario_username} sx={{ width: 1, height: 1 }}>
+          {usuario.usuario_username.toUpperCase()}
         </Avatar>
       </IconButton>
 
@@ -108,11 +110,11 @@ const handleSignOut = useCallback(async (): Promise<void> => {
       >
         <Box sx={{ p: 2, pb: 1.5 }}>
           <Typography variant="subtitle2" noWrap>
-            {_myAccount?.displayName}
+            {usuario.usuario_username}
           </Typography>
 
           <Typography variant="body2" sx={{ color: 'text.secondary' }} noWrap>
-            {_myAccount?.email}
+            {usuario.email}
           </Typography>
         </Box>
 

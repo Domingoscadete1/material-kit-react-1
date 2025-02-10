@@ -7,7 +7,18 @@ const icon = (name: string) => (
   <SvgColor width="100%" height="100%" src={`/assets/icons/navbar/${name}.svg`} />
 );
 
-export const navData = [
+const getUserRole = () => {
+  const token = localStorage.getItem('userData');
+  if (token) {
+    const userData = JSON.parse(token);
+    return userData.role || '';
+  }
+  return '';
+};
+
+const role = getUserRole();
+
+const baseNavData = [
   {
     title: 'Dashboard',
     path: '/',
@@ -19,40 +30,20 @@ export const navData = [
     icon: icon('ic-user'),
   },
   {
-    title: 'Funcionários',
-    path: '/funcionario',
-    icon: icon('ic-user'),
-  },
-  {
     title: 'Produtos',
     path: '/products',
     icon: icon('ic-cart'),
-    // info: (
-    //   <Label color="error" variant="inverted">
-    //     +3
-    //   </Label>
-    // ),
   },
   {
     title: 'Home',
     path: '/blog',
     icon: icon('ic-blog'),
   },
-  // {
-  //   title: 'Not found',
-  //   path: '/404',
-  //   icon: icon('ic-disabled'),
-  // },
   {
     title: 'Mensagens',
     path: '/listasms',
     icon: icon('ic-disabled'),
   },
-  // {
-  //   title: 'Chat',
-  //   path: '/chat',
-  //   icon: icon('ic-disabled'),
-  // },
   {
     title: 'Perfil',
     path: '/perfil',
@@ -63,14 +54,15 @@ export const navData = [
     path: '/relatorio',
     icon: icon('ic-lock'),
   },
-  // {
-  //   title: 'Sign in',
-  //   path: '/sign-in',
-  //   icon: icon('ic-lock'),
-  // },
-  // {
-  //   title: 'Not found',
-  //   path: '/404',
-  //   icon: icon('ic-disabled'),
-  // },
 ];
+
+export const navData = role === 'admin'
+  ? [
+      ...baseNavData,
+      {
+        title: 'Funcionários',
+        path: '/funcionario',
+        icon: icon('ic-user'),
+      },
+    ]
+  : baseNavData;

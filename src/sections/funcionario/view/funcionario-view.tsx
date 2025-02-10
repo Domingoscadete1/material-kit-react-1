@@ -14,8 +14,7 @@ import { DashboardContent } from 'src/layouts/dashboard';
 import { Iconify } from 'src/components/iconify';
 import { Scrollbar } from 'src/components/scrollbar';
 
-import AddPostoModal from './postomodal';
-
+import AddFuncionarioModal from './funcionariomodal';
 import { TableNoData } from '../table-no-data';
 import { UserTableRow } from '../user-table-row';
 import { UserTableHead } from '../user-table-head';
@@ -45,7 +44,7 @@ export function FuncionarioView() {
     <DashboardContent>
       <Box display="flex" alignItems="center" mb={5}>
         <Typography variant="h4" flexGrow={1}>
-          Postos
+          Funcionarios
         </Typography>
         <Button
           variant="contained"
@@ -53,9 +52,9 @@ export function FuncionarioView() {
           startIcon={<Iconify icon="mingcute:add-line" />}
           onClick={() => setModalOpen(true)}
         >
-          Adionar Posto
+          Adicionar Funcionario
         </Button>
-        <AddPostoModal open={modalOpen} onClose={() => setModalOpen(false)} />
+        <AddFuncionarioModal open={modalOpen} onClose={() => setModalOpen(false)} />
       </Box>
 
       <Card>
@@ -85,8 +84,8 @@ export function FuncionarioView() {
                 }
                 headLabel={[
                   { id: 'name', label: 'Nome' },
-                  { id: 'company', label: 'Capacidade' },
-                  { id: 'role', label: 'Horário' },
+                  { id: 'email', label: 'email' },
+                  { id: 'role', label: 'Cargo' },
                   { id: 'isVerified', label: 'Verificada', align: 'center' },
                   { id: 'status', label: 'Status' },
                   { id: '' },

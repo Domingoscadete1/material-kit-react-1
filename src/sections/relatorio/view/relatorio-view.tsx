@@ -25,6 +25,7 @@ export function RelatorioView() {
   const [totalPages, setTotalPages] = useState(0);
   const [menuAnchor, setMenuAnchor] = useState<{ [key: number]: HTMLElement | null }>({});
 
+  const [empresaData, setEmpresaData] = useState<{ saldo: number ,nome:string} | null>(null);
 
 
   useEffect(() => {
@@ -37,6 +38,23 @@ export function RelatorioView() {
       }
     }
   }, []);
+  const fetchEmpresaData = useCallback(async () => {
+    if (!empresaId) return;
+    try {
+      const response = await axios.get(`http://localhost:8000/api/empresa/${empresaId}/`);
+      console.log('Dados da empresa:', response.data);
+      setEmpresaData(response.data);
+    } catch (error) {
+      console.error('Erro ao buscar dados da empresa:', error);
+    }
+  }, [empresaId]);
+  useEffect(() => {
+    if (empresaId) {
+      fetchEmpresaData();
+    }
+  }, [empresaId, fetchEmpresaData]);
+  
+  
 
   const fetchProducts = useCallback(async () => {
     if (!empresaId) {
@@ -95,6 +113,21 @@ export function RelatorioView() {
       <Typography variant="h4" flexGrow={1} mb={4}>
         Transações
       </Typography>
+
+      <Box mb={4} p={2} bgcolor="white" borderRadius={2} boxShadow={1}>
+  <Typography variant="h5">{empresaData?.nome}</Typography>
+  {empresaData ? (
+    <>
+      <Typography variant="body1">Saldo: {empresaData.saldo} Kzs</Typography>
+      
+    </>
+  ) : (
+    <Typography variant="body2" color="text.secondary">
+      Carregando informações da empresa...
+    </Typography>
+  )}
+</Box>
+
 
       <Grid container spacing={3}>
         {transacoes.map((report) => {

@@ -1,5 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
-
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import Box from '@mui/material/Box';
 import Avatar from '@mui/material/Avatar';
 import Popover from '@mui/material/Popover';
@@ -25,14 +24,16 @@ export type UserProps = {
   avatarUrl: string;
   isVerified: boolean;
 };
+
 interface Posto {
   id: number;
   nome: string;
   capacidade: number;
   horario: string;
   status: string;
-  imagem:string;
+  imagem: string;
 }
+
 type PostoProps = {
   id: number;
   empresa: {
@@ -40,7 +41,7 @@ type PostoProps = {
     nome: string;
   };
   posto: Posto;
-  indisponivel:Boolean;
+  indisponivel: boolean;
 };
 
 type UserTableRowProps = {
@@ -49,18 +50,32 @@ type UserTableRowProps = {
   onSelectRow: () => void;
 };
 
+type FuncionarioProps = {
+  id: number;
+  username: string;
+  email: string;
+  role: string;
+  deleted: boolean;
+  usuario_username: string;
+  foto: string;
+};
+
 export function UserTableRow({ row, selected, onSelectRow }: UserTableRowProps) {
   const [openPopover, setOpenPopover] = useState<HTMLButtonElement | null>(null);
   const [empresaId, setEmpresaId] = useState<string | null>(null);
   const baseUrl = "http://127.0.0.1:8000/";
   const [loading, setLoading] = useState(true);
-  const [postos, setPostos] = useState<PostoProps[]>([]); // Armazenar produtos da API
+  const [postos, setPostos] = useState<PostoProps[]>([]);
   const [postoAtual, setPostoAtual] = useState<PostoProps | null>(null);
+  const [funcionarios, setFuncionarios] = useState<FuncionarioProps[]>([]);
+  const [funcionarioAtual, setFuncionarioAtual] = useState<FuncionarioProps | null>(null);
+  const [isFetched, setIsFetched] = useState(false);
+  const hasFetched = useRef(false); // Rastreia se a função já foi chamada
 
   const handleOpenPopover = useCallback(
     (event: React.MouseEvent<HTMLButtonElement>, posto: PostoProps) => {
       setOpenPopover(event.currentTarget);
-      setPostoAtual(posto); // Armazena o posto selecionado
+      setPostoAtual(posto);
     },
     []
   );
@@ -81,134 +96,62 @@ export function UserTableRow({ row, selected, onSelectRow }: UserTableRowProps) 
     }
   }, []);
 
-  const fetchPostos = useCallback(async () => {
-    if (!empresaId) {
-      console.error('ID da empresa não definido.');
-      return;
-    }
+  const fetchFuncionarios = useCallback(async () => {
+    if (!empresaId) return;
+
     try {
       setLoading(true);
-      const response = await axios.get(`http://localhost:8000/api/postos/empresa/${empresaId}/`);
-      console.log('Postos recebidos:', response.data.postos);
-  
-      // Evita a duplicação armazenando IDs únicos
-      setPostos((prevPostos) => {
-        const postosMap = new Map(prevPostos.map((p) => [p.id, p]));
-        response.data.postos.forEach((posto: PostoProps) => {
-          postosMap.set(posto.id, posto);
-        });
-        return Array.from(postosMap.values()); // Retorna apenas valores únicos
-      });
+      console.log("Chamando fetchFuncionarios()");
+
+      const response = await axios.get(`${baseUrl}api/empresa/funcionarios/${empresaId}/`);
+      console.log("Funcionários recebidos:", response.data.funcionarios);
+
+      // Substitui a lista de funcionários pelos novos dados
+      setFuncionarios(response.data.funcionarios);
+
+      setIsFetched(true);
     } catch (error) {
-      console.error('Erro ao buscar postos:', error);
+      console.error("Erro ao buscar funcionários:", error);
     } finally {
       setLoading(false);
     }
-  }, [empresaId]); 
+  }, [empresaId]);
 
   useEffect(() => {
-    if (empresaId) {
-      fetchPostos();
+    if (empresaId && !hasFetched.current) {
+      hasFetched.current = true;
+      fetchFuncionarios();
     }
-  }, [empresaId, fetchPostos]);
-
-  const handleAtivarPosto = async () => {
-    if (!postoAtual) return;
-    try {
-      const response = await fetch(`${baseUrl}api/empresa-posto/disponivel/`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          empresa_id: empresaId,
-          posto_id: postoAtual.id,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Erro na requisição: ${response.status}`);
-      }
-
-      alert('Posto ativado com sucesso!');
-      fetchPostos();
-      handleClosePopover();
-    } catch (error) {
-      console.error('Erro ao ativar o posto:', error);
-      alert('Erro ao ativar o posto.');
-    }
-  };
-
-  const handleDesativarPosto = async () => {
-    if (!postoAtual) return;
-    try {
-      const response = await fetch(`${baseUrl}api/empresa-posto/indisponivel/`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          empresa_id: empresaId,
-          posto_id: postoAtual.posto.id,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Erro na requisição: ${response.status}`);
-      }
-
-      alert('Posto desativado com sucesso!');
-      fetchPostos();
-      handleClosePopover();
-    } catch (error) {
-      console.error('Erro ao desativar o posto:', error);
-      alert('Erro ao desativar o posto.');
-    }
-  };
+  }, [empresaId, fetchFuncionarios]);
 
   return (
     <>
-      {postos.map((postoAceite) => (
-  <TableRow hover tabIndex={-1} role="checkbox" selected={selected} key={postoAceite.id}>
-    <TableCell padding="checkbox">
-      <Checkbox disableRipple checked={selected} onChange={onSelectRow} />
-    </TableCell>
+      {funcionarios.map((funcionario) => (
+        <TableRow hover tabIndex={-1} role="checkbox" key={funcionario.id}>
+          <TableCell padding="checkbox">
+            <Checkbox disableRipple />
+          </TableCell>
 
-    <TableCell component="th" scope="row">
-      <Box gap={2} display="flex" alignItems="center">
-        <Avatar
-          alt={postoAceite.posto?.nome}
-          src={`http://localhost:8000${postoAceite.posto?.imagem}`}
-        />
-        {postoAceite.posto?.nome}
-      </Box>
-    </TableCell>
+          <TableCell component="th" scope="row">
+            <Box gap={2} display="flex" alignItems="center">
+              <Avatar src={`http://127.0.0.1:8000${funcionario.foto}`} />
+              {funcionario.usuario_username}
+            </Box>
+          </TableCell>
 
-    <TableCell>{postoAceite.posto?.capacidade}</TableCell>
+          <TableCell>{funcionario.email}</TableCell>
+          <TableCell>{funcionario.role}</TableCell>
 
-    <TableCell>{postoAceite.posto?.horario}</TableCell>
+          <TableCell align="center">
+            {funcionario.deleted ? (
+              <Iconify width={22} icon="solar:check-circle-bold" sx={{ color: 'success.main' }} />
+            ) : (
+              '-'
+            )}
+          </TableCell>
+        </TableRow>
+      ))}
 
-    <TableCell align="center">
-      {postoAceite.indisponivel === false ? (
-        <Iconify width={22} icon="solar:check-circle-bold" sx={{ color: 'success.main' }} />
-      ) : (
-        '-'
-      )}
-    </TableCell>
-
-    <TableCell>
-      <Label color={postoAceite.indisponivel === true ? 'error' : 'success'}>
-        {postoAceite.posto?.status}
-      </Label>
-    </TableCell>
-
-    <TableCell align="right">
-      <IconButton onClick={(e) => handleOpenPopover(e,  postoAceite)}>
-        <Iconify icon="eva:more-vertical-fill" />
-      </IconButton>
-    </TableCell>
-  </TableRow>
-))}
       <Popover
         open={!!openPopover}
         anchorEl={openPopover}
@@ -232,14 +175,14 @@ export function UserTableRow({ row, selected, onSelectRow }: UserTableRowProps) 
             },
           }}
         >
-          <MenuItem onClick={handleAtivarPosto}>
+          <MenuItem>
             <Iconify icon="solar:pen-bold" />
-            Ativar
+            Editar
           </MenuItem>
 
-          <MenuItem onClick={handleDesativarPosto} sx={{ color: 'error.main' }}>
+          <MenuItem sx={{ color: 'error.main' }}>
             <Iconify icon="solar:trash-bin-trash-bold" />
-            Desativar
+            Remover
           </MenuItem>
         </MenuList>
       </Popover>

@@ -46,21 +46,21 @@ export function PerfilView() {
           <Paper elevation={4} sx={{ p: 4, textAlign: 'center' }}>
             {/* Profile Picture */}
             <Avatar
-              src={`http://localhost:8000${empresa.nome}`}
+              src={`http://localhost:8000${empresa.foto}`}
               alt="Profile"
               sx={{ width: 120, height: 120, mx: 'auto', mb: 2 }}
             />
             <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
-            {empresa.empresa.nome}
+            {empresa.usuario_username}
             </Typography>
-            <Typography variant="body2" sx={{ color: 'text.secondary', mb: 1 }}>
+            {/* <Typography variant="body2" sx={{ color: 'text.secondary', mb: 1 }}>
               Saldo empresa:{empresa.empresa.saldo}
-            </Typography>
+            </Typography> */}
             <Typography variant="body2" sx={{ color: 'text.secondary', mb: 1 }}>
-            {empresa.empresa.telefone1}
+            Cargo: {empresa.role}
             </Typography>
             <Typography variant="body2" sx={{ color: 'text.secondary', mb: 3 }}>
-            {empresa.empresa.email}
+            Email: {empresa.email}
             </Typography>
             {/* SMS Activation */}
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
@@ -68,7 +68,7 @@ export function PerfilView() {
               <Switch defaultChecked />
             </Box>
             {/* Save Button */}
-            <Button variant="contained" color="primary" fullWidth>
+            <Button variant="contained" color="primary" fullWidth disabled>
               Salvar Alterações
             </Button>
           </Paper>
