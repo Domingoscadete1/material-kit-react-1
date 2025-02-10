@@ -37,7 +37,7 @@ export function PerfilView() {
     <DashboardContent>
       {/* Header */}
       <Typography variant="h4" gutterBottom>
-        Perfil do Usuário
+        Perfil
       </Typography>
 
       <Grid container spacing={3}>
