@@ -50,6 +50,11 @@ const baseNavData = [
     icon: icon('ic-user'),
   },
   {
+    title: 'Perfil2',
+    path: '/perfil2',
+    icon: icon('ic-user'),
+  },
+  {
     title: 'Transações',
     path: '/relatorio',
     icon: icon('ic-lock'),

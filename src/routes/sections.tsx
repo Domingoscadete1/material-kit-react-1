@@ -10,6 +10,7 @@ import { DashboardLayout } from 'src/layouts/dashboard';
 
 import { ChatView } from 'src/sections/chat/view';
 import { PerfilView } from 'src/sections/perfil/view';
+import { Perfil2View } from 'src/sections/perfil2/view';
 import { RelatorioView } from 'src/sections/relatorio/view';
 import { FuncionarioView } from 'src/sections/funcionario/view';
 
@@ -25,6 +26,7 @@ export const Page404 = lazy(() => import('src/pages/page-not-found'));
 export const Lista = lazy(() => import('src/pages/listasms'));
 export const Relatório = lazy(() => import('src/pages/relatorio'));
 export const Perfil = lazy(() => import('src/pages/perfil'));
+export const Perfil2 = lazy(() => import('src/pages/perfil2'));
 
 // ----------------------------------------------------------------------
 
@@ -60,6 +62,7 @@ export function Router() {
         { path: 'listasms', element: <Lista /> },
         { path: 'chat', element: <ChatView  /> },
         { path: 'perfil', element: <PerfilView /> },
+        { path: 'perfil2', element: <Perfil2View /> },
         { path: 'relatorio', element: <RelatorioView /> },
       ],
     },
