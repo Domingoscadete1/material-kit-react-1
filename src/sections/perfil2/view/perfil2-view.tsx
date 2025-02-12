@@ -5,75 +5,104 @@ import Paper from '@mui/material/Paper';
 import Button from '@mui/material/Button';
 import Avatar from '@mui/material/Avatar';
 import Divider from '@mui/material/Divider';
+import Modal from '@mui/material/Modal';
 import Switch from '@mui/material/Switch';
+import { IconButton } from '@mui/material';
+import { useEffect, useState } from 'react';
+import { useParams, useLocation } from 'react-router-dom';
 
+import axios from 'axios';
 import { DashboardContent } from 'src/layouts/dashboard';
 
-import React,{ useState, useEffect, useRef } from 'react';
-import axios from 'axios';
+interface Imagem {
+  imagem: string;
+}
 
+interface Produto {
+  id: number;
+  nome: string;
+  preco: number;
+  imagens?: Imagem[];
+  descricao:string;
+}
 
-// ----------------------------------------------------------------------
+interface Dados {
+  nome: string;
+  email: string;
+  telefone1?: string;
+  numero_telefone?: string;
+  foto?: string;
+  imagens?: Imagem[];
+}
 
 export function Perfil2View() {
-  const [empresaId, setEmpresaId] = React.useState<string | null>(null);
-  const empresa = JSON.parse(localStorage.getItem('userData') || '{}'); // Parse para garantir que seja um objeto
+  const [dados, setDados] = useState<Dados | null>(null);
+  const [produtos, setProdutos] = useState<Produto[]>([]);
+  const [produtoSelecionado, setProdutoSelecionado] = useState<Produto | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
 
-  const [loadingMessages, setLoadingMessages] = useState(false); // Estado de carregamento das mensagens
-  const socketRef = useRef<WebSocket | null>(null);
 
-  // Recupera o ID da empresa do localStorage
+  const { id, tipo } = useParams<{ id: string; tipo?: string }>(); //  const location = useLocation();
   useEffect(() => {
-    const token = localStorage.getItem('userData');
-    if (token) {
-      const userData = JSON.parse(token);
-      const postoId = userData.empresa;
-      if (postoId) {
-        setEmpresaId(postoId);
+    const fetchData = async () => {
+      try {
+        const response = await axios.get(`http://localhost:8000/api/${tipo}/${id}/`);
+        setDados(response.data);
+        console.log('dados',response.data)
+        
+        const produtosResponse = await axios.get(`http://localhost:8000/api/produtos/${tipo === 'empresa' ? 'empresa' : 'usuario'}/${id}`);
+        setProdutos(produtosResponse.data.produtos);
+        console.log('produtos',produtosResponse.data.produtos)
+      } catch (error) {
+        console.error('Erro ao buscar os dados:', error);
       }
-    }
-  }, []);
+    };
+
+    fetchData();
+  }, [id, tipo]);
+
+  if (!dados) return <Typography>Carregando...</Typography>;
+
   return (
     <DashboardContent>
-      {/* Header */}
       <Typography variant="h4" gutterBottom>
-        Perfil2
+        Perfil de {tipo === 'empresa' ? 'Empresa' : 'Usuário'}
       </Typography>
 
       <Grid container spacing={3}>
-        {/* Profile Section */}
         <Grid xs={12} md={4}>
           <Paper elevation={4} sx={{ p: 4, textAlign: 'center' }}>
-            {/* Profile Picture */}
             <Avatar
-              src={`http://localhost:8000${empresa.foto}`}
+              src={`${dados.foto || (dados.imagens?.length ? dados.imagens[0].imagem : '')}`}
               alt="Profile"
               sx={{ width: 120, height: 120, mx: 'auto', mb: 2 }}
             />
             <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
-            {empresa.usuario_username}
+              {dados.nome}
             </Typography>
-            {/* <Typography variant="body2" sx={{ color: 'text.secondary', mb: 1 }}>
-              Saldo empresa:{empresa.empresa.saldo}
-            </Typography> */}
             <Typography variant="body2" sx={{ color: 'text.secondary', mb: 1 }}>
-            Cargo: {empresa.role}
+              Email: {dados.email}
             </Typography>
             <Typography variant="body2" sx={{ color: 'text.secondary', mb: 3 }}>
-            Email: {empresa.email}
+              Telefone: {dados.telefone1 || dados.numero_telefone || 'Não informado'}
             </Typography>
-            {/* SMS Activation */}
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-              <Typography variant="body2">Ativar alertas por SMS</Typography>
-              <Switch defaultChecked />
-            </Box>
-            {/* Save Button */}
             <Button variant="contained" color="primary" fullWidth disabled>
               Salvar Alterações
             </Button>
           </Paper>
+          {tipo === 'empresa' && Array.isArray(dados.imagens) && dados.imagens.length > 0 && (
+            <Box sx={{ mt: 4 }}>
+              <Typography variant="h6">Imagens da Empresa</Typography>
+              <Grid container spacing={2}>
+                {dados.imagens.map((imagem, index) => (
+                  <Grid key={index} md={3}>
+                    <Box component="img" src={`${imagem.imagem}`} sx={{ width: '100%' }} />
+                  </Grid>
+                ))}
+              </Grid>
+            </Box>
+          )}
         </Grid>
-
         {/* Account and Bills Section */}
         <Grid xs={12} md={8}>
           <Paper elevation={4} sx={{ p: 4 }}>
@@ -131,9 +160,60 @@ export function Perfil2View() {
                 </Box>
               ))}
             </Box>
+            </Paper>
+            </Grid>
+
+        
+        <Grid xs={12} md={8}>
+          <Paper elevation={4} sx={{ p: 4 }}>
+            <Typography variant="h6">Produtos</Typography>
+            <Divider sx={{ mb: 2 }} />
+            <Grid container spacing={2}>
+              {produtos.length > 0 ? (
+                produtos.map((produto) => (
+                  <Grid key={produto.id} md={4}>
+                    <Paper elevation={2} sx={{ p: 2, textAlign: 'center', cursor: 'pointer' }} onClick={() => {
+                      setProdutoSelecionado(produto);
+                      setModalOpen(true);
+                    }}>
+                      <Avatar
+                        src={`http://localhost:8000${produto.imagens?.length ? produto.imagens[0].imagem : ''}`}
+                        alt={produto.nome}
+                        sx={{ width: 80, height: 80, mx: 'auto', mb: 1 }}
+                      />
+                      <Typography>{produto.nome}</Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        {produto.preco} Kz
+                      </Typography>
+                    </Paper>
+                  </Grid>
+                ))
+              ) : (
+                <Typography>Nenhum produto encontrado.</Typography>
+              )}
+            </Grid>
           </Paper>
         </Grid>
       </Grid>
+
+       {/* Modal de Detalhes do Produto */}
+       <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
+        <Box sx={{ position: 'fixed', right: 0, top: 64,  height: 'calc(100vh - 64px)', width: '300px', backgroundColor: 'white', p: 3, overflowY: 'auto' }}>
+          {produtoSelecionado && (
+            <>
+              <Typography variant="h6">{produtoSelecionado.nome}</Typography>
+              <Divider sx={{ my: 2 }} />
+              {produtoSelecionado.imagens?.map((imagem, index) => (
+                <Box key={index} component="img" src={`http://localhost:8000${imagem.imagem}`} sx={{ width: '100%', mb: 2 }} />
+              ))}
+              <Typography variant="body1">{produtoSelecionado.descricao}</Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                Preço: {produtoSelecionado.preco} Kz
+              </Typography>
+            </>
+          )}
+        </Box>
+      </Modal>
     </DashboardContent>
   );
 }

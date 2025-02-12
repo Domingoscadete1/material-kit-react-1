@@ -62,7 +62,7 @@ export function Router() {
         { path: 'listasms', element: <Lista /> },
         { path: 'chat', element: <ChatView  /> },
         { path: 'perfil', element: <PerfilView /> },
-        { path: 'perfil2', element: <Perfil2View /> },
+        { path: 'perfil2/:id/:tipo?', element: <Perfil2View /> },
         { path: 'relatorio', element: <RelatorioView /> },
       ],
     },

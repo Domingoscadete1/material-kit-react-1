@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import type { CardProps } from '@mui/material/Card';
-
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import {
   Box,
@@ -90,6 +90,11 @@ export function PostItem({
   const [websocket, setWebSocket] = useState<WebSocket | null>(null);
   const [userData, setUserData] = useState(JSON.parse(localStorage.getItem('userData') || '{}'));
   const [message, setMessage] = useState('');
+  const navigate = useNavigate();
+
+  const handleAvatarClick = () => {
+    navigate(`/perfil2/${post.empresa.id}/empresa`);
+  };
 
   const sendMessage = () => {
     if (!message.trim()) {
@@ -246,6 +251,7 @@ const initiatePayment = async () => {
           top: 24,
         }),
       }}
+      onClick={handleAvatarClick} // Adicionando o redirecionamento com ID e Tipo
     />
   );
 

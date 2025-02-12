@@ -49,11 +49,11 @@ const baseNavData = [
     path: '/perfil',
     icon: icon('ic-user'),
   },
-  {
-    title: 'Perfil2',
-    path: '/perfil2',
-    icon: icon('ic-user'),
-  },
+  // {
+  //   title: 'Perfil de Usuário',
+  //   path: `/perfil2/tipo/id`, 
+  //   icon: icon('ic-user'),
+  // },
   {
     title: 'Transações',
     path: '/relatorio',
