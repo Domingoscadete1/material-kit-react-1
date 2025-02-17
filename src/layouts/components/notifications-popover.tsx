@@ -38,6 +38,7 @@ export type NotificationItemProps = {
   deleted: boolean;
   usuario:{
     foto:string;
+    nome:string;
   };
   empresa:{
     imagens:{
@@ -46,6 +47,7 @@ export type NotificationItemProps = {
   };
   remetente:{
     foto:string;
+    nome:string;
   }
 };
 
@@ -173,7 +175,7 @@ export function NotificationsPopover({ data = [], sx, ...other }: NotificationsP
 function NotificationItem({ notification }: { notification: NotificationItemProps }) {
   const {  title } = renderContent(notification);
   
-  const avatarUrl=notification?.remetente?.foto || notification.usuario.foto
+  const avatarUrl='snsn'
 
   return (
     <ListItemButton sx={{ py: 1.5, px: 2.5, mt: '1px', bgcolor: notification.lida ? 'transparent' : 'action.selected' }}>
