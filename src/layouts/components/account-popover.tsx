@@ -91,9 +91,9 @@ const handleSignOut = useCallback(async (): Promise<void> => {
         }}
         {...other}
       >
-        <Avatar src={`http://127.0.0.1:8000${usuario.foto}`} alt={usuario.usuario_username} sx={{ width: 1, height: 1 }}>
+        {/* <Avatar src={`http://127.0.0.1:8000${usuario.foto}`} alt={usuario.usuario_username} sx={{ width: 1, height: 1 }}>
           {usuario.usuario_username.toUpperCase()}
-        </Avatar>
+        </Avatar> */}
       </IconButton>
 
       <Popover
