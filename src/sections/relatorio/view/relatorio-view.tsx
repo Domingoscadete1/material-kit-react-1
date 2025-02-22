@@ -41,7 +41,11 @@ export function RelatorioView() {
   const fetchEmpresaData = useCallback(async () => {
     if (!empresaId) return;
     try {
-      const response = await axios.get(`http://localhost:8000/api/empresa/${empresaId}/`);
+      const response = await axios.get(`https://408e-154-71-159-172.ngrok-free.app/api/empresa/${empresaId}/`,{
+        headers: {
+          "ngrok-skip-browser-warning": "true", // Evita bloqueios do ngrok
+        },
+      });
       console.log('Dados da empresa:', response.data);
       setEmpresaData(response.data);
     } catch (error) {
@@ -63,7 +67,11 @@ export function RelatorioView() {
     }
     try {
       setLoading(true);
-      const response = await axios.get(`http://localhost:8000/api/empresa/transacoes/${empresaId}/?page=${page}`);
+      const response = await axios.get(`https://408e-154-71-159-172.ngrok-free.app/api/empresa/transacoes/${empresaId}/?page=${page}`,{
+        headers: {
+          "ngrok-skip-browser-warning": "true", // Evita bloqueios do ngrok
+        },
+      });
       
       console.log('Dados recebidos da API:', response.data);
   
@@ -89,7 +97,7 @@ export function RelatorioView() {
   }, [empresaId, fetchProducts]);
   const downloadInvoice = async (transacaoId: number) => {
     try {
-      const apiUrl = `http://localhost:8000/api/fatura/${transacaoId}/`;
+      const apiUrl = `https://408e-154-71-159-172.ngrok-free.app/api/fatura/${transacaoId}/`;
       window.open(apiUrl, '_blank'); // Abre a fatura em uma nova aba
     } catch (error) {
       console.error('Erro ao baixar fatura:', error);
@@ -143,7 +151,7 @@ export function RelatorioView() {
               <Card>
                 <Box
                   component="img"
-                  src={`http://localhost:8000${report.produto.imagens[0]?.imagem}`}
+                  src={`https://408e-154-71-159-172.ngrok-free.app${report.produto.imagens[0]?.imagem}`}
                   alt={report.produto.nome}
                   sx={{
                     width: '100%',

@@ -175,7 +175,11 @@ export function ProductsView() {
   }, []); // Mantenha vazio se `empresaId` não mudar
   const fetchCategories = useCallback(async () => {
     try {
-      const response = await axios.get('http://localhost:8000/api/categorias/'); // Substitua pela URL da API
+      const response = await axios.get('https://408e-154-71-159-172.ngrok-free.app/api/categorias/',{
+        headers: {
+          "ngrok-skip-browser-warning": "true", // Evita bloqueios do ngrok
+        },
+      }); // Substitua pela URL da API
       setCategories(response.data);
     } catch (error) {
       console.error('Erro ao buscar categorias:', error);
@@ -197,7 +201,11 @@ export function ProductsView() {
     }
     try {
       setLoading(true);
-      const response = await axios.get(`http://localhost:8000/api/produtos/empresa/${empresaId}/`);
+      const response = await axios.get(`https://408e-154-71-159-172.ngrok-free.app/api/produtos/empresa/${empresaId}/`,{
+        headers: {
+          "ngrok-skip-browser-warning": "true", // Evita bloqueios do ngrok
+        },
+      });
       console.log('Produtos recebidos:', response.data.produtos);
 
       setProducts(response.data.produtos);
@@ -234,9 +242,11 @@ export function ProductsView() {
     });
 
     try {
-      const response = await axios.post(`http://localhost:8000/api/produto/create/`, formData, {
+      const response = await axios.post(`https://408e-154-71-159-172.ngrok-free.app/api/produto/create/`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
+          "ngrok-skip-browser-warning": "true", // Evita bloqueios do ngrok
+
 
         },
       });

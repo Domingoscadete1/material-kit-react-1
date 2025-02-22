@@ -52,7 +52,7 @@ type UserTableRowProps = {
 export function UserTableRow({ row, selected, onSelectRow }: UserTableRowProps) {
   const [openPopover, setOpenPopover] = useState<HTMLButtonElement | null>(null);
   const [empresaId, setEmpresaId] = useState<string | null>(null);
-  const baseUrl = "http://127.0.0.1:8000/";
+  const baseUrl = "https://408e-154-71-159-172.ngrok-free.app/";
   const [loading, setLoading] = useState(true);
   const [postos, setPostos] = useState<PostoProps[]>([]); // Armazenar produtos da API
   const [postoAtual, setPostoAtual] = useState<PostoProps | null>(null);
@@ -88,7 +88,11 @@ export function UserTableRow({ row, selected, onSelectRow }: UserTableRowProps) 
     }
     try {
       setLoading(true);
-      const response = await axios.get(`http://localhost:8000/api/postos/empresa/${empresaId}/`);
+      const response = await axios.get(`https://408e-154-71-159-172.ngrok-free.app/api/postos/empresa/${empresaId}/`,{
+        headers: {
+          "ngrok-skip-browser-warning": "true", // Evita bloqueios do ngrok
+        },
+      });
       console.log('Postos recebidos:', response.data.postos);
   
       // Evita a duplicação armazenando IDs únicos
@@ -119,6 +123,8 @@ export function UserTableRow({ row, selected, onSelectRow }: UserTableRowProps) 
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
+          "ngrok-skip-browser-warning": "true", // Evita bloqueios do ngrok
+
         },
         body: JSON.stringify({
           empresa_id: empresaId,
@@ -146,6 +152,8 @@ export function UserTableRow({ row, selected, onSelectRow }: UserTableRowProps) 
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
+          "ngrok-skip-browser-warning": "true", // Evita bloqueios do ngrok
+
         },
         body: JSON.stringify({
           empresa_id: empresaId,
@@ -178,7 +186,7 @@ export function UserTableRow({ row, selected, onSelectRow }: UserTableRowProps) 
       <Box gap={2} display="flex" alignItems="center">
         <Avatar
           alt={postoAceite.posto?.nome}
-          src={`http://localhost:8000${postoAceite.posto?.imagem}`}
+          src={`https://408e-154-71-159-172.ngrok-free.app${postoAceite.posto?.imagem}`}
         />
         {postoAceite.posto?.nome}
       </Box>

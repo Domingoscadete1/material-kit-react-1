@@ -46,11 +46,19 @@ export function Perfil2View() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(`http://localhost:8000/api/${tipo}/${id}/`);
+        const response = await axios.get(`https://408e-154-71-159-172.ngrok-free.app/api/${tipo}/${id}/`,{
+          headers: {
+            "ngrok-skip-browser-warning": "true", // Evita bloqueios do ngrok
+          },
+        });
         setDados(response.data);
         console.log('dados',response.data)
         
-        const produtosResponse = await axios.get(`http://localhost:8000/api/produtos/${tipo === 'empresa' ? 'empresa' : 'usuario'}/${id}`);
+        const produtosResponse = await axios.get(`https://408e-154-71-159-172.ngrok-free.app/api/produtos/${tipo === 'empresa' ? 'empresa' : 'usuario'}/${id}`,{
+          headers: {
+            "ngrok-skip-browser-warning": "true", // Evita bloqueios do ngrok
+          },
+        });
         setProdutos(produtosResponse.data.produtos);
         console.log('produtos',produtosResponse.data.produtos)
       } catch (error) {
@@ -177,7 +185,7 @@ export function Perfil2View() {
                       setModalOpen(true);
                     }}>
                       <Avatar
-                        src={`http://localhost:8000${produto.imagens?.length ? produto.imagens[0].imagem : ''}`}
+                        src={`https://408e-154-71-159-172.ngrok-free.app${produto.imagens?.length ? produto.imagens[0].imagem : ''}`}
                         alt={produto.nome}
                         sx={{ width: 80, height: 80, mx: 'auto', mb: 1 }}
                       />
@@ -204,7 +212,7 @@ export function Perfil2View() {
               <Typography variant="h6">{produtoSelecionado.nome}</Typography>
               <Divider sx={{ my: 2 }} />
               {produtoSelecionado.imagens?.map((imagem, index) => (
-                <Box key={index} component="img" src={`http://localhost:8000${imagem.imagem}`} sx={{ width: '100%', mb: 2 }} />
+                <Box key={index} component="img" src={`https://408e-154-71-159-172.ngrok-free.app${imagem.imagem}`} sx={{ width: '100%', mb: 2 }} />
               ))}
               <Typography variant="body1">{produtoSelecionado.descricao}</Typography>
               <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
