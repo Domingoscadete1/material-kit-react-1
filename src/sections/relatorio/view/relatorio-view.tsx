@@ -170,6 +170,9 @@ export function RelatorioView() {
                   <Typography variant="body2" color="text.secondary" gutterBottom>
                     Descrição: {report.produto.descricao}
                   </Typography>
+                  <Typography variant="body2" color="text.secondary" gutterBottom>
+                    Status: {report.transacao.status}
+                  </Typography>
 
                   <Typography variant="body2" color="text.secondary">
                     {isVenda ? 'Comprador' : 'Vendedor'}: {nomePessoa}
