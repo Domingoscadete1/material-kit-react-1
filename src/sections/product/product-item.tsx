@@ -140,7 +140,7 @@ export function ProductItem({ product }: { product: ProductItemProps }) {
           <Box
             component="img"
             alt={product.nome}
-            src={`https://408e-154-71-159-172.ngrok-free.app${product.imagens[0]?.imagem}`}
+            src={`https://83dc-154-71-159-172.ngrok-free.app${product.imagens[0]?.imagem}`}
             sx={{
               top: 0,
               width: 1,
@@ -244,7 +244,7 @@ export function ProductItem({ product }: { product: ProductItemProps }) {
               <Box key={image.id} sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
                 <Box
                   component="img"
-                  src={`https://408e-154-71-159-172.ngrok-free.app${image.imagem}`}
+                  src={`https://83dc-154-71-159-172.ngrok-free.app${image.imagem}`}
                   alt="Produto"
                   sx={{ width: 50, height: 50, objectFit: 'cover', mr: 2 }}
                 />

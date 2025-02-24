@@ -73,7 +73,7 @@ export function NotificationsPopover({ data = [], sx, ...other }: NotificationsP
     if (!empresaId) return;
     const fetchNotifications = async () => {
       try {
-        const response = await axios.get(`https://408e-154-71-159-172.ngrok-free.app/api/notificacoes/empresa-list/${empresaId}/`,{
+        const response = await axios.get(`https://83dc-154-71-159-172.ngrok-free.app/api/notificacoes/empresa-list/${empresaId}/`,{
           headers: {
             "ngrok-skip-browser-warning": "true", // Evita bloqueios do ngrok
           },
@@ -184,7 +184,7 @@ function NotificationItem({ notification }: { notification: NotificationItemProp
   return (
     <ListItemButton sx={{ py: 1.5, px: 2.5, mt: '1px', bgcolor: notification.lida ? 'transparent' : 'action.selected' }}>
       <ListItemAvatar>
-        <Avatar src={`https://408e-154-71-159-172.ngrok-free.app${avatarUrl}`} sx={{ bgcolor: 'background.neutral' }} />
+        <Avatar src={`https://83dc-154-71-159-172.ngrok-free.app${avatarUrl}`} sx={{ bgcolor: 'background.neutral' }} />
       </ListItemAvatar>
       <ListItemText
         primary={title}

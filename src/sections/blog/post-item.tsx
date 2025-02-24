@@ -204,7 +204,7 @@ useEffect(() => {
 
 const checkPostoAvailability = async (postoId:number) => {
   try {
-    const response = await axios.get(`https://408e-154-71-159-172.ngrok-free.app/api/posto/available/${postoId}/`,{
+    const response = await axios.get(`https://83dc-154-71-159-172.ngrok-free.app/api/posto/available/${postoId}/`,{
       headers: {
         "ngrok-skip-browser-warning": "true", // Evita bloqueios do ngrok
       },
@@ -223,7 +223,7 @@ const initiatePayment = async () => {
   }
   setLoading(true);
   try {
-    const response = await axios.post('https://408e-154-71-159-172.ngrok-free.app/api/stripe/create-payment/bussiness-bussiness/', {
+    const response = await axios.post('https://83dc-154-71-159-172.ngrok-free.app/api/stripe/create-payment/bussiness-bussiness/', {
       produto_id: post.id,
       empresa_id: userData?.empresa?.id,
       posto_id: selectedPosto,
@@ -245,7 +245,7 @@ const initiatePayment = async () => {
   const renderAvatar = (
     <Avatar
       alt={post.empresa.nome}
-      src={`https://408e-154-71-159-172.ngrok-free.app${post.empresa?.imagens[0]?.imagem}`}
+      src={`https://83dc-154-71-159-172.ngrok-free.app${post.empresa?.imagens[0]?.imagem}`}
       sx={{
         left: 24,
         zIndex: 9,
@@ -320,7 +320,7 @@ const initiatePayment = async () => {
       component="img"
       onClick={handleOpen}
       alt={post.nome}
-      src={`https://408e-154-71-159-172.ngrok-free.app${post.imagens[0]?.imagem}`}
+      src={`https://83dc-154-71-159-172.ngrok-free.app${post.imagens[0]?.imagem}`}
       sx={{
         top: 0,
         width: 1,
@@ -379,7 +379,7 @@ const initiatePayment = async () => {
       </Box>
       <Box
         component="img"
-        src={`https://408e-154-71-159-172.ngrok-free.app${post.imagens[0]?.imagem}`}
+        src={`https://83dc-154-71-159-172.ngrok-free.app${post.imagens[0]?.imagem}`}
         alt={post.nome}
         sx={{
           width: 80,
@@ -484,7 +484,7 @@ const initiatePayment = async () => {
               <Box
                 key={img.id}
                 component="img"
-                src={`https://408e-154-71-159-172.ngrok-free.app${img.imagem}`}
+                src={`https://83dc-154-71-159-172.ngrok-free.app${img.imagem}`}
                 alt={post.nome}
                 sx={{ width: 120, height: 120, borderRadius: 1, objectFit: 'cover' }}
               />

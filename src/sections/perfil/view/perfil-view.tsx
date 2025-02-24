@@ -46,7 +46,7 @@ export function PerfilView() {
           <Paper elevation={4} sx={{ p: 4, textAlign: 'center' }}>
             {/* Profile Picture */}
             <Avatar
-              src={`https://408e-154-71-159-172.ngrok-free.app${empresa.foto}`}
+              src={`https://83dc-154-71-159-172.ngrok-free.app${empresa.foto}`}
               alt="Profile"
               sx={{ width: 120, height: 120, mx: 'auto', mb: 2 }}
             />

@@ -50,7 +50,7 @@ export function OverviewAnalyticsView() {
     const fetchProducts = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(`https://408e-154-71-159-172.ngrok-free.app/api/produtos-search/bussiness/${empresaId}/`,{
+        const response = await axios.get(`https://83dc-154-71-159-172.ngrok-free.app/api/produtos-search/bussiness/${empresaId}/`,{
           headers: {
             "ngrok-skip-browser-warning": "true", // Evita bloqueios do ngrok
           },
@@ -71,7 +71,7 @@ export function OverviewAnalyticsView() {
     const fetchAnalytics = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(`https://408e-154-71-159-172.ngrok-free.app/api/empresa/analytics/${empresaId}/`,{
+        const response = await axios.get(`https://83dc-154-71-159-172.ngrok-free.app/api/empresa/analytics/${empresaId}/`,{
           headers: {
             "ngrok-skip-browser-warning": "true", // Evita bloqueios do ngrok
           },

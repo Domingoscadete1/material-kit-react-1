@@ -41,7 +41,7 @@ export function RelatorioView() {
   const fetchEmpresaData = useCallback(async () => {
     if (!empresaId) return;
     try {
-      const response = await axios.get(`https://408e-154-71-159-172.ngrok-free.app/api/empresa/${empresaId}/`,{
+      const response = await axios.get(`https://83dc-154-71-159-172.ngrok-free.app/api/empresa/${empresaId}/`,{
         headers: {
           "ngrok-skip-browser-warning": "true", // Evita bloqueios do ngrok
         },
@@ -67,7 +67,7 @@ export function RelatorioView() {
     }
     try {
       setLoading(true);
-      const response = await axios.get(`https://408e-154-71-159-172.ngrok-free.app/api/empresa/transacoes/${empresaId}/?page=${page}`,{
+      const response = await axios.get(`https://83dc-154-71-159-172.ngrok-free.app/api/empresa/transacoes/${empresaId}/?page=${page}`,{
         headers: {
           "ngrok-skip-browser-warning": "true", // Evita bloqueios do ngrok
         },
@@ -97,7 +97,7 @@ export function RelatorioView() {
   }, [empresaId, fetchProducts]);
   const downloadInvoice = async (transacaoId: number) => {
     try {
-      const apiUrl = `https://408e-154-71-159-172.ngrok-free.app/api/fatura/${transacaoId}/`;
+      const apiUrl = `https://83dc-154-71-159-172.ngrok-free.app/api/fatura/${transacaoId}/`;
       window.open(apiUrl, '_blank'); // Abre a fatura em uma nova aba
     } catch (error) {
       console.error('Erro ao baixar fatura:', error);
@@ -151,7 +151,7 @@ export function RelatorioView() {
               <Card>
                 <Box
                   component="img"
-                  src={`https://408e-154-71-159-172.ngrok-free.app${report.produto.imagens[0]?.imagem}`}
+                  src={`https://83dc-154-71-159-172.ngrok-free.app${report.produto.imagens[0]?.imagem}`}
                   alt={report.produto.nome}
                   sx={{
                     width: '100%',

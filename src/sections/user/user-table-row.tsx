@@ -52,7 +52,7 @@ type UserTableRowProps = {
 export function UserTableRow({ row, selected, onSelectRow }: UserTableRowProps) {
   const [openPopover, setOpenPopover] = useState<HTMLButtonElement | null>(null);
   const [empresaId, setEmpresaId] = useState<string | null>(null);
-  const baseUrl = "https://408e-154-71-159-172.ngrok-free.app/";
+  const baseUrl = "https://83dc-154-71-159-172.ngrok-free.app/";
   const [loading, setLoading] = useState(true);
   const [postos, setPostos] = useState<PostoProps[]>([]); // Armazenar produtos da API
   const [postoAtual, setPostoAtual] = useState<PostoProps | null>(null);
@@ -88,7 +88,7 @@ export function UserTableRow({ row, selected, onSelectRow }: UserTableRowProps) 
     }
     try {
       setLoading(true);
-      const response = await axios.get(`https://408e-154-71-159-172.ngrok-free.app/api/postos/empresa/${empresaId}/`,{
+      const response = await axios.get(`https://83dc-154-71-159-172.ngrok-free.app/api/postos/empresa/${empresaId}/`,{
         headers: {
           "ngrok-skip-browser-warning": "true", // Evita bloqueios do ngrok
         },
@@ -186,7 +186,7 @@ export function UserTableRow({ row, selected, onSelectRow }: UserTableRowProps) 
       <Box gap={2} display="flex" alignItems="center">
         <Avatar
           alt={postoAceite.posto?.nome}
-          src={`https://408e-154-71-159-172.ngrok-free.app${postoAceite.posto?.imagem}`}
+          src={`https://83dc-154-71-159-172.ngrok-free.app${postoAceite.posto?.imagem}`}
         />
         {postoAceite.posto?.nome}
       </Box>

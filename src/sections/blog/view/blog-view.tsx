@@ -47,7 +47,7 @@ export function BlogView() {
     }
     try {
       setLoading(true);
-      const response = await axios.get(`https://408e-154-71-159-172.ngrok-free.app/api/produtos-search/bussiness/${empresaId}/`,{
+      const response = await axios.get(`https://83dc-154-71-159-172.ngrok-free.app/api/produtos-search/bussiness/${empresaId}/`,{
         headers: {
           "ngrok-skip-browser-warning": "true", // Evita bloqueios do ngrok
         },

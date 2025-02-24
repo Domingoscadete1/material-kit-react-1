@@ -1,3 +1,4 @@
+
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Unstable_Grid2';
 import Typography from '@mui/material/Typography';
@@ -6,8 +7,12 @@ import Button from '@mui/material/Button';
 import Avatar from '@mui/material/Avatar';
 import Divider from '@mui/material/Divider';
 import Modal from '@mui/material/Modal';
+import TextField from '@mui/material/TextField';
 import Switch from '@mui/material/Switch';
-import { IconButton } from '@mui/material';
+// import { IconButton } from '@mui/material';
+import { Select, MenuItem, FormControl, InputLabel } from '@mui/material';
+
+
 import { useEffect, useState } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 
@@ -34,19 +39,41 @@ interface Dados {
   foto?: string;
   imagens?: Imagem[];
 }
+const MOTIVOS = [
+  { value: 'fraude', label: 'Fraude' },
+  { value: 'conteudo_inapropriado', label: 'Conteúdo inapropriado' },
+  { value: 'ofensa', label: 'Ofensa' },
+  { value: 'spam', label: 'Spam' },
+  { value: 'outro', label: 'Outro' },
+];
 
 export function Perfil2View() {
+  const [empresaId, setEmpresaId] = useState<string | null>(null);
+
   const [dados, setDados] = useState<Dados | null>(null);
   const [produtos, setProdutos] = useState<Produto[]>([]);
   const [produtoSelecionado, setProdutoSelecionado] = useState<Produto | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
+  const [modalDenunciaOpen, setModalDenunciaOpen] = useState(false);
+  const [motivo, setMotivo] = useState('');
+  const [descricao, setDescricao] = useState('');
 
 
+  useEffect(() => {
+    const token = localStorage.getItem('userData');
+    if (token) {
+      const userData = JSON.parse(token);
+      const postoId = userData.empresa.id;
+      if (postoId) {
+        setEmpresaId(postoId);
+      }
+    }
+  }, []);
   const { id, tipo } = useParams<{ id: string; tipo?: string }>(); //  const location = useLocation();
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(`https://408e-154-71-159-172.ngrok-free.app/api/${tipo}/${id}/`,{
+        const response = await axios.get(`https://83dc-154-71-159-172.ngrok-free.app/api/${tipo}/${id}/`,{
           headers: {
             "ngrok-skip-browser-warning": "true", // Evita bloqueios do ngrok
           },
@@ -54,7 +81,7 @@ export function Perfil2View() {
         setDados(response.data);
         console.log('dados',response.data)
         
-        const produtosResponse = await axios.get(`https://408e-154-71-159-172.ngrok-free.app/api/produtos/${tipo === 'empresa' ? 'empresa' : 'usuario'}/${id}`,{
+        const produtosResponse = await axios.get(`https://83dc-154-71-159-172.ngrok-free.app/api/produtos/${tipo === 'empresa' ? 'empresa' : 'usuario'}/${id}`,{
           headers: {
             "ngrok-skip-browser-warning": "true", // Evita bloqueios do ngrok
           },
@@ -68,7 +95,27 @@ export function Perfil2View() {
 
     fetchData();
   }, [id, tipo]);
+  
 
+  const denunciarEmpresa = async () => {
+    try {
+      const formData = new FormData();
+      formData.append('empresa_denunciante_id', empresaId ?? '');
+      formData.append('denunciado_empresa_id', id ?? '');
+      formData.append('tipo', 'empresa');
+      formData.append('motivo', motivo);
+      formData.append('descricao', descricao);
+
+      await axios.post(`https://83dc-154-71-159-172.ngrok-free.app/api/reportes/create/`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+
+      alert('Denúncia enviada com sucesso!');
+      setModalDenunciaOpen(false);
+    } catch (error) {
+      console.error('Erro ao enviar denúncia:', error);
+    }
+  };
   if (!dados) return <Typography>Carregando...</Typography>;
 
   return (
@@ -94,9 +141,55 @@ export function Perfil2View() {
             <Typography variant="body2" sx={{ color: 'text.secondary', mb: 3 }}>
               Telefone: {dados.telefone1 || dados.numero_telefone || 'Não informado'}
             </Typography>
-            <Button variant="contained" color="primary" fullWidth disabled>
-              Salvar Alterações
+            <Button variant="contained" color="error" fullWidth onClick={() => setModalDenunciaOpen(true)}>
+            Denunciar empresa
+          </Button>
+
+            {/* Modal de Denúncia */}
+      <Modal open={modalDenunciaOpen} onClose={() => setModalDenunciaOpen(false)}>
+        <Box sx={{
+          position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
+          backgroundColor: 'white', p: 4, borderRadius: 2, width: 400, boxShadow: 24
+        }}>
+          <Typography variant="h6" gutterBottom>
+            Motivo do bloqueio
+          </Typography>
+
+          <FormControl fullWidth margin="normal">
+    <InputLabel>Motivo</InputLabel>
+    <Select
+      value={motivo}
+      onChange={(e) => setMotivo(e.target.value)}
+      label="Motivo"
+    >
+      {MOTIVOS.map((motivo1) => (
+        <MenuItem key={motivo1.value} value={motivo1.value}>
+          {motivo1.label}
+        </MenuItem>
+      ))}
+    </Select>
+  </FormControl>
+
+          <TextField
+            label="Descrição"
+            fullWidth
+            multiline
+            rows={3}
+            value={descricao}
+            onChange={(e) => setDescricao(e.target.value)}
+            margin="normal"
+          />
+
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 3 }}>
+            <Button onClick={() => setModalDenunciaOpen(false)} variant="outlined">
+              Cancelar
             </Button>
+            <Button onClick={denunciarEmpresa} variant="contained" color="error">
+              Enviar
+            </Button>
+          </Box>
+        </Box>
+      </Modal>
           </Paper>
           {tipo === 'empresa' && Array.isArray(dados.imagens) && dados.imagens.length > 0 && (
             <Box sx={{ mt: 4 }}>
@@ -129,9 +222,9 @@ export function Perfil2View() {
                     xxxx-xxxx-4245
                   </Typography>
                 </Box>
-                <Button variant="contained" color="error">
+                {/* <Button variant="contained" color="error">
                   Bloquear Conta
-                </Button>
+                </Button> */}
               </Box>
               <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                 <Box>
@@ -142,9 +235,9 @@ export function Perfil2View() {
                     xxxx-xxxx-1234
                   </Typography>
                 </Box>
-                <Button variant="contained" color="success">
+                {/* <Button variant="contained" color="success">
                   Desbloquear Conta
-                </Button>
+                </Button> */}
               </Box>
             </Box>
 
@@ -185,7 +278,7 @@ export function Perfil2View() {
                       setModalOpen(true);
                     }}>
                       <Avatar
-                        src={`https://408e-154-71-159-172.ngrok-free.app${produto.imagens?.length ? produto.imagens[0].imagem : ''}`}
+                        src={`https://83dc-154-71-159-172.ngrok-free.app${produto.imagens?.length ? produto.imagens[0].imagem : ''}`}
                         alt={produto.nome}
                         sx={{ width: 80, height: 80, mx: 'auto', mb: 1 }}
                       />
@@ -212,7 +305,7 @@ export function Perfil2View() {
               <Typography variant="h6">{produtoSelecionado.nome}</Typography>
               <Divider sx={{ my: 2 }} />
               {produtoSelecionado.imagens?.map((imagem, index) => (
-                <Box key={index} component="img" src={`https://408e-154-71-159-172.ngrok-free.app${imagem.imagem}`} sx={{ width: '100%', mb: 2 }} />
+                <Box key={index} component="img" src={`https://83dc-154-71-159-172.ngrok-free.app${imagem.imagem}`} sx={{ width: '100%', mb: 2 }} />
               ))}
               <Typography variant="body1">{produtoSelecionado.descricao}</Typography>
               <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>

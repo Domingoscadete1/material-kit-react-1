@@ -175,7 +175,7 @@ export function ProductsView() {
   }, []); // Mantenha vazio se `empresaId` não mudar
   const fetchCategories = useCallback(async () => {
     try {
-      const response = await axios.get('https://408e-154-71-159-172.ngrok-free.app/api/categorias/',{
+      const response = await axios.get('https://83dc-154-71-159-172.ngrok-free.app/api/categorias/',{
         headers: {
           "ngrok-skip-browser-warning": "true", // Evita bloqueios do ngrok
         },
@@ -201,7 +201,7 @@ export function ProductsView() {
     }
     try {
       setLoading(true);
-      const response = await axios.get(`https://408e-154-71-159-172.ngrok-free.app/api/produtos/empresa/${empresaId}/`,{
+      const response = await axios.get(`https://83dc-154-71-159-172.ngrok-free.app/api/produtos/empresa/${empresaId}/`,{
         headers: {
           "ngrok-skip-browser-warning": "true", // Evita bloqueios do ngrok
         },
@@ -242,7 +242,7 @@ export function ProductsView() {
     });
 
     try {
-      const response = await axios.post(`https://408e-154-71-159-172.ngrok-free.app/api/produto/create/`, formData, {
+      const response = await axios.post(`https://83dc-154-71-159-172.ngrok-free.app/api/produto/create/`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
           "ngrok-skip-browser-warning": "true", // Evita bloqueios do ngrok
