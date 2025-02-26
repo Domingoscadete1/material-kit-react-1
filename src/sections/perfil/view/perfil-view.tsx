@@ -6,22 +6,58 @@ import Button from '@mui/material/Button';
 import Avatar from '@mui/material/Avatar';
 import Divider from '@mui/material/Divider';
 import Switch from '@mui/material/Switch';
+import Modal from '@mui/material/Modal';
+import TextField from '@mui/material/TextField';
+
 
 import { DashboardContent } from 'src/layouts/dashboard';
 
-import React,{ useState, useEffect, useRef } from 'react';
+import React,{ useState, useEffect, useRef, useCallback } from 'react';
 import axios from 'axios';
 
 
 // ----------------------------------------------------------------------
 
+type MensagemSuporte = {
+  id: number;
+  chat_room: number;
+  usuario?: number | null;
+  empresa?: number | null;
+  funcionario?: number | null;
+  conteudo?: string | null;
+  created_at: string;
+  updated_at?: string | null;
+  deleted: boolean;
+  expires_at: string;
+};
+
+
+const modalStyle = {
+  position: 'absolute' as 'absolute',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+  width: 400,
+  bgcolor: 'background.paper',
+  boxShadow: 24,
+  p: 4,
+  borderRadius: 2,
+};
 export function PerfilView() {
   const [empresaId, setEmpresaId] = React.useState<string | null>(null);
   const empresa = JSON.parse(localStorage.getItem('userData') || '{}'); // Parse para garantir que seja um objeto
+  const [openModal, setOpenModal] = useState(false);
+  const [openChat, setOpenChat] = useState(false);
+  const [chatExistente, setChatExistente] = useState<boolean>(false);
+  const [chatId1, setChatId] = useState<number | null>(null);
 
+  const [mensagens, setMensagens] = useState<MensagemSuporte[]>([]);
   const [loadingMessages, setLoadingMessages] = useState(false); // Estado de carregamento das mensagens
+  const [mensagem, setMensagem] = useState('');
+
   const socketRef = useRef<WebSocket | null>(null);
 
+  
   // Recupera o ID da empresa do localStorage
   useEffect(() => {
     const token = localStorage.getItem('userData');
@@ -30,9 +66,102 @@ export function PerfilView() {
       const postoId = userData.empresa;
       if (postoId) {
         setEmpresaId(postoId);
+
+
+        
       }
     }
   }, []);
+  const handleOpenModal = () => {
+    setOpenModal(true);
+  
+    if (!chatId1) {
+      const socketUrl = `wss://e6b5-154-71-159-172.ngrok-free.app/ws/suporte/chat/${empresa?.empresa?.id}/`;
+      socketRef.current = new WebSocket(socketUrl);
+  
+      socketRef.current.onopen = () => console.log("WebSocket conectado para novo chat");
+      socketRef.current.onmessage = (event) => {
+        const novaMensagem = JSON.parse(event.data);
+        setMensagens((prev) => [...prev, novaMensagem]);
+      };
+      socketRef.current.onerror = (error) => console.error("Erro no WebSocket:", error);
+      socketRef.current.onclose = () => console.log("WebSocket fechado");
+    }
+  };
+  
+  const verificarChat = useCallback(() => {
+    axios.get(`https://e6b5-154-71-159-172.ngrok-free.app/api/empresa/chat-suport/${empresa?.empresa?.id}/`, {
+      headers: {
+        "ngrok-skip-browser-warning": "true",
+        "Content-Type": "application/json"
+      }
+    })
+    .then(response => {
+      console.log(response.data);
+      if (response.data.chats) {
+        setChatId(response.data.chats.id);
+        carregarMensagens(response.data.chats.id);
+      }
+    })
+    .catch(error => console.error('Erro ao buscar chat:', error));
+  }, [empresa?.empresa?.id]);
+  
+  useEffect(() => {
+    verificarChat();
+  }, [verificarChat]);
+  
+  
+
+  const carregarMensagens = (chatId:number) => {
+    axios.get(`https://e6b5-154-71-159-172.ngrok-free.app/api/chat-suporte/mensagens/${chatId}/`,{
+      headers: {
+        "ngrok-skip-browser-warning": "true", // Evita bloqueios do ngrok
+        "Content-Type": "application/json" // Define o tipo de conteúdo esperado
+      }
+    })
+      .then(response => setMensagens(response.data.mensagens))
+      .catch(error => console.error('Erro ao buscar mensagens:', error));
+  };
+  const conectarWebSocket = useCallback((chatId: number) => {
+    const socketUrl = chatId
+      ? `wss://e6b5-154-71-159-172.ngrok-free.app/ws/suporte/empresa/${empresa?.empresa?.id}/`
+      : `wss://e6b5-154-71-159-172.ngrok-free.app/ws/suporte/chat/${empresa?.empresa?.id}/`;
+  
+    socketRef.current = new WebSocket(socketUrl);
+  
+    socketRef.current.onopen = () => console.log("WebSocket conectado");
+    socketRef.current.onmessage = (event) => {
+      const novaMensagem = JSON.parse(event.data);
+      setMensagens((prev) => [...prev, novaMensagem]);
+    };
+    socketRef.current.onerror = (error) => console.error("Erro no WebSocket:", error);
+    socketRef.current.onclose = () => console.log("WebSocket fechado");
+  
+    return () => socketRef.current?.close();
+  }, [empresa?.empresa?.id]);
+  
+
+  const handleSendMessage = () => {
+    if (socketRef.current && mensagem.trim()) {
+      const data = {
+        mensagem,
+        empresa_id: empresa?.empresa.id,
+         // Garantir que o backend tenha o remetente correto
+      };
+  
+      socketRef.current.send(JSON.stringify(data));
+      setMensagem('');
+    }
+  };
+  
+
+  useEffect(() => {
+    if (chatId1) {
+      conectarWebSocket(chatId1);
+    }
+  }, [chatId1,conectarWebSocket]);
+
+  
   return (
     <DashboardContent>
       {/* Header */}
@@ -46,7 +175,7 @@ export function PerfilView() {
           <Paper elevation={4} sx={{ p: 4, textAlign: 'center' }}>
             {/* Profile Picture */}
             <Avatar
-              src={`https://83dc-154-71-159-172.ngrok-free.app${empresa.foto}`}
+              src={`https://e6b5-154-71-159-172.ngrok-free.app${empresa.foto}`}
               alt="Profile"
               sx={{ width: 120, height: 120, mx: 'auto', mb: 2 }}
             />
@@ -67,6 +196,15 @@ export function PerfilView() {
               <Typography variant="body2">Ativar alertas por SMS</Typography>
               <Switch defaultChecked />
             </Box>
+            {chatId1 ? (
+          <Button variant="contained" color="primary" fullWidth onClick={() => setOpenChat(true)}>
+            Abrir Chat
+          </Button>
+        ) : (
+          <Button variant="contained" color="secondary" fullWidth onClick={() => handleOpenModal()}>
+            Solicitar Suporte
+          </Button>
+        )}
             {/* Save Button */}
             <Button variant="contained" color="primary" fullWidth disabled>
               Salvar Alterações
@@ -134,6 +272,54 @@ export function PerfilView() {
           </Paper>
         </Grid>
       </Grid>
+
+      <Modal open={openModal} onClose={() => setOpenModal(false)}>
+        <Box sx={modalStyle}>
+          <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>
+            Solicitar Suporte
+          </Typography>
+          <TextField
+            fullWidth
+            multiline
+            rows={4}
+            placeholder="Descreva seu problema..."
+            value={mensagem}
+            onChange={(e) => setMensagem(e.target.value)}
+            sx={{ mb: 2 }}
+          />
+          <Button variant="contained" color="primary" fullWidth onClick={handleSendMessage}>
+            Enviar Mensagem
+          </Button>
+        </Box>
+      </Modal>
+
+
+      <Modal open={openChat} onClose={() => setOpenChat(false)}>
+        <Box sx={modalStyle}>
+          <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>
+            Chat de Suporte
+          </Typography>
+          <Box sx={{ maxHeight: 300, overflowY: 'auto', mb: 2 }}>
+            {mensagens.map((msg, index) => (
+              <Box key={index} sx={{ p: 1, borderBottom: '1px solid #ccc' }}>
+                <Typography variant="body2">
+                  <strong>{msg.usuario}</strong>: {msg.conteudo}
+                </Typography>
+              </Box>
+            ))}
+          </Box>
+          <TextField
+            fullWidth
+            placeholder="Digite sua mensagem..."
+            value={mensagem}
+            onChange={(e) => setMensagem(e.target.value)}
+            sx={{ mb: 2 }}
+          />
+          <Button variant="contained" color="primary" fullWidth onClick={handleSendMessage}>
+            Enviar
+          </Button>
+        </Box>
+      </Modal>
     </DashboardContent>
   );
 }

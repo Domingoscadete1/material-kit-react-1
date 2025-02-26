@@ -7,6 +7,7 @@ import ListItem from '@mui/material/ListItem';
 import { useTheme } from '@mui/material/styles';
 import ListItemButton from '@mui/material/ListItemButton';
 import Drawer, { drawerClasses } from '@mui/material/Drawer';
+import Divider from '@mui/material/Divider';
 
 import { usePathname } from 'src/routes/hooks';
 import { RouterLink } from 'src/routes/components';
@@ -126,6 +127,8 @@ export function NavContent({ data, slots, workspaces, sx }: NavContentProps) {
       <Box sx={{ my: 2, textAlign: 'left', fontWeight: 'bold', fontSize: '35' }}>
         DDStore
       </Box>
+
+      <Divider sx={{ mb: 2 }} />
 
       <Scrollbar fillContent>
         <Box component="nav" display="flex" flex="1 1 auto" flexDirection="column" sx={sx}>

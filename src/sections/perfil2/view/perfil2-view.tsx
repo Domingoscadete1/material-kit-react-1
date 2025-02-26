@@ -10,9 +10,10 @@ import Modal from '@mui/material/Modal';
 import TextField from '@mui/material/TextField';
 import Switch from '@mui/material/Switch';
 // import { IconButton } from '@mui/material';
-import { Select, MenuItem, FormControl, InputLabel } from '@mui/material';
+import { Select, MenuItem, FormControl, InputLabel, IconButton } from '@mui/material';
 
 
+import { Iconify } from 'src/components/iconify';
 import { useEffect, useState } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 
@@ -28,7 +29,7 @@ interface Produto {
   nome: string;
   preco: number;
   imagens?: Imagem[];
-  descricao:string;
+  descricao: string;
 }
 
 interface Dados {
@@ -73,21 +74,21 @@ export function Perfil2View() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(`https://83dc-154-71-159-172.ngrok-free.app/api/${tipo}/${id}/`,{
+        const response = await axios.get(`https://e6b5-154-71-159-172.ngrok-free.app/api/${tipo}/${id}/`, {
           headers: {
             "ngrok-skip-browser-warning": "true", // Evita bloqueios do ngrok
           },
         });
         setDados(response.data);
-        console.log('dados',response.data)
-        
-        const produtosResponse = await axios.get(`https://83dc-154-71-159-172.ngrok-free.app/api/produtos/${tipo === 'empresa' ? 'empresa' : 'usuario'}/${id}`,{
+        console.log('dados', response.data)
+
+        const produtosResponse = await axios.get(`https://e6b5-154-71-159-172.ngrok-free.app/api/produtos/${tipo === 'empresa' ? 'empresa' : 'usuario'}/${id}`, {
           headers: {
             "ngrok-skip-browser-warning": "true", // Evita bloqueios do ngrok
           },
         });
         setProdutos(produtosResponse.data.produtos);
-        console.log('produtos',produtosResponse.data.produtos)
+        console.log('produtos', produtosResponse.data.produtos)
       } catch (error) {
         console.error('Erro ao buscar os dados:', error);
       }
@@ -95,7 +96,10 @@ export function Perfil2View() {
 
     fetchData();
   }, [id, tipo]);
-  
+
+
+  const [openMessageModal, setOpenMessageModal] = useState(false);
+  const handleCloseMessageModal = () => setOpenMessageModal(false);
 
   const denunciarEmpresa = async () => {
     try {
@@ -106,7 +110,7 @@ export function Perfil2View() {
       formData.append('motivo', motivo);
       formData.append('descricao', descricao);
 
-      await axios.post(`https://83dc-154-71-159-172.ngrok-free.app/api/reportes/create/`, formData, {
+      await axios.post(`https://e6b5-154-71-159-172.ngrok-free.app/api/reportes/create/`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 
@@ -124,8 +128,8 @@ export function Perfil2View() {
         Perfil de {tipo === 'empresa' ? 'Empresa' : 'Usuário'}
       </Typography>
 
-      <Grid container spacing={3}>
-        <Grid xs={12} md={4}>
+      <Grid container spacing={2}>
+        <Grid xs={12} md={6}>
           <Paper elevation={4} sx={{ p: 4, textAlign: 'center' }}>
             <Avatar
               src={`${dados.foto || (dados.imagens?.length ? dados.imagens[0].imagem : '')}`}
@@ -142,175 +146,145 @@ export function Perfil2View() {
               Telefone: {dados.telefone1 || dados.numero_telefone || 'Não informado'}
             </Typography>
             <Button variant="contained" color="error" fullWidth onClick={() => setModalDenunciaOpen(true)}>
-            Denunciar empresa
-          </Button>
+              Denunciar empresa
+            </Button>
 
             {/* Modal de Denúncia */}
-      <Modal open={modalDenunciaOpen} onClose={() => setModalDenunciaOpen(false)}>
-        <Box sx={{
-          position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
-          backgroundColor: 'white', p: 4, borderRadius: 2, width: 400, boxShadow: 24
-        }}>
-          <Typography variant="h6" gutterBottom>
-            Motivo do bloqueio
-          </Typography>
+            <Modal open={modalDenunciaOpen} onClose={() => setModalDenunciaOpen(false)}>
+              <Box sx={{
+                position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
+                backgroundColor: 'white', p: 4, borderRadius: 2, width: 400, boxShadow: 24
+              }}>
+                <Typography variant="h6" gutterBottom>
+                  Motivo do bloqueio
+                </Typography>
 
-          <FormControl fullWidth margin="normal">
-    <InputLabel>Motivo</InputLabel>
-    <Select
-      value={motivo}
-      onChange={(e) => setMotivo(e.target.value)}
-      label="Motivo"
-    >
-      {MOTIVOS.map((motivo1) => (
-        <MenuItem key={motivo1.value} value={motivo1.value}>
-          {motivo1.label}
-        </MenuItem>
-      ))}
-    </Select>
-  </FormControl>
+                <FormControl fullWidth margin="normal">
+                  <InputLabel>Motivo</InputLabel>
+                  <Select
+                    value={motivo}
+                    onChange={(e) => setMotivo(e.target.value)}
+                    label="Motivo"
+                  >
+                    {MOTIVOS.map((motivo1) => (
+                      <MenuItem key={motivo1.value} value={motivo1.value}>
+                        {motivo1.label}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
 
-          <TextField
-            label="Descrição"
-            fullWidth
-            multiline
-            rows={3}
-            value={descricao}
-            onChange={(e) => setDescricao(e.target.value)}
-            margin="normal"
-          />
+                <TextField
+                  label="Descrição"
+                  fullWidth
+                  multiline
+                  rows={3}
+                  value={descricao}
+                  onChange={(e) => setDescricao(e.target.value)}
+                  margin="normal"
+                />
 
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 3 }}>
-            <Button onClick={() => setModalDenunciaOpen(false)} variant="outlined">
-              Cancelar
-            </Button>
-            <Button onClick={denunciarEmpresa} variant="contained" color="error">
-              Enviar
-            </Button>
-          </Box>
-        </Box>
-      </Modal>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 3 }}>
+                  <Button onClick={() => setModalDenunciaOpen(false)} variant="outlined">
+                    Cancelar
+                  </Button>
+                  <Button onClick={denunciarEmpresa} variant="contained" color="error">
+                    Enviar
+                  </Button>
+                </Box>
+              </Box>
+            </Modal>
           </Paper>
-          {tipo === 'empresa' && Array.isArray(dados.imagens) && dados.imagens.length > 0 && (
-            <Box sx={{ mt: 4 }}>
-              <Typography variant="h6">Imagens da Empresa</Typography>
-              <Grid container spacing={2}>
-                {dados.imagens.map((imagem, index) => (
-                  <Grid key={index} md={3}>
-                    <Box component="img" src={`${imagem.imagem}`} sx={{ width: '100%' }} />
-                  </Grid>
-                ))}
-              </Grid>
-            </Box>
-          )}
         </Grid>
-        {/* Account and Bills Section */}
-        <Grid xs={12} md={8}>
-          <Paper elevation={4} sx={{ p: 4 }}>
-            {/* Accounts Section */}
-            <Box sx={{ mb: 4 }}>
-              <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>
-                Minhas Contas xPay
-              </Typography>
-              <Divider sx={{ mb: 2 }} />
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-                <Box>
-                  <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
-                    Conta Ativa
-                  </Typography>
-                  <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                    xxxx-xxxx-4245
-                  </Typography>
-                </Box>
-                {/* <Button variant="contained" color="error">
-                  Bloquear Conta
-                </Button> */}
-              </Box>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                <Box>
-                  <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
-                    Conta Bloqueada
-                  </Typography>
-                  <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                    xxxx-xxxx-1234
-                  </Typography>
-                </Box>
-                {/* <Button variant="contained" color="success">
-                  Desbloquear Conta
-                </Button> */}
-              </Box>
-            </Box>
 
-            {/* Bills Section */}
+        <Grid xs={12} md={6}>
+          <Paper elevation={4} sx={{ p: 4 }}>
+
+            <Typography variant="h4">Imagens da Empresa</Typography>
             <Box>
-              <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>
-                Minhas Faturas
-              </Typography>
-              <Divider sx={{ mb: 2 }} />
-              {[
-                { label: 'Conta de telefone', status: 'Pago', color: 'green' },
-                { label: 'Conta de internet', status: 'Não pago', color: 'red' },
-                { label: 'Aluguel da casa', status: 'Pago', color: 'green' },
-                { label: 'Imposto de renda', status: 'Não pago', color: 'red' },
-              ].map((bill, index) => (
-                <Box key={index} sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                  <Typography variant="body2">{bill.label}</Typography>
-                  <Typography variant="body2" sx={{ color: bill.color }}>
-                    {bill.status}
-                  </Typography>
-                </Box>
-              ))}
-            </Box>
-            </Paper>
-            </Grid>
-
-        
-        <Grid xs={12} md={8}>
-          <Paper elevation={4} sx={{ p: 4 }}>
-            <Typography variant="h6">Produtos</Typography>
-            <Divider sx={{ mb: 2 }} />
-            <Grid container spacing={2}>
-              {produtos.length > 0 ? (
-                produtos.map((produto) => (
-                  <Grid key={produto.id} md={4}>
-                    <Paper elevation={2} sx={{ p: 2, textAlign: 'center', cursor: 'pointer' }} onClick={() => {
-                      setProdutoSelecionado(produto);
-                      setModalOpen(true);
-                    }}>
-                      <Avatar
-                        src={`https://83dc-154-71-159-172.ngrok-free.app${produto.imagens?.length ? produto.imagens[0].imagem : ''}`}
-                        alt={produto.nome}
-                        sx={{ width: 80, height: 80, mx: 'auto', mb: 1 }}
-                      />
-                      <Typography>{produto.nome}</Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        {produto.preco} Kz
-                      </Typography>
-                    </Paper>
+              {tipo === 'empresa' && Array.isArray(dados.imagens) && dados.imagens.length > 0 && (
+                <Box sx={{ mt: 4 }}>
+                  <Grid container spacing={2}>
+                    {dados.imagens.map((imagem, index) => (
+                      <Grid key={index} md={4} >
+                        <Box component="img" src={`${imagem.imagem}`} sx={{ width: '100%' }} />
+                      </Grid>
+                    ))}
                   </Grid>
-                ))
-              ) : (
-                <Typography>Nenhum produto encontrado.</Typography>
+                </Box>
               )}
-            </Grid>
+            </Box>
           </Paper>
         </Grid>
       </Grid>
 
-       {/* Modal de Detalhes do Produto */}
-       <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
-        <Box sx={{ position: 'fixed', right: 0, top: 64,  height: 'calc(100vh - 64px)', width: '300px', backgroundColor: 'white', p: 3, overflowY: 'auto' }}>
+      <Typography variant="h4" sx={{ p: 1 }}>Produtos Divulgados</Typography>
+
+      <Grid xs={12} md={8}>
+        <Paper elevation={4} sx={{ p: 4 }}>
+          <Grid container spacing={2}>
+            {produtos.length > 0 ? (
+              produtos.map((produto) => (
+                <Grid key={produto.id} md={4}>
+                  <Paper elevation={2} sx={{ p: 2, textAlign: 'center', cursor: 'pointer' }} onClick={() => {
+                    setProdutoSelecionado(produto);
+                    setModalOpen(true);
+                  }}>
+                    <Avatar
+                      src={`https://e6b5-154-71-159-172.ngrok-free.app${produto.imagens?.length ? produto.imagens[0].imagem : ''}`}
+                      alt={produto.nome}
+                      sx={{ width: 80, height: 80, mx: 'auto', mb: 1 }}
+                    />
+                    <Typography>{produto.nome}</Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {produto.preco} Kz
+                    </Typography>
+                  </Paper>
+                </Grid>
+              ))
+            ) : (
+              <Typography>Nenhum produto encontrado.</Typography>
+            )}
+          </Grid>
+        </Paper>
+      </Grid>
+
+      {/* Modal de Detalhes do Produto */}
+      <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
+        <Box sx={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: 600,
+          bgcolor: 'background.paper',
+          boxShadow: 24,
+          p: 4,
+          borderRadius: 2,
+          display: 'flex',
+          flexDirection: 'column',
+        }}>
+          {/* <IconButton onClick={handleCloseMessageModal} sx={{ position: 'absolute', top: 8, right: 8 }}>
+            <Iconify icon="mdi:close" width={24} />
+          </IconButton> */}
           {produtoSelecionado && (
             <>
               <Typography variant="h6">{produtoSelecionado.nome}</Typography>
               <Divider sx={{ my: 2 }} />
-              {produtoSelecionado.imagens?.map((imagem, index) => (
-                <Box key={index} component="img" src={`https://83dc-154-71-159-172.ngrok-free.app${imagem.imagem}`} sx={{ width: '100%', mb: 2 }} />
-              ))}
+              
               <Typography variant="body1">{produtoSelecionado.descricao}</Typography>
               <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
                 Preço: {produtoSelecionado.preco} Kz
               </Typography>
+              {produtoSelecionado.imagens?.map((imagem, index) => (
+                <Box key={index} component="img" src={`https://e6b5-154-71-159-172.ngrok-free.app${imagem.imagem}`} sx={{
+                  width: 80,
+                  height: 80,
+                  objectFit: 'cover',
+                  borderRadius: 1,
+                  display: 'flex'
+                }} />
+              ))}
             </>
           )}
         </Box>

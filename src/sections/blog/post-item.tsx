@@ -56,14 +56,14 @@ type Message = {
   remetente: string;
   created_at: string;
 };
-type Posto={
-  nome:string;
-  localizacao:string;
-  id:number;
-  posto:{
-  nome:string;
-  localizacao:string;
-  id:number;
+type Posto = {
+  nome: string;
+  localizacao: string;
+  id: number;
+  posto: {
+    nome: string;
+    localizacao: string;
+    id: number;
   }
 }
 
@@ -122,15 +122,15 @@ export function PostItem({
     if (!openMessageModal) {
       return undefined; // Retorno explícito para evitar erro do ESLint
     }
-  
+
     const wsUrl = `wss://ef49-154-71-159-172.ngrok-free.app/ws/new_chat/${userData?.id}/`;
     const ws = new WebSocket(wsUrl);
     setWebSocket(ws);
-  
+
     ws.onopen = () => {
       console.log("Conectado ao WebSocket");
     };
-  
+
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
       if (Array.isArray(data.messages)) {
@@ -148,107 +148,105 @@ export function PostItem({
         const timestamp = new Date().toLocaleString();
         setMessages((prevMessages) => [
           ...prevMessages,
-          { 
-            id: prevMessages.length + 1, 
-            conteudo: data.message, 
-            remetente: data.remetente, 
-            created_at: timestamp 
+          {
+            id: prevMessages.length + 1,
+            conteudo: data.message,
+            remetente: data.remetente,
+            created_at: timestamp
           },
         ]);
       }
     };
-  
+
     ws.onerror = (error) => {
       console.error("Erro no WebSocket:", error);
       alert("Erro no WebSocket.");
     };
-  
+
     ws.onclose = (e) => {
       console.log("Desconectado do WebSocket", e.code, e.reason);
     };
-  
+
     // Retorna a função de cleanup para fechar o WebSocket
     return () => {
       ws.close();
     };
   }, [openMessageModal, userData?.id]);
 
-const [openPaymentModal, setOpenPaymentModal] = useState(false);
-const [postos, setPostos] = useState<Posto[]>([]);
-const [selectedPosto, setSelectedPosto] = useState<number | null>(null);
-const [checkoutUrl, setCheckoutUrl] = useState(null);
-const [postoDisponivel, setPostoDisponivel] = useState(false);
-const [quantidade, setQuantidade] = useState('1');
-const [loading, setLoading] = useState(false);
+  const [openPaymentModal, setOpenPaymentModal] = useState(false);
+  const [postos, setPostos] = useState<Posto[]>([]);
+  const [selectedPosto, setSelectedPosto] = useState<number | null>(null);
+  const [checkoutUrl, setCheckoutUrl] = useState(null);
+  const [postoDisponivel, setPostoDisponivel] = useState(false);
+  const [quantidade, setQuantidade] = useState('1');
+  const [loading, setLoading] = useState(false);
 
-const handleOpenPaymentModal = () => setOpenPaymentModal(true);
-const handleClosePaymentModal = () => setOpenPaymentModal(false);
+  const handleOpenPaymentModal = () => setOpenPaymentModal(true);
+  const handleClosePaymentModal = () => setOpenPaymentModal(false);
 
-useEffect(() => {
-  const fetchPostos = async () => {
+  useEffect(() => {
+    const fetchPostos = async () => {
+      setLoading(true);
+      try {
+        const response = await axios.get(`http://127.0.0.1:8000/api/postos/empresa/${post.empresa.id}/`);
+        setPostos(response.data.postos || []);
+      } catch (err) {
+        alert(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (openPaymentModal) {
+      fetchPostos();
+    }
+  }, [openPaymentModal, post.empresa.id]);
+
+  const checkPostoAvailability = async (postoId: number) => {
+    try {
+      const response = await axios.get(`https://e6b5-154-71-159-172.ngrok-free.app/api/posto/available/${postoId}/`, {
+        headers: {
+          "ngrok-skip-browser-warning": "true", // Evita bloqueios do ngrok
+        },
+      });
+      setPostoDisponivel(response.status === 200);
+      if (response.status === 303) alert('Não há espaço neste posto.');
+    } catch {
+      alert('Erro ao verificar disponibilidade do posto');
+    }
+  };
+
+  const initiatePayment = async () => {
+    if (!selectedPosto) {
+      alert('Por favor, selecione um posto antes de prosseguir.');
+      return;
+    }
     setLoading(true);
     try {
-      const response = await axios.get(`http://127.0.0.1:8000/api/postos/empresa/${post.empresa.id}/`);
-      setPostos(response.data.postos || []);
-    } catch (err) {
-      alert(err.message);
+      const response = await axios.post('https://e6b5-154-71-159-172.ngrok-free.app/api/stripe/create-payment/bussiness-bussiness/', {
+        produto_id: post.id,
+        empresa_id: userData?.empresa?.id,
+        posto_id: selectedPosto,
+        descricao: post.descricao,
+        currency: 'AOA',
+        quantidade,
+      });
+      setCheckoutUrl(response.data.checkout_url);
+    } catch (error) {
+      alert('Erro ao iniciar pagamento');
     } finally {
       setLoading(false);
     }
   };
 
-  if (openPaymentModal) {
-    fetchPostos();
-  }
-}, [openPaymentModal, post.empresa.id]);
-
-const checkPostoAvailability = async (postoId:number) => {
-  try {
-    const response = await axios.get(`https://83dc-154-71-159-172.ngrok-free.app/api/posto/available/${postoId}/`,{
-      headers: {
-        "ngrok-skip-browser-warning": "true", // Evita bloqueios do ngrok
-      },
-    });
-    setPostoDisponivel(response.status === 200);
-    if (response.status === 303) alert('Não há espaço neste posto.');
-  } catch {
-    alert('Erro ao verificar disponibilidade do posto');
-  }
-};
-
-const initiatePayment = async () => {
-  if (!selectedPosto) {
-    alert( 'Por favor, selecione um posto antes de prosseguir.');
-    return;
-  }
-  setLoading(true);
-  try {
-    const response = await axios.post('https://83dc-154-71-159-172.ngrok-free.app/api/stripe/create-payment/bussiness-bussiness/', {
-      produto_id: post.id,
-      empresa_id: userData?.empresa?.id,
-      posto_id: selectedPosto,
-      descricao: post.descricao,
-      currency: 'AOA',
-      quantidade,
-    });
-    setCheckoutUrl(response.data.checkout_url);
-  } catch (error) {
-    alert('Erro ao iniciar pagamento');
-  } finally {
-    setLoading(false);
-  }
-};
-  
-  
-
-
   const renderAvatar = (
     <Avatar
       alt={post.empresa.nome}
-      src={`https://83dc-154-71-159-172.ngrok-free.app${post.empresa?.imagens[0]?.imagem}`}
+      src={`https://e6b5-154-71-159-172.ngrok-free.app${post.empresa?.imagens[0]?.imagem}`}
       sx={{
         left: 24,
         zIndex: 9,
+        cursor: 'pointer',
         bottom: -24,
         position: 'absolute',
         ...((latestPostLarge || latestPost) && {
@@ -263,7 +261,7 @@ const initiatePayment = async () => {
     <Link
       color="inherit"
       variant="subtitle2"
-      underline="hover"
+      underline="none"
       sx={{
         height: 44,
         overflow: 'hidden',
@@ -320,11 +318,12 @@ const initiatePayment = async () => {
       component="img"
       onClick={handleOpen}
       alt={post.nome}
-      src={`https://83dc-154-71-159-172.ngrok-free.app${post.imagens[0]?.imagem}`}
+      src={`https://e6b5-154-71-159-172.ngrok-free.app${post.imagens[0]?.imagem}`}
       sx={{
         top: 0,
         width: 1,
         height: 1,
+        cursor: 'pointer',
         objectFit: 'cover',
         position: 'absolute',
       }}
@@ -379,7 +378,7 @@ const initiatePayment = async () => {
       </Box>
       <Box
         component="img"
-        src={`https://83dc-154-71-159-172.ngrok-free.app${post.imagens[0]?.imagem}`}
+        src={`https://e6b5-154-71-159-172.ngrok-free.app${post.imagens[0]?.imagem}`}
         alt={post.nome}
         sx={{
           width: 80,
@@ -484,9 +483,9 @@ const initiatePayment = async () => {
               <Box
                 key={img.id}
                 component="img"
-                src={`https://83dc-154-71-159-172.ngrok-free.app${img.imagem}`}
+                src={`https://e6b5-154-71-159-172.ngrok-free.app${img.imagem}`}
                 alt={post.nome}
-                sx={{ width: 120, height: 120, borderRadius: 1, objectFit: 'cover' }}
+                sx={{ width: 120, height: 120, borderRadius: 1, objectFit: 'cover', cursor: 'pointer' }}
               />
             ))}
           </Box>
@@ -517,10 +516,10 @@ const initiatePayment = async () => {
           {renderAvatar}
           {renderProductInfo}
 
-          <Box component="form" sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 4 }}  onSubmit={(event) => {
-    event.preventDefault(); // Evita o reload da página
-    sendMessage();
-  }}>
+          <Box component="form" sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 4 }} onSubmit={(event) => {
+            event.preventDefault(); // Evita o reload da página
+            sendMessage();
+          }}>
             <textarea
               rows={2}
               placeholder="Digite sua mensagem..."
@@ -555,108 +554,107 @@ const initiatePayment = async () => {
           </Box>
         </Box>
       </Modal>
+
       {/* modal de pagamento */}
-
-
       <Modal open={openPaymentModal} onClose={handleClosePaymentModal}>
-  <Box
-    sx={{
-      position: 'absolute',
-      top: '50%',
-      left: '50%',
-      transform: 'translate(-50%, -50%)',
-      width: 600,
-      bgcolor: 'background.paper',
-      boxShadow: 24,
-      p: 4,
-      borderRadius: 2,
-      display: 'flex',
-      flexDirection: 'column',
-    }}
-  >
-    <IconButton onClick={handleClosePaymentModal} sx={{ position: 'absolute', top: 8, right: 8 }}>
-      <Iconify icon="mdi:close" width={24} />
-    </IconButton>
+        <Box
+          sx={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: 600,
+            bgcolor: 'background.paper',
+            boxShadow: 24,
+            p: 4,
+            borderRadius: 2,
+            display: 'flex',
+            flexDirection: 'column',
+          }}
+        >
+          <IconButton onClick={handleClosePaymentModal} sx={{ position: 'absolute', top: 8, right: 8 }}>
+            <Iconify icon="mdi:close" width={24} />
+          </IconButton>
 
-    <Typography variant="h5" sx={{ mb: 2 }}>
-      Selecionar Posto para Pagamento
-    </Typography>
+          <Typography variant="h5" sx={{ mb: 2 }}>
+            Selecionar Posto para Pagamento
+          </Typography>
 
-    {loading ? (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 100 }}>
-        <CircularProgress />
-      </Box>
-    ) : (
-      <>
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-          {postos.map((posto) => (
-            <Box
-            key={posto.posto.id}
-            sx={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              p: 2,
-              border: '1px solid #ccc',
-              borderRadius: 1,
-              cursor: 'pointer',
-              backgroundColor: selectedPosto === posto.posto.id ? '#f0f0f0' : 'transparent',
-            }}
-            onClick={() => {
-              setSelectedPosto(posto.posto.id);
-              checkPostoAvailability(posto.posto.id);
-            }}
-          >
-            <Typography>{posto.posto.nome}</Typography>
-            <Typography>{posto.posto.localizacao}</Typography>
-            {selectedPosto === posto.posto.id && (
-              <Iconify
-                icon={postoDisponivel ? "mdi:check-circle" : "mdi:alert-circle"}
-                width={24}
-                color={postoDisponivel ? "green" : "red"}
-              />
-            )}
-          </Box>
-          ))}
+          {loading ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 100 }}>
+              <CircularProgress />
+            </Box>
+          ) : (
+            <>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                {postos.map((posto) => (
+                  <Box
+                    key={posto.posto.id}
+                    sx={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      p: 2,
+                      border: '1px solid #ccc',
+                      borderRadius: 1,
+                      cursor: 'pointer',
+                      backgroundColor: selectedPosto === posto.posto.id ? '#f0f0f0' : 'transparent',
+                    }}
+                    onClick={() => {
+                      setSelectedPosto(posto.posto.id);
+                      checkPostoAvailability(posto.posto.id);
+                    }}
+                  >
+                    <Typography>{posto.posto.nome}</Typography>
+                    <Typography>{posto.posto.localizacao}</Typography>
+                    {selectedPosto === posto.posto.id && (
+                      <Iconify
+                        icon={postoDisponivel ? "mdi:check-circle" : "mdi:alert-circle"}
+                        width={24}
+                        color={postoDisponivel ? "green" : "red"}
+                      />
+                    )}
+                  </Box>
+                ))}
+              </Box>
+
+              {postoDisponivel && (
+                <Box sx={{ mt: 2 }}>
+                  <TextField
+                    label="Quantidade"
+                    type="number"
+                    value={quantidade}
+                    onChange={(e) => setQuantidade(e.target.value)}
+                    fullWidth
+                    sx={{ mb: 2 }}
+                  />
+                  <Button
+                    variant="contained"
+                    onClick={initiatePayment}
+                    disabled={loading}
+                    fullWidth
+                  >
+                    Gerar Link de Pagamento
+                  </Button>
+                </Box>
+              )}
+
+              {checkoutUrl && (
+                <Box sx={{ mt: 2 }}>
+                  <Button
+                    variant="contained"
+                    color="success"
+                    onClick={() => window.open(checkoutUrl, '_blank')}
+                    fullWidth
+                  >
+                    Ir para Pagamento
+                  </Button>
+                </Box>
+              )}
+            </>
+          )}
         </Box>
-
-        {postoDisponivel && (
-          <Box sx={{ mt: 2 }}>
-            <TextField
-              label="Quantidade"
-              type="number"
-              value={quantidade}
-              onChange={(e) => setQuantidade(e.target.value)}
-              fullWidth
-              sx={{ mb: 2 }}
-            />
-            <Button
-              variant="contained"
-              onClick={initiatePayment}
-              disabled={loading}
-              fullWidth
-            >
-              Gerar Link de Pagamento
-            </Button>
-          </Box>
-        )}
-
-        {checkoutUrl && (
-          <Box sx={{ mt: 2 }}>
-            <Button
-              variant="contained"
-              color="success"
-              onClick={() => window.open(checkoutUrl, '_blank')}
-              fullWidth
-            >
-              Ir para Pagamento
-            </Button>
-          </Box>
-        )}
-      </>
-    )}
-  </Box>
-</Modal>
+      </Modal>
     </>
   );
 }

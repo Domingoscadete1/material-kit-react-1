@@ -47,7 +47,7 @@ export function BlogView() {
     }
     try {
       setLoading(true);
-      const response = await axios.get(`https://83dc-154-71-159-172.ngrok-free.app/api/produtos-search/bussiness/${empresaId}/`,{
+      const response = await axios.get(`https://e6b5-154-71-159-172.ngrok-free.app/api/produtos-search/bussiness/${empresaId}/`,{
         headers: {
           "ngrok-skip-browser-warning": "true", // Evita bloqueios do ngrok
         },
@@ -81,13 +81,6 @@ export function BlogView() {
         <Typography variant="h4" flexGrow={1}>
           Explore
         </Typography>
-        {/* <Button
-          variant="contained"
-          color="inherit"
-          startIcon={<Iconify icon="mingcute:add-line" />}
-        >
-          New post
-        </Button> */}
       </Box>
 
       <Box display="flex" alignItems="center" justifyContent="space-between" sx={{ mb: 5 }}>
@@ -128,7 +121,7 @@ export function BlogView() {
         </Grid>
       )}
 
-      <Pagination count={10} color="primary" sx={{ mt: 8, mx: 'auto' }} />
+      {/* <Pagination count={10} color="primary" sx={{ mt: 8, mx: 'auto' }} /> */}
     </DashboardContent>
   );
 }

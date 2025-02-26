@@ -65,6 +65,7 @@ export function PostSort({ options, sortBy, onSort, sx, ...other }: PostSortProp
           sx={{
             p: 0.5,
             gap: 0.5,
+            cursor: 'pointer',
             width: 160,
             display: 'flex',
             flexDirection: 'column',
