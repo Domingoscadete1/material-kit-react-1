@@ -20,7 +20,7 @@ const  AddPostoModal: React.FC<AddPostoModalProps> = ({ open, onClose }) => {
   const fetchPostos = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await axios.get('https://e6b5-154-71-159-172.ngrok-free.app/api/postos/',{
+      const response = await axios.get('https://fad7-154-71-159-172.ngrok-free.app/api/postos/',{
         headers: {
           "ngrok-skip-browser-warning": "true", // Evita bloqueios do ngrok
         },
@@ -49,7 +49,7 @@ const  AddPostoModal: React.FC<AddPostoModalProps> = ({ open, onClose }) => {
     }
 
     try {
-      const response = await axios.post('https://e6b5-154-71-159-172.ngrok-free.app/api/empresa-posto/create/', {
+      const response = await axios.post('https://fad7-154-71-159-172.ngrok-free.app/api/empresa-posto/create/', {
         empresa_id: empresaId,
         posto_id: selectedPosto,
       },{

@@ -19,16 +19,17 @@ import axios from 'axios';
 // ----------------------------------------------------------------------
 
 type MensagemSuporte = {
-  id: number;
-  chat_room: number;
+  id?: number;
+  chat_room?: number;
   usuario?: number | null;
   empresa?: number | null;
   funcionario?: number | null;
   conteudo?: string | null;
-  created_at: string;
+  created_at?: string;
   updated_at?: string | null;
-  deleted: boolean;
-  expires_at: string;
+  deleted?: boolean;
+  expires_at?: string;
+  remetente:string;
 };
 
 
@@ -76,7 +77,7 @@ export function PerfilView() {
     setOpenModal(true);
   
     if (!chatId1) {
-      const socketUrl = `wss://e6b5-154-71-159-172.ngrok-free.app/ws/suporte/chat/${empresa?.empresa?.id}/`;
+      const socketUrl = `wss://fad7-154-71-159-172.ngrok-free.app/ws/suporte/chat/${empresa?.empresa?.id}/`;
       socketRef.current = new WebSocket(socketUrl);
   
       socketRef.current.onopen = () => console.log("WebSocket conectado para novo chat");
@@ -90,7 +91,7 @@ export function PerfilView() {
   };
   
   const verificarChat = useCallback(() => {
-    axios.get(`https://e6b5-154-71-159-172.ngrok-free.app/api/empresa/chat-suport/${empresa?.empresa?.id}/`, {
+    axios.get(`https://fad7-154-71-159-172.ngrok-free.app/api/empresa/chat-suport/${empresa?.empresa?.id}/`, {
       headers: {
         "ngrok-skip-browser-warning": "true",
         "Content-Type": "application/json"
@@ -113,7 +114,7 @@ export function PerfilView() {
   
 
   const carregarMensagens = (chatId:number) => {
-    axios.get(`https://e6b5-154-71-159-172.ngrok-free.app/api/chat-suporte/mensagens/${chatId}/`,{
+    axios.get(`https://fad7-154-71-159-172.ngrok-free.app/api/chat-suporte/mensagens/${chatId}/`,{
       headers: {
         "ngrok-skip-browser-warning": "true", // Evita bloqueios do ngrok
         "Content-Type": "application/json" // Define o tipo de conteúdo esperado
@@ -124,15 +125,23 @@ export function PerfilView() {
   };
   const conectarWebSocket = useCallback((chatId: number) => {
     const socketUrl = chatId
-      ? `wss://e6b5-154-71-159-172.ngrok-free.app/ws/suporte/empresa/${empresa?.empresa?.id}/`
-      : `wss://e6b5-154-71-159-172.ngrok-free.app/ws/suporte/chat/${empresa?.empresa?.id}/`;
+      ? `wss://fad7-154-71-159-172.ngrok-free.app/ws/suporte/empresa/${empresa?.empresa?.id}/`
+      : `wss://fad7-154-71-159-172.ngrok-free.app/ws/suporte/chat/${empresa?.empresa?.id}/`;
   
     socketRef.current = new WebSocket(socketUrl);
   
     socketRef.current.onopen = () => console.log("WebSocket conectado");
     socketRef.current.onmessage = (event) => {
       const novaMensagem = JSON.parse(event.data);
-      setMensagens((prev) => [...prev, novaMensagem]);
+      console.log("Nova mensagem recebida:", novaMensagem);
+  
+      setMensagens((prevMensagens) => [
+        ...prevMensagens,
+        {
+          conteudo: novaMensagem.message,
+          remetente: novaMensagem.remetente,
+        },
+      ]);
     };
     socketRef.current.onerror = (error) => console.error("Erro no WebSocket:", error);
     socketRef.current.onclose = () => console.log("WebSocket fechado");
@@ -146,6 +155,7 @@ export function PerfilView() {
       const data = {
         mensagem,
         empresa_id: empresa?.empresa.id,
+        chat_id:chatId1
          // Garantir que o backend tenha o remetente correto
       };
   
@@ -175,7 +185,7 @@ export function PerfilView() {
           <Paper elevation={4} sx={{ p: 4, textAlign: 'center' }}>
             {/* Profile Picture */}
             <Avatar
-              src={`https://e6b5-154-71-159-172.ngrok-free.app${empresa.foto}`}
+              src={`https://fad7-154-71-159-172.ngrok-free.app${empresa.foto}`}
               alt="Profile"
               sx={{ width: 120, height: 120, mx: 'auto', mb: 2 }}
             />
@@ -303,7 +313,7 @@ export function PerfilView() {
             {mensagens.map((msg, index) => (
               <Box key={index} sx={{ p: 1, borderBottom: '1px solid #ccc' }}>
                 <Typography variant="body2">
-                  <strong>{msg.usuario}</strong>: {msg.conteudo}
+                  <strong>{msg.remetente}</strong>: {msg.conteudo}
                 </Typography>
               </Box>
             ))}

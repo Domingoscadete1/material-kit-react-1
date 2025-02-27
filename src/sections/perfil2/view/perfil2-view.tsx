@@ -74,7 +74,7 @@ export function Perfil2View() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(`https://e6b5-154-71-159-172.ngrok-free.app/api/${tipo}/${id}/`, {
+        const response = await axios.get(`https://fad7-154-71-159-172.ngrok-free.app/api/${tipo}/${id}/`, {
           headers: {
             "ngrok-skip-browser-warning": "true", // Evita bloqueios do ngrok
           },
@@ -82,7 +82,7 @@ export function Perfil2View() {
         setDados(response.data);
         console.log('dados', response.data)
 
-        const produtosResponse = await axios.get(`https://e6b5-154-71-159-172.ngrok-free.app/api/produtos/${tipo === 'empresa' ? 'empresa' : 'usuario'}/${id}`, {
+        const produtosResponse = await axios.get(`https://fad7-154-71-159-172.ngrok-free.app/api/produtos/${tipo === 'empresa' ? 'empresa' : 'usuario'}/${id}`, {
           headers: {
             "ngrok-skip-browser-warning": "true", // Evita bloqueios do ngrok
           },
@@ -110,7 +110,7 @@ export function Perfil2View() {
       formData.append('motivo', motivo);
       formData.append('descricao', descricao);
 
-      await axios.post(`https://e6b5-154-71-159-172.ngrok-free.app/api/reportes/create/`, formData, {
+      await axios.post(`https://fad7-154-71-159-172.ngrok-free.app/api/reportes/create/`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 
@@ -231,7 +231,7 @@ export function Perfil2View() {
                     setModalOpen(true);
                   }}>
                     <Avatar
-                      src={`https://e6b5-154-71-159-172.ngrok-free.app${produto.imagens?.length ? produto.imagens[0].imagem : ''}`}
+                      src={`https://fad7-154-71-159-172.ngrok-free.app${produto.imagens?.length ? produto.imagens[0].imagem : ''}`}
                       alt={produto.nome}
                       sx={{ width: 80, height: 80, mx: 'auto', mb: 1 }}
                     />
@@ -277,7 +277,7 @@ export function Perfil2View() {
                 Preço: {produtoSelecionado.preco} Kz
               </Typography>
               {produtoSelecionado.imagens?.map((imagem, index) => (
-                <Box key={index} component="img" src={`https://e6b5-154-71-159-172.ngrok-free.app${imagem.imagem}`} sx={{
+                <Box key={index} component="img" src={`https://fad7-154-71-159-172.ngrok-free.app${imagem.imagem}`} sx={{
                   width: 80,
                   height: 80,
                   objectFit: 'cover',

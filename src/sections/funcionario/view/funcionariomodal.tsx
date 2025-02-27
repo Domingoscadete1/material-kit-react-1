@@ -47,7 +47,7 @@ const AddFuncionarioModal: React.FC<AddFuncionarioModalProps> = ({ open, onClose
       }
       
 
-      await axios.post('https://e6b5-154-71-159-172.ngrok-free.app/api/empresa-user-add/', formData, {
+      await axios.post('https://fad7-154-71-159-172.ngrok-free.app/api/empresa-user-add/', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
           "ngrok-skip-browser-warning": "true",
