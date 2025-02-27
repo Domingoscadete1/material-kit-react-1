@@ -15,13 +15,13 @@ import axios from 'axios';
 import { useRouter } from 'src/routes/hooks';
 import { Iconify } from 'src/components/iconify';
 import type { JwtPayload } from 'jwt-decode';
+import Config from '../Config';
 import Modal from '@mui/material/Modal';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import Button from '@mui/material/Button';
-import Config from '../Config';
 
 // ----------------------------------------------------------------------
 
@@ -169,6 +169,9 @@ export function SignInView() {
             <Typography variant="h4">Sign in</Typography>
             <Typography variant="body2" color="text.secondary">
                 Welcome, again!!
+                <Link variant="subtitle2" sx={{ ml: 0.5 }}>
+                    Get started
+                </Link>
             </Typography>
 
             <Box component="form" onSubmit={handleSubmit(onSubmit)} display="flex" flexDirection="column">

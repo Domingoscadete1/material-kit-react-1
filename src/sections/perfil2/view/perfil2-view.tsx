@@ -1,4 +1,3 @@
-
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Unstable_Grid2';
 import Typography from '@mui/material/Typography';
@@ -9,14 +8,10 @@ import Divider from '@mui/material/Divider';
 import Modal from '@mui/material/Modal';
 import TextField from '@mui/material/TextField';
 import Switch from '@mui/material/Switch';
-// import { IconButton } from '@mui/material';
 import { Select, MenuItem, FormControl, InputLabel, IconButton } from '@mui/material';
-
-
 import { Iconify } from 'src/components/iconify';
 import { useEffect, useState } from 'react';
-import { useParams, useLocation } from 'react-router-dom';
-
+import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import { DashboardContent } from 'src/layouts/dashboard';
 
@@ -40,6 +35,7 @@ interface Dados {
   foto?: string;
   imagens?: Imagem[];
 }
+
 const MOTIVOS = [
   { value: 'fraude', label: 'Fraude' },
   { value: 'conteudo_inapropriado', label: 'Conteúdo inapropriado' },
@@ -50,7 +46,6 @@ const MOTIVOS = [
 
 export function Perfil2View() {
   const [empresaId, setEmpresaId] = useState<string | null>(null);
-
   const [dados, setDados] = useState<Dados | null>(null);
   const [produtos, setProdutos] = useState<Produto[]>([]);
   const [produtoSelecionado, setProdutoSelecionado] = useState<Produto | null>(null);
@@ -58,7 +53,6 @@ export function Perfil2View() {
   const [modalDenunciaOpen, setModalDenunciaOpen] = useState(false);
   const [motivo, setMotivo] = useState('');
   const [descricao, setDescricao] = useState('');
-
 
   useEffect(() => {
     const token = localStorage.getItem('userData');
@@ -70,25 +64,25 @@ export function Perfil2View() {
       }
     }
   }, []);
-  const { id, tipo } = useParams<{ id: string; tipo?: string }>(); //  const location = useLocation();
+
+  const { id, tipo } = useParams<{ id: string; tipo?: string }>();
+
   useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await axios.get(`https://fad7-154-71-159-172.ngrok-free.app/api/${tipo}/${id}/`, {
           headers: {
-            "ngrok-skip-browser-warning": "true", // Evita bloqueios do ngrok
+            "ngrok-skip-browser-warning": "true",
           },
         });
         setDados(response.data);
-        console.log('dados', response.data)
 
         const produtosResponse = await axios.get(`https://fad7-154-71-159-172.ngrok-free.app/api/produtos/${tipo === 'empresa' ? 'empresa' : 'usuario'}/${id}`, {
           headers: {
-            "ngrok-skip-browser-warning": "true", // Evita bloqueios do ngrok
+            "ngrok-skip-browser-warning": "true",
           },
         });
         setProdutos(produtosResponse.data.produtos);
-        console.log('produtos', produtosResponse.data.produtos)
       } catch (error) {
         console.error('Erro ao buscar os dados:', error);
       }
@@ -96,10 +90,6 @@ export function Perfil2View() {
 
     fetchData();
   }, [id, tipo]);
-
-
-  const [openMessageModal, setOpenMessageModal] = useState(false);
-  const handleCloseMessageModal = () => setOpenMessageModal(false);
 
   const denunciarEmpresa = async () => {
     try {
@@ -120,6 +110,7 @@ export function Perfil2View() {
       console.error('Erro ao enviar denúncia:', error);
     }
   };
+
   if (!dados) return <Typography>Carregando...</Typography>;
 
   return (
@@ -153,7 +144,7 @@ export function Perfil2View() {
             <Modal open={modalDenunciaOpen} onClose={() => setModalDenunciaOpen(false)}>
               <Box sx={{
                 position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
-                backgroundColor: 'white', p: 4, borderRadius: 2, width: 400, boxShadow: 24
+                backgroundColor: 'white', p: 4, borderRadius: 2, width: { xs: '90%', sm: 400 }, boxShadow: 24
               }}>
                 <Typography variant="h6" gutterBottom>
                   Motivo do bloqueio
@@ -199,15 +190,14 @@ export function Perfil2View() {
 
         <Grid xs={12} md={6}>
           <Paper elevation={4} sx={{ p: 4 }}>
-
             <Typography variant="h4">Imagens da Empresa</Typography>
             <Box>
               {tipo === 'empresa' && Array.isArray(dados.imagens) && dados.imagens.length > 0 && (
                 <Box sx={{ mt: 4 }}>
                   <Grid container spacing={2}>
                     {dados.imagens.map((imagem, index) => (
-                      <Grid key={index} md={4} >
-                        <Box component="img" src={`${imagem.imagem}`} sx={{ width: '100%' }} />
+                      <Grid key={index} md={4}>
+                        <Box component="img" src={`${imagem.imagem}`} sx={{ width: '100%', borderRadius: 1 }} />
                       </Grid>
                     ))}
                   </Grid>
@@ -256,7 +246,7 @@ export function Perfil2View() {
           top: '50%',
           left: '50%',
           transform: 'translate(-50%, -50%)',
-          width: 600,
+          width: { xs: '90%', sm: 600 },
           bgcolor: 'background.paper',
           boxShadow: 24,
           p: 4,
@@ -264,27 +254,26 @@ export function Perfil2View() {
           display: 'flex',
           flexDirection: 'column',
         }}>
-          {/* <IconButton onClick={handleCloseMessageModal} sx={{ position: 'absolute', top: 8, right: 8 }}>
-            <Iconify icon="mdi:close" width={24} />
-          </IconButton> */}
           {produtoSelecionado && (
             <>
               <Typography variant="h6">{produtoSelecionado.nome}</Typography>
               <Divider sx={{ my: 2 }} />
-              
               <Typography variant="body1">{produtoSelecionado.descricao}</Typography>
               <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
                 Preço: {produtoSelecionado.preco} Kz
               </Typography>
-              {produtoSelecionado.imagens?.map((imagem, index) => (
-                <Box key={index} component="img" src={`https://fad7-154-71-159-172.ngrok-free.app${imagem.imagem}`} sx={{
-                  width: 80,
-                  height: 80,
-                  objectFit: 'cover',
-                  borderRadius: 1,
-                  display: 'flex'
-                }} />
-              ))}
+              <Grid container spacing={2} sx={{ mt: 2 }}>
+                {produtoSelecionado.imagens?.map((imagem, index) => (
+                  <Grid key={index} xs={6} md={4}>
+                    <Box component="img" src={`https://fad7-154-71-159-172.ngrok-free.app${imagem.imagem}`} sx={{
+                      width: '100%',
+                      height: 100,
+                      objectFit: 'cover',
+                      borderRadius: 1,
+                    }} />
+                  </Grid>
+                ))}
+              </Grid>
             </>
           )}
         </Box>
