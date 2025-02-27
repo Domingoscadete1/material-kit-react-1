@@ -1,5 +1,5 @@
 export default class Config {
-  static API_URL = 'http://127.0.0.1:8000/';
+  static API_URL = 'https://fad7-154-71-159-172.ngrok-free.app/';
   
   static APP_NAME = 'MeuApp';
   
