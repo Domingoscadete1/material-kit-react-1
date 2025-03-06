@@ -109,6 +109,7 @@ export function SignInView() {
 
                         // Armazena os dados no localStorage
                         await localStorage.setItem('userData', JSON.stringify(data));
+                        router.push('/'); // Redireciona para a página inicial
                     } else {
                         console.error('Resposta da API inesperada:', response);
                     }
@@ -147,7 +148,7 @@ export function SignInView() {
                         localStorage.setItem('refreshToken', refresh);
                         localStorage.setItem('custom-auth-token', access);
 
-                        router.push('/'); // Redireciona para a página inicial
+                        
                     } else {
                         setError('root', { type: 'server', message: 'Usuário não autorizado.' });
                     }
@@ -161,7 +162,7 @@ export function SignInView() {
                 setIsPending(false);
             }
         },
-        [baseUrl, router, setError]
+        [baseUrl,  setError,router]
     );
 
     return (
