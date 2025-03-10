@@ -21,6 +21,7 @@ import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import Button from '@mui/material/Button';
+import { MenuItem } from '@mui/material';
 import Config from '../Config';
 
 // ----------------------------------------------------------------------
@@ -35,6 +36,17 @@ interface UserData {
     endereco: string;
     status: string;
 }
+interface FormDataType {
+  nome: string;
+  email: string;
+  senha: string;
+  telefone1: string;
+  telefone2: string;
+  endereco: string;
+  categoria: string;
+  descricao: string;
+  imagens: File[];
+}
 
 const schema = zod.object({
     username: zod.string().min(1, { message: 'Username is required' }),
@@ -45,6 +57,12 @@ type Values = zod.infer<typeof schema>;
 
 const defaultValues = { username: '', password: '' };
 
+const categorias = [
+  { value: 'moda', label: 'Moda' },
+  { value: 'tecnologia', label: 'Tecnologia' },
+  { value: 'cosmeticos', label: 'Cosméticos' },
+];
+
 export function SignInView() {
     const router = useRouter();
     const baseUrl = Config.getApiUrl();
@@ -52,6 +70,64 @@ export function SignInView() {
     const [showPassword, setShowPassword] = useState(false);
     const [userData, setUserData] = React.useState < UserData | null > (null);
     const [open, setOpen] = useState(false); // Estado para controlar a abertura do modal
+    const [form, setForm] = useState<FormDataType>({
+      nome: '',
+      email: '',
+      senha: '',
+      telefone1: '',
+      telefone2: '',
+      endereco: '',
+      categoria: '',
+      descricao: '',
+      imagens: [],
+    });
+  const [loading, setLoading] = useState(false);
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+  
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files) return;
+  
+    const files: File[] = Array.from(e.target.files);
+    if (files.length > 5) {
+      alert('Você pode enviar no máximo 5 imagens.');
+      return;
+    }
+  
+    setForm((prev) => ({ ...prev, imagens: files }));
+  };
+  
+const handlecadastro = async () => {
+  const formData = new FormData();
+  Object.keys(form).forEach((key) => {
+    const fieldKey = key as keyof FormDataType;
+  
+    if (fieldKey === 'imagens' && Array.isArray(form[fieldKey])) {
+      form[fieldKey].forEach((file, index) => formData.append(`imagem${index + 1}`, file));
+    } else {
+      formData.append(fieldKey, String(form[fieldKey]));
+    }
+  });
+  
+
+  try {
+      setLoading(true);
+      const response = await axios.post(`${Config.getApiUrl()}api/empresa/create/`, formData, {
+          headers: { 'Content-Type': 'multipart/form-data',"ngrok-skip-browser-warning": "true" },
+      });
+
+      alert('Empresa cadastrada com sucesso!');
+      handleClose();
+  } catch (error) {
+      console.error('Erro ao cadastrar empresa:', error.response?.data || error.message);
+      alert(error.response?.data?.detail || 'Erro ao cadastrar empresa.');
+  } finally {
+      setLoading(false);
+  }
+};
+
 
     const {
         control,
@@ -255,55 +331,40 @@ export function SignInView() {
 
             {/* Modal de Cadastro de Empresa */}
             <Dialog open={open} onClose={handleClose}>
-                <DialogTitle>Cadastrar Empresa</DialogTitle>
-                <DialogContent>
-                    <Box component="form" sx={{ mt: 1 }}>
-                        <TextField
-                            margin="normal"
-                            required
-                            fullWidth
-                            id="nome"
-                            label="Nome da Empresa"
-                            name="nome"
-                            autoComplete="nome"
-                            autoFocus
-                        />
-                        <TextField
-                            margin="normal"
-                            required
-                            fullWidth
-                            id="email"
-                            label="Email"
-                            name="email"
-                            autoComplete="email"
-                        />
-                        <TextField
-                            margin="normal"
-                            required
-                            fullWidth
-                            id="telefone"
-                            label="Telefone"
-                            name="telefone"
-                            autoComplete="telefone"
-                        />
-                        <TextField
-                            margin="normal"
-                            required
-                            fullWidth
-                            id="endereco"
-                            label="Endereço"
-                            name="endereco"
-                            autoComplete="endereco"
-                        />
-                    </Box>
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={handleClose}>Cancelar</Button>
-                    <Button onClick={handleClose} variant="contained" color="primary">
-                        Cadastrar
-                    </Button>
-                </DialogActions>
-            </Dialog>
+            <DialogTitle>Cadastrar Empresa</DialogTitle>
+            <DialogContent>
+                <TextField fullWidth margin="normal" label="Nome da Empresa" name="nome" onChange={handleChange} required />
+                <TextField fullWidth margin="normal" label="Email" name="email" onChange={handleChange} required />
+                <TextField fullWidth margin="normal" label="Senha" type="password" name="senha" onChange={handleChange} required />
+                <TextField fullWidth margin="normal" label="Telefone 1" name="telefone1" onChange={handleChange} required />
+                <TextField fullWidth margin="normal" label="Telefone 2" name="telefone2" onChange={handleChange} />
+                <TextField fullWidth margin="normal" label="Endereço" name="endereco" onChange={handleChange} required />
+                <TextField
+                    select
+                    fullWidth
+                    margin="normal"
+                    label="Categoria"
+                    name="categoria"
+                    onChange={handleChange}
+                    required
+                >
+                    {categorias.map((option) => (
+                        <MenuItem key={option.value} value={option.value}>
+                            {option.label}
+                        </MenuItem>
+                    ))}
+                </TextField>
+                <TextField fullWidth margin="normal" label="Descrição" name="descricao" onChange={handleChange} multiline rows={3} required />
+                <input type="file" multiple accept="image/*" onChange={handleFileChange} />
+            </DialogContent>
+            <DialogActions>
+                <Button onClick={handleClose}>Cancelar</Button>
+                <Button onClick={()=>handlecadastro()} variant="contained" color="primary" disabled={loading}>
+  {loading ? 'Cadastrando...' : 'Cadastrar'}
+</Button>
+
+            </DialogActions>
+        </Dialog>
         </Box>
     );
 }
