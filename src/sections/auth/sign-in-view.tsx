@@ -46,7 +46,11 @@ interface FormDataType {
   categoria: string;
   descricao: string;
   imagens: File[];
+  nif: string;
+  alvara_comercial: File | null;
+  certidao_registro_comercial: File | null;
 }
+
 
 const schema = zod.object({
     username: zod.string().min(1, { message: 'Username is required' }),
@@ -80,32 +84,37 @@ export function SignInView() {
       categoria: '',
       descricao: '',
       imagens: [],
+      nif: '',
+      alvara_comercial: null,
+      certidao_registro_comercial: null,
     });
+    
   const [loading, setLoading] = useState(false);
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
   
-
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
   
-    const files: File[] = Array.from(e.target.files);
-    if (files.length > 5) {
-      alert('Você pode enviar no máximo 5 imagens.');
-      return;
-    }
+    const { name } = e.target;
+    const file = e.target.files[0];
   
-    setForm((prev) => ({ ...prev, imagens: files }));
+    setForm((prev) => ({ ...prev, [name]: file }));
   };
+  
   
 const handlecadastro = async () => {
   const formData = new FormData();
   Object.keys(form).forEach((key) => {
     const fieldKey = key as keyof FormDataType;
-  
+
     if (fieldKey === 'imagens' && Array.isArray(form[fieldKey])) {
       form[fieldKey].forEach((file, index) => formData.append(`imagem${index + 1}`, file));
+    } else if (fieldKey === 'alvara_comercial' || fieldKey === 'certidao_registro_comercial') {
+      if (form[fieldKey]) {
+        formData.append(fieldKey, form[fieldKey] as File);
+      }
     } else {
       formData.append(fieldKey, String(form[fieldKey]));
     }
@@ -335,6 +344,8 @@ const handlecadastro = async () => {
             <DialogContent>
                 <TextField fullWidth margin="normal" label="Nome da Empresa" name="nome" onChange={handleChange} required />
                 <TextField fullWidth margin="normal" label="Email" name="email" onChange={handleChange} required />
+                <TextField fullWidth margin="normal" label="Numero de identificação fiscal" name="nif" onChange={handleChange} required />
+
                 <TextField fullWidth margin="normal" label="Senha" type="password" name="senha" onChange={handleChange} required />
                 <TextField fullWidth margin="normal" label="Telefone 1" name="telefone1" onChange={handleChange} required />
                 <TextField fullWidth margin="normal" label="Telefone 2" name="telefone2" onChange={handleChange} />
@@ -356,6 +367,11 @@ const handlecadastro = async () => {
                 </TextField>
                 <TextField fullWidth margin="normal" label="Descrição" name="descricao" onChange={handleChange} multiline rows={3} required />
                 <input type="file" multiple accept="image/*" onChange={handleFileChange} />
+                <input type="text" name="nif" value={form.nif} onChange={handleChange} placeholder="NIF" required />
+
+                <input type="file" name="alvara_comercial" accept=".pdf,.doc,.docx" onChange={handleFileChange} />
+
+                <input type="file" name="certidao_registro_comercial" accept=".pdf,.doc,.docx" onChange={handleFileChange} />
             </DialogContent>
             <DialogActions>
                 <Button onClick={handleClose}>Cancelar</Button>
