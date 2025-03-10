@@ -366,10 +366,19 @@ const handlecadastro = async () => {
                     ))}
                 </TextField>
                 <TextField fullWidth margin="normal" label="Descrição" name="descricao" onChange={handleChange} multiline rows={3} required />
+                <Typography variant="body2" color="text.secondary">
+                    Imagens da empresa
+            </Typography>
+
                 <input type="file" multiple accept="image/*" onChange={handleFileChange} />
-                <input type="text" name="nif" value={form.nif} onChange={handleChange} placeholder="NIF" required />
+                <Typography variant="body2" color="text.secondary">
+                Alvará Comercial
+            </Typography>
 
                 <input type="file" name="alvara_comercial" accept=".pdf,.doc,.docx" onChange={handleFileChange} />
+                <Typography variant="body2" color="text.secondary">
+                Certidão de Registro Comercial
+            </Typography>
 
                 <input type="file" name="certidao_registro_comercial" accept=".pdf,.doc,.docx" onChange={handleFileChange} />
             </DialogContent>
