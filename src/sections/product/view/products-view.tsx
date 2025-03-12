@@ -208,7 +208,7 @@ export function ProductsView() {
       });
       console.log('Produtos recebidos:', response.data);
 
-      setProducts(response.data);
+      setProducts(response.data.results);
     } catch (error) {
       console.error('Erro ao buscar produtos:', error);
     } finally {

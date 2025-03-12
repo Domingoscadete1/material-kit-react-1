@@ -34,6 +34,7 @@ export function BlogView() {
     if (token) {
       const userData = JSON.parse(token);
       const postoId = userData.empresa.id;
+      console.log(postoId);
       if (postoId) {
         setEmpresaId(postoId);
       }
