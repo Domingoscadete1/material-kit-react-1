@@ -206,9 +206,9 @@ export function ProductsView() {
           "ngrok-skip-browser-warning": "true", // Evita bloqueios do ngrok
         },
       });
-      console.log('Produtos recebidos:', response.data.produtos);
+      console.log('Produtos recebidos:', response.data);
 
-      setProducts(response.data.produtos);
+      setProducts(response.data);
     } catch (error) {
       console.error('Erro ao buscar produtos:', error);
     } finally {
