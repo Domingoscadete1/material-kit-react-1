@@ -27,9 +27,15 @@ export default function App() {
       const plataforma = window.navigator.userAgent;
 
       if (!empresa?.id || !tokenFirebase || !plataforma) {
-        alert('Dados incompletos para registrar dispositivo.');
+        // alert('Dados incompletos para registrar dispositivo.');
         return;
       }
+      const storedToken = localStorage.getItem('registeredDeviceToken');
+      if (storedToken === token) {
+        console.log('Dispositivo já registrado.');
+        return;
+      }
+
 
       const response = await fetch(`https://fad7-154-71-159-172.ngrok-free.app/api/dispositivo-create/`, {
         method: 'POST',
@@ -46,6 +52,7 @@ export default function App() {
 
       if (response.ok) {
         console.log('Dispositivo registrado com sucesso!');
+        localStorage.setItem('registeredDeviceToken', token); 
       } else {
         const data = await response.json();
         console.log('Erro:', data.erro || 'Erro ao registrar dispositivo');

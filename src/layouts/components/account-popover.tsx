@@ -37,6 +37,7 @@ const signOut = async (): Promise<{ error?: string }> => {
   localStorage.removeItem('userData');
   localStorage.removeItem('refreshToken');
   localStorage.removeItem('accessToken');
+  localStorage.removeItem('registeredDeviceToken');
   return {};
 };
 
