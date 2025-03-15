@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect,useRef } from 'react';
 
 import Box from '@mui/material/Box';
 import Avatar from '@mui/material/Avatar';
@@ -56,6 +56,10 @@ export function UserTableRow({ row, selected, onSelectRow }: UserTableRowProps) 
   const [loading, setLoading] = useState(true);
   const [postos, setPostos] = useState<PostoProps[]>([]); // Armazenar produtos da API
   const [postoAtual, setPostoAtual] = useState<PostoProps | null>(null);
+  const [hasFetched, setHasFetched] = useState(false);
+  const hasFetchedRef = useRef(false);
+
+
 
   const handleOpenPopover = useCallback(
     (event: React.MouseEvent<HTMLButtonElement>, posto: PostoProps) => {
@@ -70,52 +74,38 @@ export function UserTableRow({ row, selected, onSelectRow }: UserTableRowProps) 
     setPostoAtual(null);
   }, []);
 
+  const fetchPostos = useCallback(async () => {
+    if (!empresaId || hasFetchedRef.current) return;
+
+    try {
+      const response = await axios.get(`${baseUrl}api/postos/empresa/${empresaId}/`, {
+        headers: { "ngrok-skip-browser-warning": "true" },
+      });
+
+      setPostos(response.data.postos);
+      hasFetchedRef.current = true; // Marca como buscado
+      console.log('Postos buscados com sucesso!');
+    } catch (error) {
+      console.error('Erro ao buscar postos:', error);
+    }
+  }, [empresaId, baseUrl]);
+
   useEffect(() => {
     const token = localStorage.getItem('userData');
     if (token) {
       const userData = JSON.parse(token);
-      const postoId = userData.empresa.id;
-      if (postoId) {
-        setEmpresaId(postoId);
-      }
+      const empresaId2 = userData?.empresa?.id;
+      if (empresaId2) setEmpresaId(empresaId2.toString());
     }
   }, []);
 
-  const fetchPostos = useCallback(async () => {
-    if (!empresaId) {
-      console.error('ID da empresa não definido.');
-      return;
-    }
-    try {
-      setLoading(true);
-      const response = await axios.get(`https://fad7-154-71-159-172.ngrok-free.app/api/postos/empresa/${empresaId}/`,{
-        headers: {
-          "ngrok-skip-browser-warning": "true", // Evita bloqueios do ngrok
-        },
-      });
-      console.log('Postos recebidos:', response.data.postos);
-  
-      // Evita a duplicação armazenando IDs únicos
-      setPostos((prevPostos) => {
-        const postosMap = new Map(prevPostos.map((p) => [p.id, p]));
-        response.data.postos.forEach((posto: PostoProps) => {
-          postosMap.set(posto.id, posto);
-        });
-        return Array.from(postosMap.values()); // Retorna apenas valores únicos
-      });
-    } catch (error) {
-      console.error('Erro ao buscar postos:', error);
-    } finally {
-      setLoading(false);
-    }
-  }, [empresaId]); 
-
   useEffect(() => {
-    if (empresaId) {
+    if (empresaId && !hasFetchedRef.current) {
       fetchPostos();
     }
   }, [empresaId, fetchPostos]);
-
+   // Removi `hasFetched` daqui
+  
   const handleAtivarPosto = async () => {
     if (!postoAtual) return;
     try {
@@ -137,11 +127,13 @@ export function UserTableRow({ row, selected, onSelectRow }: UserTableRowProps) 
       }
 
       alert('Posto ativado com sucesso!');
+      window.location.reload()
       fetchPostos();
       handleClosePopover();
     } catch (error) {
       console.error('Erro ao ativar o posto:', error);
       alert('Erro ao ativar o posto.');
+      window.location.reload()
     }
   };
 
@@ -167,6 +159,7 @@ export function UserTableRow({ row, selected, onSelectRow }: UserTableRowProps) 
 
       alert('Posto desativado com sucesso!');
       fetchPostos();
+      window.location.reload()
       handleClosePopover();
     } catch (error) {
       console.error('Erro ao desativar o posto:', error);

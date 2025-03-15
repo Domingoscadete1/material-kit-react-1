@@ -98,6 +98,11 @@ export function ProductsView() {
     images: [] as File[], // Para permitir múltiplas imagens
 
   });
+  const [pagination, setPagination] = useState({
+    pageIndex: 0,
+    pageSize: 4,
+    totalPages: 1,
+});
   function LocationMarker() {
     const map = useMapEvents({
       click(e) {
@@ -201,7 +206,7 @@ export function ProductsView() {
     }
     try {
       setLoading(true);
-      const response = await axios.get(`https://fad7-154-71-159-172.ngrok-free.app/api/produtos/empresa/${empresaId}/`,{
+      const response = await axios.get(`https://fad7-154-71-159-172.ngrok-free.app/api/produtos/empresa/${empresaId}/?page=${pagination.pageIndex + 1}`,{
         headers: {
           "ngrok-skip-browser-warning": "true", // Evita bloqueios do ngrok
         },
@@ -209,12 +214,16 @@ export function ProductsView() {
       console.log('Produtos recebidos:', response.data);
 
       setProducts(response.data.results);
+      setPagination((prev) => ({
+        ...prev,
+        totalPages: Math.ceil(response.data.count / prev.pageSize),
+    }));
     } catch (error) {
       console.error('Erro ao buscar produtos:', error);
     } finally {
       setLoading(false);
     }
-  }, [empresaId]);
+  }, [empresaId,pagination.pageIndex]);
 
 
 
@@ -252,6 +261,7 @@ export function ProductsView() {
       });
       console.log('Produto criado com sucesso:', response.data);
       setOpenModal(false);
+      window.location.reload();
       fetchProducts(); // Atualizar a lista de produtos
     } catch (error) {
       console.error('Erro ao criar produto:', error);
@@ -501,7 +511,26 @@ export function ProductsView() {
         )}
       </Grid>
 
-      <Pagination count={10} color="primary" sx={{ mt: 8, mx: 'auto' }} />
+      <Pagination count={pagination.totalPages} color="primary" sx={{ mt: 8, mx: 'auto' }} />
+      
+                                <Button
+                                    className="px-4 py-2 text-sm font-medium text-white bg-brand-900 rounded-[20px] hover:bg-brand-800 flex items-center justify-center"
+                                    onClick={() => setPagination((p) => ({ ...p, pageIndex: p.pageIndex - 1 }))}
+                                    disabled={pagination.pageIndex === 0}
+                                >
+                                     Anterior
+                                </Button>
+                                <Button
+                                    className="px-4 py-2 text-sm font-medium text-white bg-brand-900 rounded-[20px] hover:bg-brand-800 flex items-center justify-center"
+                                    onClick={() => setPagination((p) => ({ ...p, pageIndex: p.pageIndex + 1 }))}
+                                    disabled={pagination.pageIndex + 1 >= pagination.totalPages}
+                                >
+                                    Próxima 
+                                </Button>
+                            
+                            <Typography variant="h6" sx={{ width: '100%', textAlign: 'center' }}>
+                                Página {pagination.pageIndex + 1} de {pagination.totalPages}
+                            </Typography>
     </DashboardContent>
   );
 }
