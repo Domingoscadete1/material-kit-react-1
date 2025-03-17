@@ -208,9 +208,14 @@ export function PostItem({
         headers: {
           "ngrok-skip-browser-warning": "true", // Evita bloqueios do ngrok
         },
+        validateStatus: (status) => status === 200 || status === 303,
       });
       setPostoDisponivel(response.status === 200);
-      if (response.status === 303) alert('Não há espaço neste posto.');
+      if (response.status === 303){
+        alert('Não há espaço neste posto.');
+        setPostoDisponivel(false);
+        
+      }
     } catch {
       alert('Erro ao verificar disponibilidade do posto');
     }
