@@ -81,7 +81,7 @@ export function ProductsView() {
   const [page, setPage] = useState(1); // Para controle de paginação
   const [openFilter, setOpenFilter] = useState(false);
   const [empresaId, setEmpresaId] = React.useState<string | null>(null);
-  const baseUrl = "https://4762-154-71-159-172.ngrok-free.app";
+  const baseUrl = "https://fad7-154-71-159-172.ngrok-free.app";
   const [openModal, setOpenModal] = useState(false);
   const [categories, setCategories] = useState<any[]>([]); // Armazenar categorias da API
   const token2 = localStorage.getItem('refreshToken'); // Token salvo ao logar
@@ -96,6 +96,7 @@ export function ProductsView() {
     localizacao: '',
     quantidade: 1,
     images: [] as File[], // Para permitir múltiplas imagens
+    videos: [] as File[],
 
   });
   const [pagination, setPagination] = useState({
@@ -248,6 +249,10 @@ export function ProductsView() {
     // Adicionar até 5 imagens ao FormData
     newProduct.images.slice(0, 5).forEach((image, index) => {
       formData.append(`imagem${index + 1}`, image);
+    });
+    // Adicionar até 5 vídeos ao FormData
+    newProduct.videos.slice(0, 5).forEach((video, index) => {
+      formData.append(`video${index + 1}`, video);
     });
 
     try {
@@ -405,6 +410,18 @@ export function ProductsView() {
               const files = Array.from(e.target.files || []);
               if (files.length > 0) {
                 setNewProduct((prev) => ({ ...prev, images: files }));
+              }
+            }}
+            margin="normal"
+          />
+          <TextField
+            fullWidth
+            type="file"
+            inputProps={{ multiple: true, accept: 'video/*' }} // Permitir múltiplos vídeos
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+              const files = Array.from(e.target.files || []);
+              if (files.length > 0) {
+                setNewProduct((prev) => ({ ...prev, videos: files }));
               }
             }}
             margin="normal"

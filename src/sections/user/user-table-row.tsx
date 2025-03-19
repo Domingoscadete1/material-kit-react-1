@@ -84,7 +84,7 @@ export function UserTableRow({ row, selected, onSelectRow }: UserTableRowProps) 
 
       setPostos(response.data.postos);
       hasFetchedRef.current = true; // Marca como buscado
-      console.log('Postos buscados com sucesso!');
+        console.log('Postos buscados com sucesso!');
     } catch (error) {
       console.error('Erro ao buscar postos:', error);
     }

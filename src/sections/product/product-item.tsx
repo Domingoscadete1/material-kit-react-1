@@ -12,13 +12,14 @@ import Config from '../Config';
 
 export type ProductItemProps = {
   id: number;
-  quantidade:number;
+  quantidade: number;
   nome: string;
   preco: number;
   status: string;
   descricao: string;
   localizacao: string;
   imagens: { id: number; imagem: string }[];
+  videos: { id: number; video: string }[]; // Adicionando vídeos
   precoVenda: number | null;
   categoria: { nome: string }; // Adicionando categoria
 };
@@ -28,10 +29,13 @@ export function ProductItem({ product }: { product: ProductItemProps }) {
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
   const [formData, setFormData] = useState({ ...product });
   const [selectedImages, setSelectedImages] = useState(product.imagens);
+  const [selectedVideos, setSelectedVideos] = useState(product.videos); // Estado para vídeos
   const [imagensParaRemover, setImagensParaRemover] = useState<number[]>([]);
-  const [newImages, setNewImages] = useState<File[]>([]);  
+  const [videosParaRemover, setVideosParaRemover] = useState<number[]>([]); // Estado para vídeos a remover
+  const [newImages, setNewImages] = useState<File[]>([]);
+  const [newVideos, setNewVideos] = useState<File[]>([]); // Estado para novos vídeos
   const baseUrl = Config.getApiUrl();
-  const mediaUrl=Config.getApiUrlMedia();
+  const mediaUrl = Config.getApiUrlMedia();
 
   const handleOpenUpdateModal = () => setOpenUpdateModal(true);
   const handleCloseUpdateModal = () => setOpenUpdateModal(false);
@@ -62,12 +66,22 @@ export function ProductItem({ product }: { product: ProductItemProps }) {
     imagensParaRemover.forEach((imageId) => {
       formDataToSend.append('imagens_para_remover[]', imageId.toString());
     });
+    // Adiciona os vídeos novos
+    newVideos.forEach((video, index) => {
+      formDataToSend.append(`video${index + 1}`, video);
+    });
+
+    // Adiciona os vídeos a remover
+    videosParaRemover.forEach((videoId) => {
+      formDataToSend.append('videos_para_remover[]', videoId.toString());
+    });
+
 
     try {
       const response = await axios.put(
         `${baseUrl}api/produto/${product.id}/atualizar/`, // Ajuste a URL para o endpoint da API
         formDataToSend,
-        { headers: { 'Content-Type': 'multipart/form-data' } }
+        { headers: { 'Content-Type': 'multipart/form-data', "ngrok-skip-browser-warning": "true", } }
       );
       console.log(response.data);
       setOpenUpdateModal(false);
@@ -92,10 +106,20 @@ export function ProductItem({ product }: { product: ProductItemProps }) {
     setImagensParaRemover((prev) => [...prev, imageId]);
     setSelectedImages((prev) => prev.filter((img) => img.id !== imageId));
   };
+  const handleVideoDelete = (videoId: number) => {
+    setVideosParaRemover((prev) => [...prev, videoId]);
+    setSelectedVideos((prev) => prev.filter((vid) => vid.id !== videoId));
+  };
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const newUploadedImages = Array.from(e.target.files);
       setNewImages((prev) => [...prev, ...newUploadedImages]);
+    }
+  };
+  const handleVideoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const newUploadedVideos = Array.from(e.target.files);
+      setNewVideos((prev) => [...prev, ...newUploadedVideos]);
     }
   };
 
@@ -254,8 +278,8 @@ export function ProductItem({ product }: { product: ProductItemProps }) {
               </Box>
             ))}
 
-              {/* Adicionar novas imagens */}
-              <Button variant="contained" component="label" sx={{ mt: 2 }}>
+            {/* Adicionar novas imagens */}
+            <Button variant="contained" component="label" sx={{ mt: 2 }}>
               Adicionar Imagens
               <input
                 type="file"
@@ -273,8 +297,49 @@ export function ProductItem({ product }: { product: ProductItemProps }) {
                 ))}
               </Box>
             )}
-            
+
           </Box>
+
+          <Box sx={{ mt: 2 }}>
+            <Typography variant="body2">Vídeos:</Typography>
+            {selectedVideos.map((video) => (
+              <Box key={video.id} sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
+
+                <video
+                  src={`https://fad7-154-71-159-172.ngrok-free.app${video.video}`}
+                  controls
+                  style={{ width: 100, height: 100, marginRight: 10 }}
+                >
+                  <track kind="captions" src="" label="Legendas" />
+                </video>
+
+                <Button color="error" onClick={() => handleVideoDelete(video.id)}>
+                  Remover
+                </Button>
+              </Box>
+            ))}
+
+            <Button variant="contained" component="label" sx={{ mt: 2 }}>
+              Adicionar Vídeos
+              <input
+                type="file"
+                multiple
+                hidden
+                accept="video/*"
+                onChange={handleVideoUpload}
+              />
+            </Button>
+
+            {newVideos.length > 0 && (
+              <Box sx={{ mt: 2 }}>
+                <Typography variant="body2">Novos Vídeos Selecionados:</Typography>
+                {newVideos.map((video, index) => (
+                  <Typography key={index}>{video.name}</Typography>
+                ))}
+              </Box>
+            )}
+          </Box>
+
 
           <Button onClick={handleUpdateProduct} sx={{ mt: 2 }} variant="contained">
             Atualizar
