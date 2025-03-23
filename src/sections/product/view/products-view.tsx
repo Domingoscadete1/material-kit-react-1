@@ -34,6 +34,8 @@ import 'leaflet/dist/leaflet.css';
 
 // ----------------------------------------------------------------------
 
+const API_BASE_URL = "https://dce9-154-71-159-172.ngrok-free.app";
+
 const GENDER_OPTIONS = [
   { value: 'men', label: 'Men' },
   { value: 'women', label: 'Women' },
@@ -87,6 +89,8 @@ export function ProductsView() {
   const token2 = localStorage.getItem('refreshToken'); // Token salvo ao logar
   const [location, setLocation] = useState<{ lat: number; lng: number }>({ lat: 0, lng: 0 });
   const [openMapModal, setOpenMapModal] = useState(false);
+  const [anuncios, setAnuncios] = useState([]);
+
   const [newProduct, setNewProduct] = useState({
     nome: '',
     descricao: '',
@@ -132,6 +136,7 @@ export function ProductsView() {
       );
     }
   }, []);
+
 
 
   const handleGetCurrentLocation = () => {
@@ -191,10 +196,34 @@ export function ProductsView() {
       console.error('Erro ao buscar categorias:', error);
     }
   }, []);
+  const fetchAnuncios = async () => {
+    try {
+      const url = `${API_BASE_URL}/api/anuncios-app/`;
+      const response = await fetch(url, {
+        headers: {
+          "ngrok-skip-browser-warning": "true",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Erro na requisição: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log("Anuncios carregados:", data);
+
+      
+      setAnuncios(data);
+
+    } catch (error) {
+      console.error("Erro ao buscar produtos:", error);
+    }
+  };
 
 
   useEffect(() => {
     fetchCategories();
+    fetchAnuncios();
     if (empresaId) {
       console.log(empresaId);
     }
@@ -314,11 +343,11 @@ export function ProductsView() {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentImageIndex((prevIndex) => (prevIndex + 1) % images.length);
+      setCurrentImageIndex((prevIndex) => (prevIndex + 1) % anuncios.length);
     }, 3000);
 
     return () => clearInterval(interval);
-  }, [images.length]);
+  }, [anuncios.length]);
 
   return (
     <DashboardContent>
@@ -327,11 +356,11 @@ export function ProductsView() {
       </Typography>
 
       <Box sx={{ mb: 5, borderRadius: 1, overflow: 'hidden', position: 'relative', width: '100%', height: '300px' }}>
-        {images.map((image, index) => (
+        {anuncios.map((image:any, index) => (
           <Box
             key={index}
             component="img"
-            src={image}
+            src={image.imagem1}
             alt={`Imagem ${index + 1}`}
             sx={{
               width: '100%',
@@ -357,7 +386,7 @@ export function ProductsView() {
             gap: '10px',
           }}
         >
-          {images.map((_, index) => (
+          {anuncios.map((imagem:any, index) => (
             <Button
               key={index}
               sx={{
@@ -370,7 +399,7 @@ export function ProductsView() {
                   backgroundColor: 'primary.dark',
                 },
               }}
-              onClick={() => setCurrentImageIndex(index)}
+              onClick={() => setCurrentImageIndex(imagem.imagem1)}
             />
           ))}
         </Box>

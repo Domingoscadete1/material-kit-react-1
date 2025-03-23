@@ -1,6 +1,7 @@
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Unstable_Grid2';
 import Typography from '@mui/material/Typography';
+import Pagination from '@mui/material/Pagination';
 import Paper from '@mui/material/Paper';
 import Button from '@mui/material/Button';
 import Avatar from '@mui/material/Avatar';
@@ -53,6 +54,11 @@ export function Perfil2View() {
   const [modalDenunciaOpen, setModalDenunciaOpen] = useState(false);
   const [motivo, setMotivo] = useState('');
   const [descricao, setDescricao] = useState('');
+  const [pagination, setPagination] = useState({
+    pageIndex: 0,
+    pageSize: 4,
+    totalPages: 1,
+});
 
   useEffect(() => {
     const token = localStorage.getItem('userData');
@@ -76,20 +82,27 @@ export function Perfil2View() {
           },
         });
         setDados(response.data);
+        
 
-        const produtosResponse = await axios.get(`https://dce9-154-71-159-172.ngrok-free.app/api/produtos/${tipo === 'empresa' ? 'empresa' : 'usuario'}/${id}`, {
+        const produtosResponse = await axios.get(`https://dce9-154-71-159-172.ngrok-free.app/api/produtos/${tipo === 'empresa' ? 'empresa' : 'usuario'}/${id}?page=${pagination.pageIndex + 1}`, {
           headers: {
             "ngrok-skip-browser-warning": "true",
           },
         });
-        setProdutos(produtosResponse.data.produtos);
+        setProdutos(produtosResponse.data.results);
+        const data=produtosResponse.data;
+        setPagination((prev) => ({
+          ...prev,
+          totalPages: Math.ceil(data.count / prev.pageSize),
+      }));
+        console.log(produtosResponse.data.results);
       } catch (error) {
         console.error('Erro ao buscar os dados:', error);
       }
     };
 
     fetchData();
-  }, [id, tipo]);
+  }, [id, tipo,pagination.pageIndex]);
 
   const denunciarEmpresa = async () => {
     try {
@@ -236,6 +249,26 @@ export function Perfil2View() {
               <Typography>Nenhum produto encontrado.</Typography>
             )}
           </Grid>
+          <Pagination count={pagination.totalPages} color="primary" sx={{ mt: 8, mx: 'auto' }} />
+
+      <Button
+        className="px-4 py-2 text-sm font-medium text-white bg-brand-900 rounded-[20px] hover:bg-brand-800 flex items-center justify-center"
+        onClick={() => setPagination((p) => ({ ...p, pageIndex: p.pageIndex - 1 }))}
+        disabled={pagination.pageIndex === 0}
+      >
+        Anterior
+      </Button>
+      <Button
+        className="px-4 py-2 text-sm font-medium text-white bg-brand-900 rounded-[20px] hover:bg-brand-800 flex items-center justify-center"
+        onClick={() => setPagination((p) => ({ ...p, pageIndex: p.pageIndex + 1 }))}
+        disabled={pagination.pageIndex + 1 >= pagination.totalPages}
+      >
+        Próxima
+      </Button>
+
+      <Typography variant="h6" sx={{ width: '100%', textAlign: 'center' }}>
+        Página {pagination.pageIndex + 1} de {pagination.totalPages}
+      </Typography>
         </Paper>
       </Grid>
 
