@@ -103,14 +103,14 @@ export function ProductsView() {
     pageIndex: 0,
     pageSize: 4,
     totalPages: 1,
-});
+  });
   function LocationMarker() {
     const map = useMapEvents({
       click(e) {
         setLocation({ lat: e.latlng.lat, lng: e.latlng.lng });
       },
     });
-  
+
     return location ? (
       <Marker position={[location.lat, location.lng]} icon={L.icon({
         iconUrl: 'https://leafletjs.com/examples/custom-icons/leaf-red.png',
@@ -132,8 +132,8 @@ export function ProductsView() {
       );
     }
   }, []);
-  
-  
+
+
   const handleGetCurrentLocation = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -150,7 +150,7 @@ export function ProductsView() {
       alert('Geolocalização não é suportada pelo seu navegador.');
     }
   };
-  
+
 
   const [filters, setFilters] = useState<FiltersProps>(defaultFilters);
 
@@ -181,7 +181,7 @@ export function ProductsView() {
   }, []); // Mantenha vazio se `empresaId` não mudar
   const fetchCategories = useCallback(async () => {
     try {
-      const response = await axios.get('https://dce9-154-71-159-172.ngrok-free.app/api/categorias/',{
+      const response = await axios.get('https://dce9-154-71-159-172.ngrok-free.app/api/categorias/', {
         headers: {
           "ngrok-skip-browser-warning": "true", // Evita bloqueios do ngrok
         },
@@ -198,7 +198,7 @@ export function ProductsView() {
     if (empresaId) {
       console.log(empresaId);
     }
-  }, [empresaId,fetchCategories]); // Adicione empresaId como dependência
+  }, [empresaId, fetchCategories]); // Adicione empresaId como dependência
 
   const fetchProducts = useCallback(async () => {
     if (!empresaId) {
@@ -207,7 +207,7 @@ export function ProductsView() {
     }
     try {
       setLoading(true);
-      const response = await axios.get(`https://dce9-154-71-159-172.ngrok-free.app/api/produtos/empresa/${empresaId}/?page=${pagination.pageIndex + 1}`,{
+      const response = await axios.get(`https://dce9-154-71-159-172.ngrok-free.app/api/produtos/empresa/${empresaId}/?page=${pagination.pageIndex + 1}`, {
         headers: {
           "ngrok-skip-browser-warning": "true", // Evita bloqueios do ngrok
         },
@@ -218,13 +218,13 @@ export function ProductsView() {
       setPagination((prev) => ({
         ...prev,
         totalPages: Math.ceil(response.data.count / prev.pageSize),
-    }));
+      }));
     } catch (error) {
       console.error('Erro ao buscar produtos:', error);
     } finally {
       setLoading(false);
     }
-  }, [empresaId,pagination.pageIndex]);
+  }, [empresaId, pagination.pageIndex]);
 
 
 
@@ -304,12 +304,78 @@ export function ProductsView() {
       setOpenMapModal(true);
     }
   };
-  
+
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const images = [
+    'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEj7o1UqwTqFhZnCHiL_ImyZSCgEgtFvVZoAqRJWs14MSm9w8zINDOEGUO9jvG6HLrmZajOP4asLgwAfX2sz6uvVEa38ELhPsmHdtEUQVNro3PrMlUlqjN65CWzzSmeBtWxHmjs3gGORwcaGRSB8ktJbbJ63bGusEOf7ibX6ttketOLEetfRyzbipr_HHg/s3840/Spirited%20Away%20Studio%20Ghibli%204K%20PC%20Desktop%20Wallpaper.png',
+    'https://www.chromethemer.com/download/hd-wallpapers/minimalist-spiderman-3840x2160.jpg',
+    'https://wallpapercat.com/w/full/b/8/f/6645-3840x2160-desktop-4k-assassins-creed-background-photo.jpg',
+  ];
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prevIndex) => (prevIndex + 1) % images.length);
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [images.length]);
+
   return (
     <DashboardContent>
       <Typography variant="h4" sx={{ mb: 5 }}>
         Produtos
       </Typography>
+
+      <Box sx={{ mb: 5, borderRadius: 1, overflow: 'hidden', position: 'relative', width: '100%', height: '300px' }}>
+        {images.map((image, index) => (
+          <Box
+            key={index}
+            component="img"
+            src={image}
+            alt={`Imagem ${index + 1}`}
+            sx={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              opacity: index === currentImageIndex ? 1 : 0,
+              transition: 'opacity 1s ease-in-out',
+            }}
+          />
+        ))}
+
+        {/* Botões de navegação */}
+        <Box
+          sx={{
+            position: 'absolute',
+            bottom: '10px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            display: 'flex',
+            gap: '10px',
+          }}
+        >
+          {images.map((_, index) => (
+            <Button
+              key={index}
+              sx={{
+                minWidth: '10px',
+                height: '10px',
+                padding: 0,
+                borderRadius: '50%',
+                backgroundColor: index === currentImageIndex ? 'primary.main' : 'grey.500',
+                '&:hover': {
+                  backgroundColor: 'primary.dark',
+                },
+              }}
+              onClick={() => setCurrentImageIndex(index)}
+            />
+          ))}
+        </Box>
+      </Box>
+
       <Box display="flex" alignItems="center" mb={5}>
 
         <Button
@@ -456,16 +522,16 @@ export function ProductsView() {
         >
           <Typography variant="h6">Escolha a Localização</Typography>
           <MapContainer center={location} zoom={13} style={{ height: '300px', width: '100%' }}>
-          <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+            <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
             <LocationMarker />
           </MapContainer>
           <Button variant="contained" onClick={() => {
-          setNewProduct((prev) => ({
-            ...prev,
-            localizacao: `${location.lat}, ${location.lng}`,
-          }));
-          setOpenMapModal(false);
-        }} sx={{ mt: 2 }}>
+            setNewProduct((prev) => ({
+              ...prev,
+              localizacao: `${location.lat}, ${location.lng}`,
+            }));
+            setOpenMapModal(false);
+          }} sx={{ mt: 2 }}>
             Confirmar Localização
           </Button>
         </Box>
@@ -529,25 +595,25 @@ export function ProductsView() {
       </Grid>
 
       <Pagination count={pagination.totalPages} color="primary" sx={{ mt: 8, mx: 'auto' }} />
-      
-                                <Button
-                                    className="px-4 py-2 text-sm font-medium text-white bg-brand-900 rounded-[20px] hover:bg-brand-800 flex items-center justify-center"
-                                    onClick={() => setPagination((p) => ({ ...p, pageIndex: p.pageIndex - 1 }))}
-                                    disabled={pagination.pageIndex === 0}
-                                >
-                                     Anterior
-                                </Button>
-                                <Button
-                                    className="px-4 py-2 text-sm font-medium text-white bg-brand-900 rounded-[20px] hover:bg-brand-800 flex items-center justify-center"
-                                    onClick={() => setPagination((p) => ({ ...p, pageIndex: p.pageIndex + 1 }))}
-                                    disabled={pagination.pageIndex + 1 >= pagination.totalPages}
-                                >
-                                    Próxima 
-                                </Button>
-                            
-                            <Typography variant="h6" sx={{ width: '100%', textAlign: 'center' }}>
-                                Página {pagination.pageIndex + 1} de {pagination.totalPages}
-                            </Typography>
+
+      <Button
+        className="px-4 py-2 text-sm font-medium text-white bg-brand-900 rounded-[20px] hover:bg-brand-800 flex items-center justify-center"
+        onClick={() => setPagination((p) => ({ ...p, pageIndex: p.pageIndex - 1 }))}
+        disabled={pagination.pageIndex === 0}
+      >
+        Anterior
+      </Button>
+      <Button
+        className="px-4 py-2 text-sm font-medium text-white bg-brand-900 rounded-[20px] hover:bg-brand-800 flex items-center justify-center"
+        onClick={() => setPagination((p) => ({ ...p, pageIndex: p.pageIndex + 1 }))}
+        disabled={pagination.pageIndex + 1 >= pagination.totalPages}
+      >
+        Próxima
+      </Button>
+
+      <Typography variant="h6" sx={{ width: '100%', textAlign: 'center' }}>
+        Página {pagination.pageIndex + 1} de {pagination.totalPages}
+      </Typography>
     </DashboardContent>
   );
 }

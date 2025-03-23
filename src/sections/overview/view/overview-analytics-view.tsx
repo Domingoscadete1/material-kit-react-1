@@ -89,7 +89,7 @@ export function OverviewAnalyticsView() {
   return (
     <DashboardContent maxWidth="xl">
       <Typography variant="h4" sx={{ mb: { xs: 3, md: 5 } }}>
-        Hi, Welcome back 👋
+        Bem-Vindo de volta 👋
       </Typography>
 
       <Grid container spacing={3}>
@@ -109,7 +109,7 @@ export function OverviewAnalyticsView() {
         <Grid xs={12} sm={6} md={3}>
           <AnalyticsWidgetSummary
             title="Usuários"
-            percent={-0.1}
+            percent={2}
             total={analyticsData.usuarios}
             color="secondary"
             icon={<img alt="icon" src="/assets/icons/glass/ic-glass-users.svg" />}
