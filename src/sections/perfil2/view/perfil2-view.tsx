@@ -70,14 +70,14 @@ export function Perfil2View() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(`https://fad7-154-71-159-172.ngrok-free.app/api/${tipo}/${id}/`, {
+        const response = await axios.get(`https://dce9-154-71-159-172.ngrok-free.app/api/${tipo}/${id}/`, {
           headers: {
             "ngrok-skip-browser-warning": "true",
           },
         });
         setDados(response.data);
 
-        const produtosResponse = await axios.get(`https://fad7-154-71-159-172.ngrok-free.app/api/produtos/${tipo === 'empresa' ? 'empresa' : 'usuario'}/${id}`, {
+        const produtosResponse = await axios.get(`https://dce9-154-71-159-172.ngrok-free.app/api/produtos/${tipo === 'empresa' ? 'empresa' : 'usuario'}/${id}`, {
           headers: {
             "ngrok-skip-browser-warning": "true",
           },
@@ -100,7 +100,7 @@ export function Perfil2View() {
       formData.append('motivo', motivo);
       formData.append('descricao', descricao);
 
-      await axios.post(`https://fad7-154-71-159-172.ngrok-free.app/api/reportes/create/`, formData, {
+      await axios.post(`https://dce9-154-71-159-172.ngrok-free.app/api/reportes/create/`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 
@@ -221,7 +221,7 @@ export function Perfil2View() {
                     setModalOpen(true);
                   }}>
                     <Avatar
-                      src={`https://fad7-154-71-159-172.ngrok-free.app${produto.imagens?.length ? produto.imagens[0].imagem : ''}`}
+                      src={`https://dce9-154-71-159-172.ngrok-free.app${produto.imagens?.length ? produto.imagens[0].imagem : ''}`}
                       alt={produto.nome}
                       sx={{ width: 80, height: 80, mx: 'auto', mb: 1 }}
                     />
@@ -265,7 +265,7 @@ export function Perfil2View() {
               <Grid container spacing={2} sx={{ mt: 2 }}>
                 {produtoSelecionado.imagens?.map((imagem, index) => (
                   <Grid key={index} xs={6} md={4}>
-                    <Box component="img" src={`https://fad7-154-71-159-172.ngrok-free.app${imagem.imagem}`} sx={{
+                    <Box component="img" src={`https://dce9-154-71-159-172.ngrok-free.app${imagem.imagem}`} sx={{
                       width: '100%',
                       height: 100,
                       objectFit: 'cover',

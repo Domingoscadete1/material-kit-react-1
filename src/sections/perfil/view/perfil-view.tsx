@@ -91,7 +91,7 @@ export function PerfilView() {
   };
   
   const verificarChat = useCallback(() => {
-    axios.get(`https://fad7-154-71-159-172.ngrok-free.app/api/empresa/chat-suport/${empresa?.empresa?.id}/`, {
+    axios.get(`https://dce9-154-71-159-172.ngrok-free.app/api/empresa/chat-suport/${empresa?.empresa?.id}/`, {
       headers: {
         "ngrok-skip-browser-warning": "true",
         "Content-Type": "application/json"
@@ -114,7 +114,7 @@ export function PerfilView() {
   
 
   const carregarMensagens = (chatId:number) => {
-    axios.get(`https://fad7-154-71-159-172.ngrok-free.app/api/chat-suporte/mensagens/${chatId}/`,{
+    axios.get(`https://dce9-154-71-159-172.ngrok-free.app/api/chat-suporte/mensagens/${chatId}/`,{
       headers: {
         "ngrok-skip-browser-warning": "true", // Evita bloqueios do ngrok
         "Content-Type": "application/json" // Define o tipo de conteúdo esperado
@@ -185,7 +185,7 @@ export function PerfilView() {
           <Paper elevation={4} sx={{ p: 4, textAlign: 'center' }}>
             {/* Profile Picture */}
             <Avatar
-              src={`https://fad7-154-71-159-172.ngrok-free.app${empresa.foto}`}
+              src={`https://dce9-154-71-159-172.ngrok-free.app${empresa.foto}`}
               alt="Profile"
               sx={{ width: 120, height: 120, mx: 'auto', mb: 2 }}
             />

@@ -37,7 +37,7 @@ export default function App() {
       }
 
 
-      const response = await fetch(`https://fad7-154-71-159-172.ngrok-free.app/api/dispositivo-create/`, {
+      const response = await fetch(`https://dce9-154-71-159-172.ngrok-free.app/api/dispositivo-create/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

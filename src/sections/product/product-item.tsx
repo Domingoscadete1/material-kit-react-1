@@ -164,7 +164,7 @@ export function ProductItem({ product }: { product: ProductItemProps }) {
           <Box
             component="img"
             alt={product.nome}
-            src={`https://fad7-154-71-159-172.ngrok-free.app${product.imagens[0]?.imagem}`}
+            src={`https://dce9-154-71-159-172.ngrok-free.app${product.imagens[0]?.imagem}`}
             sx={{
               top: 0,
               width: 1,
@@ -268,7 +268,7 @@ export function ProductItem({ product }: { product: ProductItemProps }) {
               <Box key={image.id} sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
                 <Box
                   component="img"
-                  src={`https://fad7-154-71-159-172.ngrok-free.app${image.imagem}`}
+                  src={`https://dce9-154-71-159-172.ngrok-free.app${image.imagem}`}
                   alt="Produto"
                   sx={{ width: 50, height: 50, objectFit: 'cover', mr: 2 }}
                 />
@@ -306,7 +306,7 @@ export function ProductItem({ product }: { product: ProductItemProps }) {
               <Box key={video.id} sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
 
                 <video
-                  src={`https://fad7-154-71-159-172.ngrok-free.app${video.video}`}
+                  src={`https://dce9-154-71-159-172.ngrok-free.app${video.video}`}
                   controls
                   style={{ width: 100, height: 100, marginRight: 10 }}
                 >

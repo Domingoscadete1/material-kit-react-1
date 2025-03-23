@@ -68,7 +68,7 @@ function PostItem({ sx, item, ...other }: BoxProps & { item: Props['list'][numbe
       <Avatar
         variant="rounded"
         alt={item.nome}
-        src={`https://fad7-154-71-159-172.ngrok-free.app${item.imagens[0].imagem}`}
+        src={`https://dce9-154-71-159-172.ngrok-free.app${item.imagens[0].imagem}`}
         sx={{ width: 48, height: 48, flexShrink: 0 }}
       />
 

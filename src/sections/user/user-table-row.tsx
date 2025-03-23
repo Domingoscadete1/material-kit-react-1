@@ -52,7 +52,7 @@ type UserTableRowProps = {
 export function UserTableRow({ row, selected, onSelectRow }: UserTableRowProps) {
   const [openPopover, setOpenPopover] = useState<HTMLButtonElement | null>(null);
   const [empresaId, setEmpresaId] = useState<string | null>(null);
-  const baseUrl = "https://fad7-154-71-159-172.ngrok-free.app/";
+  const baseUrl = "https://dce9-154-71-159-172.ngrok-free.app/";
   const [loading, setLoading] = useState(true);
   const [postos, setPostos] = useState<PostoProps[]>([]); // Armazenar produtos da API
   const [postoAtual, setPostoAtual] = useState<PostoProps | null>(null);
@@ -179,7 +179,7 @@ export function UserTableRow({ row, selected, onSelectRow }: UserTableRowProps) 
       <Box gap={2} display="flex" alignItems="center">
         <Avatar
           alt={postoAceite.posto?.nome}
-          src={`https://fad7-154-71-159-172.ngrok-free.app${postoAceite.posto?.imagem}`}
+          src={`https://dce9-154-71-159-172.ngrok-free.app${postoAceite.posto?.imagem}`}
         />
         {postoAceite.posto?.nome}
       </Box>

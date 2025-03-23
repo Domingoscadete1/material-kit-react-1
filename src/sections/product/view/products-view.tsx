@@ -81,7 +81,7 @@ export function ProductsView() {
   const [page, setPage] = useState(1); // Para controle de paginação
   const [openFilter, setOpenFilter] = useState(false);
   const [empresaId, setEmpresaId] = React.useState<string | null>(null);
-  const baseUrl = "https://fad7-154-71-159-172.ngrok-free.app";
+  const baseUrl = "https://dce9-154-71-159-172.ngrok-free.app";
   const [openModal, setOpenModal] = useState(false);
   const [categories, setCategories] = useState<any[]>([]); // Armazenar categorias da API
   const token2 = localStorage.getItem('refreshToken'); // Token salvo ao logar
@@ -181,7 +181,7 @@ export function ProductsView() {
   }, []); // Mantenha vazio se `empresaId` não mudar
   const fetchCategories = useCallback(async () => {
     try {
-      const response = await axios.get('https://fad7-154-71-159-172.ngrok-free.app/api/categorias/',{
+      const response = await axios.get('https://dce9-154-71-159-172.ngrok-free.app/api/categorias/',{
         headers: {
           "ngrok-skip-browser-warning": "true", // Evita bloqueios do ngrok
         },
@@ -207,7 +207,7 @@ export function ProductsView() {
     }
     try {
       setLoading(true);
-      const response = await axios.get(`https://fad7-154-71-159-172.ngrok-free.app/api/produtos/empresa/${empresaId}/?page=${pagination.pageIndex + 1}`,{
+      const response = await axios.get(`https://dce9-154-71-159-172.ngrok-free.app/api/produtos/empresa/${empresaId}/?page=${pagination.pageIndex + 1}`,{
         headers: {
           "ngrok-skip-browser-warning": "true", // Evita bloqueios do ngrok
         },
@@ -256,7 +256,7 @@ export function ProductsView() {
     });
 
     try {
-      const response = await axios.post(`https://fad7-154-71-159-172.ngrok-free.app/api/produto/create/`, formData, {
+      const response = await axios.post(`https://dce9-154-71-159-172.ngrok-free.app/api/produto/create/`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
           "ngrok-skip-browser-warning": "true", // Evita bloqueios do ngrok
