@@ -26,12 +26,14 @@ export function BlogView() {
   const [empresaId, setEmpresaId] = React.useState<string | null>(null);
   const empresa = JSON.parse(localStorage.getItem('userData') || '{}'); // Parse para garantir que seja um objeto
   const [products, setProducts] = useState<any[]>([]); // Armazenar produtos da API
+  const [filteredProducts, setFilteredProducts] = useState<any[]>([]); // Produtos filtrados por categoria
   const [loading, setLoading] = useState(true); // Para gerenciar o estado de carregamento
-  const [loadingMessages, setLoadingMessages] = useState(false); // Estado de carregamento das mensagens
+  const [loadingMessages, setLoadingMessages] = useState(false); 
   const socketRef = useRef<WebSocket | null>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [anuncios, setAnuncios] = useState<any[]>([]);
-  const [categorias, setCategorias] = useState<string[]>(['Tecnologia', 'Moda', 'Casa', 'Esportes', 'Beleza']); // Exemplo
+  const [categorias, setCategorias] = useState<string[]>([]); 
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null); 
   const navigate = useNavigate(); // Hook para navegação
 
   const fetchAnuncios = async () => {
@@ -68,8 +70,34 @@ export function BlogView() {
       }
     }
   }, []);
+  const fetchCategorias = async () => {
+    try {
+      const url = `${API_BASE_URL}/api/categorias/`;
+      const response = await fetch(url, {
+        headers: {
+          "ngrok-skip-browser-warning": "true",
+        },
+      });
 
+      if (!response.ok) {
+        throw new Error(`Erro na requisição: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log("categorias:", data);
+
+      
+      setCategorias(data);
+      
+    } catch (error) {
+      console.error("Erro ao buscar categorias:", error);
+    }
+  };
+
+  
   useEffect(() => {
+    fetchCategorias();
+
     fetchAnuncios();
   }, []);
 
@@ -88,6 +116,7 @@ export function BlogView() {
       console.log('Produtos recebidos:', response.data.produtos);
 
       setProducts(response.data.produtos);
+      setFilteredProducts(response.data.produtos);
     } catch (error) {
       console.error('Erro ao buscar produtos:', error);
     } finally {
@@ -116,6 +145,15 @@ export function BlogView() {
   // Função para redirecionar para a página de detalhes
   const handleVerDetalhes = (anuncioId: string) => {
     navigate(`/detalhes/${anuncioId}`); // Redireciona para a rota de detalhes com o ID do anúncio
+  };
+  const filterProductsByCategory = (category: string | null) => {
+    setSelectedCategory(category);
+    if (category) {
+      const filtered = products.filter(product => product.categoria.nome === category);
+      setFilteredProducts(filtered);
+    } else {
+      setFilteredProducts(products); // Se nenhuma categoria for selecionada, exibe todos os produtos
+    }
   };
 
   return (
@@ -209,28 +247,30 @@ export function BlogView() {
       <Box sx={{ mb: 5, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2 }}>
         <Typography variant="h6">Categorias</Typography>
         <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-          {categorias.map((categoria, index) => (
-            <Button
-              key={index}
-              variant="outlined"
-              sx={{
-                textTransform: 'none',
-                borderRadius: '20px',
-                borderColor: 'primary.main',
-                color: 'primary.main',
-                '&:hover': {
-                  backgroundColor: 'primary.main',
-                  color: 'white',
-                },
-              }}
-            >
-              {categoria}
-            </Button>
+          {categorias.map((categoria:any, index) => (
+             <Button
+             key={index}
+             variant="outlined"
+             sx={{
+               textTransform: 'none',
+               borderRadius: '20px',
+               borderColor: selectedCategory === categoria.nome ? 'primary.main' : 'grey.500',
+               color: selectedCategory === categoria.nome ? 'white' : 'primary.main',
+               backgroundColor: selectedCategory === categoria.nome ? 'primary.main' : 'transparent',
+               '&:hover': {
+                 backgroundColor: 'primary.main',
+                 color: 'white',
+               },
+             }}
+             onClick={() => filterProductsByCategory(categoria.nome)}
+           >
+             {categoria.nome}
+           </Button>
           ))}
         </Box>
       </Box>
 
-      <Box display="flex" alignItems="center" justifyContent="space-between" sx={{ mb: 5 }}>
+      {/* <Box display="flex" alignItems="center" justifyContent="space-between" sx={{ mb: 5 }}>
         <PostSearch posts={products} />
         <PostSort
           sortBy={sortBy}
@@ -241,7 +281,7 @@ export function BlogView() {
             // { value: 'oldest', label: 'Oldest' },
           ]}
         />
-      </Box>
+      </Box> */}
 
       {loading ? (
         <Box display="flex" justifyContent="center" alignItems="center" height="200px">
@@ -249,8 +289,8 @@ export function BlogView() {
         </Box>
       ) : (
         <Grid container spacing={3}>
-          {products.length > 0 ? (
-            products.map((product, index) => {
+          {filteredProducts.length > 0 ? (
+            filteredProducts.map((product, index) => {
               const latestPostLarge = index === 0;
               const latestPost = index === 1 || index === 2;
 

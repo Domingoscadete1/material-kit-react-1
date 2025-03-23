@@ -95,6 +95,9 @@ export function PostItem({
   const handleAvatarClick = () => {
     navigate(`/perfil2/${post.empresa.id}/empresa`);
   };
+  const handleProdutoClick = (id:any) => {
+    navigate(`/detalhes/${id}/`);
+  };
 
   const sendMessage = () => {
     if (!message.trim()) {
@@ -123,7 +126,7 @@ export function PostItem({
       return undefined; // Retorno explícito para evitar erro do ESLint
     }
 
-    const wsUrl = `wss://ef49-154-71-159-172.ngrok-free.app/ws/new_chat/${userData?.id}/`;
+    const wsUrl = `wss://dce9-154-71-159-172.ngrok-free.app/ws/new_chat/${userData?.id}/`;
     const ws = new WebSocket(wsUrl);
     setWebSocket(ws);
 
@@ -188,7 +191,12 @@ export function PostItem({
     const fetchPostos = async () => {
       setLoading(true);
       try {
-        const response = await axios.get(`http://127.0.0.1:8000/api/postos/empresa/${post.empresa.id}/`);
+        const response = await axios.get(`https://dce9-154-71-159-172.ngrok-free.app/api/postos/empresa/${post.empresa.id}/`,{
+        headers: {
+          "ngrok-skip-browser-warning": "true", // Evita bloqueios do ngrok
+        },
+        
+      });
         setPostos(response.data.postos || []);
       } catch (err) {
         alert(err.message);
@@ -224,6 +232,10 @@ export function PostItem({
   const initiatePayment = async () => {
     if (!selectedPosto) {
       alert('Por favor, selecione um posto antes de prosseguir.');
+      return;
+    }
+    if(Number(quantidade) > post.quantidade){
+      alert('A quantidade selecionada não pode ser superior à quantidade disponivel do produto.');
       return;
     }
     setLoading(true);
@@ -321,7 +333,7 @@ export function PostItem({
   const renderCover = (
     <Box
       component="img"
-      onClick={handleOpen}
+      onClick={()=>handleProdutoClick(post.id)}
       alt={post.nome}
       src={`https://dce9-154-71-159-172.ngrok-free.app${post.imagens[0]?.imagem}`}
       sx={{
