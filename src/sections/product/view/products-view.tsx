@@ -14,6 +14,7 @@ import {
 } from '@mui/material';
 
 import { Iconify } from 'src/components/iconify';
+import { useNavigate } from 'react-router-dom';
 
 import Button from '@mui/material/Button';
 
@@ -77,6 +78,7 @@ const defaultFilters = {
 };
 
 export function ProductsView() {
+  const navigate = useNavigate(); // Hook para navegação
   const [sortBy, setSortBy] = useState('featured');
   const [products, setProducts] = useState<any[]>([]); // Armazenar produtos da API
   const [loading, setLoading] = useState(true); // Para gerenciar o estado de carregamento
@@ -212,7 +214,7 @@ export function ProductsView() {
       const data = await response.json();
       console.log("Anuncios carregados:", data);
 
-      
+
       setAnuncios(data);
 
     } catch (error) {
@@ -349,6 +351,10 @@ export function ProductsView() {
     return () => clearInterval(interval);
   }, [anuncios.length]);
 
+  const handleVerDetalhes = (anuncioId: string) => {
+    navigate(`/detalhes/${anuncioId}`); // Redireciona para a rota de detalhes com o ID do anúncio
+  };
+
   return (
     <DashboardContent>
       <Typography variant="h4" sx={{ mb: 5 }}>
@@ -356,23 +362,53 @@ export function ProductsView() {
       </Typography>
 
       <Box sx={{ mb: 5, borderRadius: 1, overflow: 'hidden', position: 'relative', width: '100%', height: '300px' }}>
-        {anuncios.map((image:any, index) => (
+        {anuncios.map((anuncio: any, index) => (
           <Box
             key={index}
-            component="img"
-            src={image.imagem1}
-            alt={`Imagem ${index + 1}`}
             sx={{
               width: '100%',
               height: '100%',
-              objectFit: 'cover',
               position: 'absolute',
               top: 0,
               left: 0,
               opacity: index === currentImageIndex ? 1 : 0,
               transition: 'opacity 1s ease-in-out',
             }}
-          />
+          >
+            <Box
+              component="img"
+              src={anuncio?.imagem1}
+              alt={`Imagem ${index + 1}`}
+              sx={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+              }}
+            />
+
+            <Box
+              sx={{
+                position: 'absolute',
+                bottom: 0,
+                left: 0,
+                right: 0,
+                color: 'white',
+                padding: '16px',
+                textAlign: 'left',
+              }}
+            >
+              <Typography variant="h6" sx={{ mt: 1 }}>{anuncio?.descricao}</Typography>
+              <Typography variant="body2">{anuncio?.desconto}</Typography>
+              <Button
+                variant="contained"
+                color="primary"
+                sx={{ mt: 2 }}
+                onClick={() => handleVerDetalhes(anuncio.id)}
+              >
+                Ver Detalhes
+              </Button>
+            </Box>
+          </Box>
         ))}
 
         {/* Botões de navegação */}
@@ -386,7 +422,7 @@ export function ProductsView() {
             gap: '10px',
           }}
         >
-          {anuncios.map((imagem:any, index) => (
+          {anuncios.map((_, index) => (
             <Button
               key={index}
               sx={{
@@ -399,7 +435,7 @@ export function ProductsView() {
                   backgroundColor: 'primary.dark',
                 },
               }}
-              onClick={() => setCurrentImageIndex(imagem.imagem1)}
+              onClick={() => setCurrentImageIndex(index)}
             />
           ))}
         </Box>

@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom'; // Importe o useNavigate
 
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -29,13 +30,10 @@ export function BlogView() {
   const [loadingMessages, setLoadingMessages] = useState(false); // Estado de carregamento das mensagens
   const socketRef = useRef<WebSocket | null>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [anuncios, setAnuncios] = useState([]);
+  const [anuncios, setAnuncios] = useState<any[]>([]);
+  const [categorias, setCategorias] = useState<string[]>(['Tecnologia', 'Moda', 'Casa', 'Esportes', 'Beleza']); // Exemplo
+  const navigate = useNavigate(); // Hook para navegação
 
-  const images = [
-    'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEj7o1UqwTqFhZnCHiL_ImyZSCgEgtFvVZoAqRJWs14MSm9w8zINDOEGUO9jvG6HLrmZajOP4asLgwAfX2sz6uvVEa38ELhPsmHdtEUQVNro3PrMlUlqjN65CWzzSmeBtWxHmjs3gGORwcaGRSB8ktJbbJ63bGusEOf7ibX6ttketOLEetfRyzbipr_HHg/s3840/Spirited%20Away%20Studio%20Ghibli%204K%20PC%20Desktop%20Wallpaper.png',
-    'https://www.chromethemer.com/download/hd-wallpapers/minimalist-spiderman-3840x2160.jpg',
-    'https://wallpapercat.com/w/full/b/8/f/6645-3840x2160-desktop-4k-assassins-creed-background-photo.jpg',
-  ];
   const fetchAnuncios = async () => {
     try {
       const url = `${API_BASE_URL}/api/anuncios-app/`;
@@ -52,9 +50,7 @@ export function BlogView() {
       const data = await response.json();
       console.log("Anuncios carregados:", data);
 
-      
       setAnuncios(data);
-
     } catch (error) {
       console.error("Erro ao buscar produtos:", error);
     }
@@ -72,11 +68,10 @@ export function BlogView() {
       }
     }
   }, []);
+
   useEffect(() => {
     fetchAnuncios();
-
   }, []);
-
 
   const fetchProducts = useCallback(async () => {
     if (!empresaId) {
@@ -113,10 +108,15 @@ export function BlogView() {
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentImageIndex((prevIndex) => (prevIndex + 1) % anuncios.length);
-    }, 3000); // Muda a imagem a cada 3 segundos
+    }, 4000); // Muda a imagem a cada 4 segundos
 
     return () => clearInterval(interval); // Limpa o intervalo ao desmontar o componente
   }, [anuncios?.length]);
+
+  // Função para redirecionar para a página de detalhes
+  const handleVerDetalhes = (anuncioId: string) => {
+    navigate(`/detalhes/${anuncioId}`); // Redireciona para a rota de detalhes com o ID do anúncio
+  };
 
   return (
     <DashboardContent>
@@ -127,23 +127,53 @@ export function BlogView() {
       </Box>
 
       <Box sx={{ mb: 5, borderRadius: 1, overflow: 'hidden', position: 'relative', width: '100%', height: '300px' }}>
-        {anuncios.map((image:any, index) => (
+        {anuncios.map((anuncio: any, index) => (
           <Box
             key={index}
-            component="img"
-            src={image?.imagem1}
-            alt={`Imagem ${index + 1}`}
             sx={{
               width: '100%',
               height: '100%',
-              objectFit: 'cover',
               position: 'absolute',
               top: 0,
               left: 0,
               opacity: index === currentImageIndex ? 1 : 0,
               transition: 'opacity 1s ease-in-out',
             }}
-          />
+          >
+            <Box
+              component="img"
+              src={anuncio?.imagem1}
+              alt={`Imagem ${index + 1}`}
+              sx={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+              }}
+            />
+
+            <Box
+              sx={{
+                position: 'absolute',
+                bottom: 0,
+                left: 0,
+                right: 0,
+                color: 'white',
+                padding: '16px',
+                textAlign: 'left',
+              }}
+            >
+              <Typography variant="h6" sx={{ mt: 1 }}>{anuncio?.descricao}</Typography>
+              <Typography variant="body2">{anuncio?.desconto}</Typography>
+              <Button
+                variant="contained"
+                color="primary"
+                sx={{ mt: 2 }}
+                onClick={() => handleVerDetalhes(anuncio.id)} 
+              >
+                Ver Detalhes
+              </Button>
+            </Box>
+          </Box>
         ))}
 
         {/* Botões de navegação */}
@@ -157,7 +187,7 @@ export function BlogView() {
             gap: '10px',
           }}
         >
-          {images.map((_, index) => (
+          {anuncios.map((_, index) => (
             <Button
               key={index}
               sx={{
@@ -172,6 +202,30 @@ export function BlogView() {
               }}
               onClick={() => setCurrentImageIndex(index)}
             />
+          ))}
+        </Box>
+      </Box>
+
+      <Box sx={{ mb: 5, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2 }}>
+        <Typography variant="h6">Categorias</Typography>
+        <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+          {categorias.map((categoria, index) => (
+            <Button
+              key={index}
+              variant="outlined"
+              sx={{
+                textTransform: 'none',
+                borderRadius: '20px',
+                borderColor: 'primary.main',
+                color: 'primary.main',
+                '&:hover': {
+                  backgroundColor: 'primary.main',
+                  color: 'white',
+                },
+              }}
+            >
+              {categoria}
+            </Button>
           ))}
         </Box>
       </Box>

@@ -14,6 +14,8 @@ import { Perfil2View } from 'src/sections/perfil2/view';
 import { RelatorioView } from 'src/sections/relatorio/view';
 import { FuncionarioView } from 'src/sections/funcionario/view';
 
+import { DetalhesView } from 'src/sections/detalhes/view';
+
 // ----------------------------------------------------------------------
 
 export const HomePage = lazy(() => import('src/pages/home'));
@@ -27,6 +29,7 @@ export const Lista = lazy(() => import('src/pages/listasms'));
 export const Relatório = lazy(() => import('src/pages/relatorio'));
 export const Perfil = lazy(() => import('src/pages/perfil'));
 export const Perfil2 = lazy(() => import('src/pages/perfil2'));
+export const Detalhes = lazy(() => import('src/pages/detalhes'));
 
 // ----------------------------------------------------------------------
 
@@ -64,6 +67,7 @@ export function Router() {
         { path: 'perfil', element: <PerfilView /> },
         { path: 'perfil2/:id/:tipo?', element: <Perfil2View /> },
         { path: 'relatorio', element: <RelatorioView /> },
+        { path: 'detalhes/:id', element: <DetalhesView /> },
       ],
     },
     {

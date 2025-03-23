@@ -58,7 +58,7 @@ export function Perfil2View() {
     pageIndex: 0,
     pageSize: 4,
     totalPages: 1,
-});
+  });
 
   useEffect(() => {
     const token = localStorage.getItem('userData');
@@ -82,7 +82,7 @@ export function Perfil2View() {
           },
         });
         setDados(response.data);
-        
+
 
         const produtosResponse = await axios.get(`https://dce9-154-71-159-172.ngrok-free.app/api/produtos/${tipo === 'empresa' ? 'empresa' : 'usuario'}/${id}?page=${pagination.pageIndex + 1}`, {
           headers: {
@@ -90,11 +90,11 @@ export function Perfil2View() {
           },
         });
         setProdutos(produtosResponse.data.results);
-        const data=produtosResponse.data;
+        const data = produtosResponse.data;
         setPagination((prev) => ({
           ...prev,
           totalPages: Math.ceil(data.count / prev.pageSize),
-      }));
+        }));
         console.log(produtosResponse.data.results);
       } catch (error) {
         console.error('Erro ao buscar os dados:', error);
@@ -102,7 +102,7 @@ export function Perfil2View() {
     };
 
     fetchData();
-  }, [id, tipo,pagination.pageIndex]);
+  }, [id, tipo, pagination.pageIndex]);
 
   const denunciarEmpresa = async () => {
     try {
@@ -202,7 +202,7 @@ export function Perfil2View() {
         </Grid>
 
         <Grid xs={12} md={6}>
-          <Paper elevation={4} sx={{ p: 4 }}>
+          <Paper elevation={4} sx={{ p: 2 }}>
             <Typography variant="h4">Imagens da Empresa</Typography>
             <Box>
               {tipo === 'empresa' && Array.isArray(dados.imagens) && dados.imagens.length > 0 && (
@@ -221,7 +221,7 @@ export function Perfil2View() {
         </Grid>
       </Grid>
 
-      <Typography variant="h4" sx={{ p: 1 }}>Produtos Divulgados</Typography>
+      <Typography variant="h4" sx={{ p: 3 }}>Produtos Divulgados</Typography>
 
       <Grid xs={12} md={8}>
         <Paper elevation={4} sx={{ p: 4 }}>
@@ -249,26 +249,30 @@ export function Perfil2View() {
               <Typography>Nenhum produto encontrado.</Typography>
             )}
           </Grid>
-          <Pagination count={pagination.totalPages} color="primary" sx={{ mt: 8, mx: 'auto' }} />
+          
+          {/* <Pagination count={pagination.totalPages} color="primary" sx={{ mt: 8, mx: 'auto' }} /> */}
+          
+          <Typography variant="h6" sx={{ width: '100%', textAlign: 'center', mt: 5 }}>
+            Página {pagination.pageIndex + 1} de {pagination.totalPages}
+          </Typography>
 
-      <Button
-        className="px-4 py-2 text-sm font-medium text-white bg-brand-900 rounded-[20px] hover:bg-brand-800 flex items-center justify-center"
-        onClick={() => setPagination((p) => ({ ...p, pageIndex: p.pageIndex - 1 }))}
-        disabled={pagination.pageIndex === 0}
-      >
-        Anterior
-      </Button>
-      <Button
-        className="px-4 py-2 text-sm font-medium text-white bg-brand-900 rounded-[20px] hover:bg-brand-800 flex items-center justify-center"
-        onClick={() => setPagination((p) => ({ ...p, pageIndex: p.pageIndex + 1 }))}
-        disabled={pagination.pageIndex + 1 >= pagination.totalPages}
-      >
-        Próxima
-      </Button>
+          <Typography variant="h6" sx={{ width: '100%', textAlign: 'center' }}>
+            <Button
+              className="px-4 py-2 text-sm font-medium text-white bg-brand-900 rounded-[20px] hover:bg-brand-800 flex items-center justify-center"
+              onClick={() => setPagination((p) => ({ ...p, pageIndex: p.pageIndex - 1 }))}
+              disabled={pagination.pageIndex === 0}
+            >
+              Anterior
+            </Button>
+            <Button
+              className="px-4 py-2 text-sm font-medium text-white bg-brand-900 rounded-[20px] hover:bg-brand-800 flex items-center text-center justify-center"
+              onClick={() => setPagination((p) => ({ ...p, pageIndex: p.pageIndex + 1 }))}
+              disabled={pagination.pageIndex + 1 >= pagination.totalPages}
+            >
+              Próxima
+            </Button>
+          </Typography>
 
-      <Typography variant="h6" sx={{ width: '100%', textAlign: 'center' }}>
-        Página {pagination.pageIndex + 1} de {pagination.totalPages}
-      </Typography>
         </Paper>
       </Grid>
 
