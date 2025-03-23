@@ -147,10 +147,10 @@ export function NotificationsPopover({ data = [], sx, ...other }: NotificationsP
           paper: { sx: { width: 360, overflow: 'hidden', display: 'flex', flexDirection: 'column' } },
         }}
       >
-        <Box display="flex" alignItems="center" sx={{ py: 2, pl: 2.5, pr: 1.5 }}>
+        <Box display="flex" alignItems="center" justifyContent="space-between" sx={{ py: 2, pl: 1.5, pr: 1.5 }}>
           <Typography variant="subtitle1">Notificações</Typography>
-          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-            Você tem {totalUnRead} mensagens não lidas
+          <Typography variant="body2" sx={{ color: 'text.secondary'}}>
+            {totalUnRead} mensagens não lidas
           </Typography>
         </Box>
 
@@ -166,11 +166,11 @@ export function NotificationsPopover({ data = [], sx, ...other }: NotificationsP
 
         <Divider sx={{ borderStyle: 'dashed' }} />
 
-        <Box sx={{ p: 1 }}>
+        {/* <Box sx={{ p: 1 }}>
           <Button fullWidth disableRipple color="inherit">
             Ver todas
           </Button>
-        </Box>
+        </Box> */}
       </Popover>
     </>
   );

@@ -121,7 +121,7 @@ const handleSignOut = useCallback(async (): Promise<void> => {
 
         <Divider sx={{ borderStyle: 'dashed' }} />
 
-        <MenuList
+        {/* <MenuList
           disablePadding
           sx={{
             p: 1,
@@ -152,11 +152,11 @@ const handleSignOut = useCallback(async (): Promise<void> => {
               {option.label}
             </MenuItem>
           ))}
-        </MenuList>
+        </MenuList> */}
 
-        <Divider sx={{ borderStyle: 'dashed' }} />
+        {/* <Divider sx={{ borderStyle: 'dashed' }} /> */}
 
-        <Box sx={{ p: 1 }}>
+        <Box>
           <Button fullWidth color="error" size="medium" variant="text"  onClick={handleSignOut}>
             Logout
           </Button>

@@ -1,16 +1,13 @@
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Unstable_Grid2';
 import Typography from '@mui/material/Typography';
-import Pagination from '@mui/material/Pagination';
 import Paper from '@mui/material/Paper';
 import Button from '@mui/material/Button';
 import Avatar from '@mui/material/Avatar';
 import Divider from '@mui/material/Divider';
 import Modal from '@mui/material/Modal';
 import TextField from '@mui/material/TextField';
-import Switch from '@mui/material/Switch';
-import { Select, MenuItem, FormControl, InputLabel, IconButton } from '@mui/material';
-import { Iconify } from 'src/components/iconify';
+import { Select, MenuItem, FormControl, InputLabel } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
@@ -56,7 +53,7 @@ export function Perfil2View() {
   const [descricao, setDescricao] = useState('');
   const [pagination, setPagination] = useState({
     pageIndex: 0,
-    pageSize: 4,
+    pageSize: 5,
     totalPages: 1,
   });
 
@@ -83,19 +80,20 @@ export function Perfil2View() {
         });
         setDados(response.data);
 
-
-        const produtosResponse = await axios.get(`https://dce9-154-71-159-172.ngrok-free.app/api/produtos/${tipo === 'empresa' ? 'empresa' : 'usuario'}/${id}?page=${pagination.pageIndex + 1}`, {
-          headers: {
-            "ngrok-skip-browser-warning": "true",
-          },
-        });
+        const produtosResponse = await axios.get(
+          `https://dce9-154-71-159-172.ngrok-free.app/api/produtos/${tipo === 'empresa' ? 'empresa' : 'usuario'}/${id}?page=${pagination.pageIndex + 1}`,
+          {
+            headers: {
+              "ngrok-skip-browser-warning": "true",
+            },
+          }
+        );
         setProdutos(produtosResponse.data.results);
         const data = produtosResponse.data;
         setPagination((prev) => ({
           ...prev,
           totalPages: Math.ceil(data.count / prev.pageSize),
         }));
-        console.log(produtosResponse.data.results);
       } catch (error) {
         console.error('Erro ao buscar os dados:', error);
       }
@@ -225,54 +223,74 @@ export function Perfil2View() {
 
       <Grid xs={12} md={8}>
         <Paper elevation={4} sx={{ p: 4 }}>
-          <Grid container spacing={2}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             {produtos.length > 0 ? (
               produtos.map((produto) => (
-                <Grid key={produto.id} md={4}>
-                  <Paper elevation={2} sx={{ p: 2, textAlign: 'center', cursor: 'pointer' }} onClick={() => {
+                <Paper
+                  key={produto.id}
+                  elevation={2}
+                  sx={{
+                    p: 2,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 2,
+                    cursor: 'pointer',
+                    '&:hover': { backgroundColor: 'action.hover' },
+                  }}
+                  onClick={() => {
                     setProdutoSelecionado(produto);
                     setModalOpen(true);
-                  }}>
-                    <Avatar
-                      src={`https://dce9-154-71-159-172.ngrok-free.app${produto.imagens?.length ? produto.imagens[0].imagem : ''}`}
-                      alt={produto.nome}
-                      sx={{ width: 80, height: 80, mx: 'auto', mb: 1 }}
-                    />
-                    <Typography>{produto.nome}</Typography>
+                  }}
+                >
+                  <Box
+                    component="img"
+                    src={`https://dce9-154-71-159-172.ngrok-free.app${produto.imagens?.length ? produto.imagens[0].imagem : ''}`}
+                    alt={produto.nome}
+                    sx={{
+                      width: 80, 
+                      height: 80, 
+                      borderRadius: 2, 
+                      objectFit: 'cover', 
+                    }}
+                  />
+                  <Box sx={{ flexGrow: 1 }}>
+                    <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
+                      {produto.nome}
+                    </Typography>
+                    <Typography variant="body2">
+                      {produto.descricao}
+                    </Typography>
                     <Typography variant="body2" color="text.secondary">
                       {produto.preco} Kz
                     </Typography>
-                  </Paper>
-                </Grid>
+                  </Box>
+                </Paper>
               ))
             ) : (
               <Typography>Nenhum produto encontrado.</Typography>
             )}
-          </Grid>
-          
-          {/* <Pagination count={pagination.totalPages} color="primary" sx={{ mt: 8, mx: 'auto' }} /> */}
-          
+          </Box>
+
           <Typography variant="h6" sx={{ width: '100%', textAlign: 'center', mt: 5 }}>
             Página {pagination.pageIndex + 1} de {pagination.totalPages}
           </Typography>
 
-          <Typography variant="h6" sx={{ width: '100%', textAlign: 'center' }}>
+          <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 3 }}>
             <Button
-              className="px-4 py-2 text-sm font-medium text-white bg-brand-900 rounded-[20px] hover:bg-brand-800 flex items-center justify-center"
+              variant="contained"
               onClick={() => setPagination((p) => ({ ...p, pageIndex: p.pageIndex - 1 }))}
               disabled={pagination.pageIndex === 0}
             >
               Anterior
             </Button>
             <Button
-              className="px-4 py-2 text-sm font-medium text-white bg-brand-900 rounded-[20px] hover:bg-brand-800 flex items-center text-center justify-center"
+              variant="contained"
               onClick={() => setPagination((p) => ({ ...p, pageIndex: p.pageIndex + 1 }))}
               disabled={pagination.pageIndex + 1 >= pagination.totalPages}
             >
               Próxima
             </Button>
-          </Typography>
-
+          </Box>
         </Paper>
       </Grid>
 
