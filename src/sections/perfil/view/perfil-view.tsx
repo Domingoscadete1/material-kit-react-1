@@ -77,7 +77,7 @@ export function PerfilView() {
     setOpenModal(true);
   
     if (!chatId1) {
-      const socketUrl = `wss://fad7-154-71-159-172.ngrok-free.app/ws/suporte/chat/${empresa?.empresa?.id}/`;
+      const socketUrl = `wss://dce9-154-71-159-172.ngrok-free.app/ws/suporte/chat/${empresa?.empresa?.id}/`;
       socketRef.current = new WebSocket(socketUrl);
   
       socketRef.current.onopen = () => console.log("WebSocket conectado para novo chat");
@@ -125,8 +125,8 @@ export function PerfilView() {
   };
   const conectarWebSocket = useCallback((chatId: number) => {
     const socketUrl = chatId
-      ? `wss://fad7-154-71-159-172.ngrok-free.app/ws/suporte/empresa/${empresa?.empresa?.id}/`
-      : `wss://fad7-154-71-159-172.ngrok-free.app/ws/suporte/chat/${empresa?.empresa?.id}/`;
+      ? `wss://dce9-154-71-159-172.ngrok-free.app/ws/suporte/empresa/${empresa?.empresa?.id}/`
+      : `wss://dce9-154-71-159-172.ngrok-free.app/ws/suporte/chat/${empresa?.empresa?.id}/`;
   
     socketRef.current = new WebSocket(socketUrl);
   
