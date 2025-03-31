@@ -9,6 +9,7 @@ import { Button, Modal, TextField } from '@mui/material';
 import { fCurrency } from 'src/utils/format-number';
 import { Label } from 'src/components/label';
 import Config from '../Config';
+import { fetchWithToken } from '../../../authService';
 
 export type ProductItemProps = {
   id: number;
@@ -78,13 +79,21 @@ export function ProductItem({ product }: { product: ProductItemProps }) {
 
 
     try {
-      const response = await axios.put(
-        `${baseUrl}api/produto/${product.id}/atualizar/`, // Ajuste a URL para o endpoint da API
-        formDataToSend,
-        { headers: { 'Content-Type': 'multipart/form-data', "ngrok-skip-browser-warning": "true", } }
+      const response = await fetchWithToken(
+        `api/produto/${product.id}/atualizar/`,
+        {
+          method: 'PUT',
+          headers: {
+            // Não inclua Content-Type!
+            "ngrok-skip-browser-warning": "true"
+          },
+          body: formDataToSend
+        }
       );
-      console.log(response.data);
+      const data=await response.json();
+      console.log(data);
       setOpenUpdateModal(false);
+      window.location.reload();
     } catch (error) {
       console.error('Erro ao atualizar produto', error);
     }
@@ -92,11 +101,21 @@ export function ProductItem({ product }: { product: ProductItemProps }) {
 
   const handleDeleteProduct = async () => {
     try {
-      const response = await axios.delete(
-        `${baseUrl}api/produto/${product.id}/deletar/`
+      const response = await fetchWithToken(
+        `api/produto/${product.id}/deletar/`,{
+          method:'DELETE',
+          headers: {
+            // Não inclua Content-Type!
+            "ngrok-skip-browser-warning": "true"
+          },
+
+        }
       );
-      console.log(response.data);
+      const data=await response.json();
+
+      console.log(data);
       setOpenDeleteModal(false);
+      window.location.reload();
     } catch (error) {
       console.error('Erro ao deletar produto', error);
     }

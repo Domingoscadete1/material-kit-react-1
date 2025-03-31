@@ -13,6 +13,8 @@ import axios from 'axios';
 
 import { Label } from 'src/components/label';
 import { Iconify } from 'src/components/iconify';
+import { fetchWithToken } from '../../../authService';
+
 
 // ----------------------------------------------------------------------
 
@@ -78,17 +80,24 @@ export function UserTableRow({ row, selected, onSelectRow }: UserTableRowProps) 
     if (!empresaId || hasFetchedRef.current) return;
 
     try {
-      const response = await axios.get(`${baseUrl}api/postos/empresa/${empresaId}/`, {
-        headers: { "ngrok-skip-browser-warning": "true" },
+      const response = await fetchWithToken(`api/postos/empresa/${empresaId}/`, {
+        method: 'GET',
+        headers: {
+         
+          'Content-Type': 'multipart/form-data',
+          "ngrok-skip-browser-warning": "true"
+        },
       });
+      const data = await response.json(); // Extrai os dados da resposta
 
-      setPostos(response.data.postos);
+
+      setPostos(data.postos);
       hasFetchedRef.current = true; // Marca como buscado
         console.log('Postos buscados com sucesso!');
     } catch (error) {
       console.error('Erro ao buscar postos:', error);
     }
-  }, [empresaId, baseUrl]);
+  }, [empresaId]);
 
   useEffect(() => {
     const token = localStorage.getItem('userData');
@@ -109,7 +118,7 @@ export function UserTableRow({ row, selected, onSelectRow }: UserTableRowProps) 
   const handleAtivarPosto = async () => {
     if (!postoAtual) return;
     try {
-      const response = await fetch(`${baseUrl}api/empresa-posto/disponivel/`, {
+      const response = await fetchWithToken(`api/empresa-posto/disponivel/`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -140,7 +149,7 @@ export function UserTableRow({ row, selected, onSelectRow }: UserTableRowProps) 
   const handleDesativarPosto = async () => {
     if (!postoAtual) return;
     try {
-      const response = await fetch(`${baseUrl}api/empresa-posto/indisponivel/`, {
+      const response = await fetchWithToken(`api/empresa-posto/indisponivel/`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',

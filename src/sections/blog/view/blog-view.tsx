@@ -17,6 +17,7 @@ import { Iconify } from 'src/components/iconify';
 import { PostItem } from '../post-item';
 import { PostSort } from '../post-sort';
 import { PostSearch } from '../post-search';
+import { fetchWithToken } from '../../../../authService';
 
 // ----------------------------------------------------------------------
 const API_BASE_URL = "https://dce9-154-71-159-172.ngrok-free.app";
@@ -38,8 +39,9 @@ export function BlogView() {
 
   const fetchAnuncios = async () => {
     try {
-      const url = `${API_BASE_URL}/api/anuncios-app/`;
-      const response = await fetch(url, {
+      const url = `api/anuncios-app/`;
+      const response = await fetchWithToken(url, {
+        method:'GET',
         headers: {
           "ngrok-skip-browser-warning": "true",
         },
@@ -72,8 +74,9 @@ export function BlogView() {
   }, []);
   const fetchCategorias = async () => {
     try {
-      const url = `${API_BASE_URL}/api/categorias/`;
-      const response = await fetch(url, {
+      const url = `api/categorias/`;
+      const response = await fetchWithToken(url, {
+        method:'GET',
         headers: {
           "ngrok-skip-browser-warning": "true",
         },
@@ -108,15 +111,17 @@ export function BlogView() {
     }
     try {
       setLoading(true);
-      const response = await axios.get(`https://dce9-154-71-159-172.ngrok-free.app/api/produtos-search/bussiness/${empresaId}/`, {
+      const response = await fetchWithToken(`api/produtos-search/bussiness/${empresaId}/`, {
+        method:'GET',
         headers: {
           "ngrok-skip-browser-warning": "true", // Evita bloqueios do ngrok
         },
       });
-      console.log('Produtos recebidos:', response.data.produtos);
+      const data=await response.json();
+      console.log('Produtos recebidos:', data.produtos);
 
-      setProducts(response.data.produtos);
-      setFilteredProducts(response.data.produtos);
+      setProducts(data.produtos);
+      setFilteredProducts(data.produtos);
     } catch (error) {
       console.error('Erro ao buscar produtos:', error);
     } finally {

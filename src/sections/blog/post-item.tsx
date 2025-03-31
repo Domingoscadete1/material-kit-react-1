@@ -19,10 +19,13 @@ import { fShortenNumber } from 'src/utils/format-number';
 
 
 
+
 import { varAlpha } from 'src/theme/styles';
 
 import { Iconify } from 'src/components/iconify';
 import { SvgColor } from 'src/components/svg-color';
+import { fetchWithToken } from '../../../authService';
+
 
 // ----------------------------------------------------------------------
 
@@ -191,13 +194,15 @@ export function PostItem({
     const fetchPostos = async () => {
       setLoading(true);
       try {
-        const response = await axios.get(`https://dce9-154-71-159-172.ngrok-free.app/api/postos/empresa/${post.empresa.id}/`,{
+        const response = await fetchWithToken(`api/postos/empresa/${post.empresa.id}/`,{
+          method:'GET',
         headers: {
           "ngrok-skip-browser-warning": "true", // Evita bloqueios do ngrok
         },
         
       });
-        setPostos(response.data.postos || []);
+      const data=await response.json();
+        setPostos(data.postos || []);
       } catch (err) {
         alert(err.message);
       } finally {
@@ -212,11 +217,12 @@ export function PostItem({
 
   const checkPostoAvailability = async (postoId: number) => {
     try {
-      const response = await axios.get(`https://dce9-154-71-159-172.ngrok-free.app/api/posto/available/${postoId}/`, {
+      const response = await fetchWithToken(`api/posto/available/${postoId}/`, {
+        method:'GET',
         headers: {
           "ngrok-skip-browser-warning": "true", // Evita bloqueios do ngrok
         },
-        validateStatus: (status) => status === 200 || status === 303,
+        validateStatus: (status:any) => status === 200 || status === 303,
       });
       setPostoDisponivel(response.status === 200);
       if (response.status === 303){
@@ -240,15 +246,26 @@ export function PostItem({
     }
     setLoading(true);
     try {
-      const response = await axios.post('https://dce9-154-71-159-172.ngrok-free.app/api/stripe/create-payment/bussiness-bussiness/', {
+      const response = await fetchWithToken('api/stripe/create-payment/bussiness-bussiness/', {
+        method:'POST',
+        headers: {
+          'Content-Type': 'application/json',
+
+          "ngrok-skip-browser-warning": "true", // Evita bloqueios do ngrok
+        },
+        body:JSON.stringify(
+          {
         produto_id: post.id,
         empresa_id: userData?.empresa?.id,
         posto_id: selectedPosto,
         descricao: post.descricao,
         currency: 'AOA',
         quantidade,
+          }
+        ),
       });
-      setCheckoutUrl(response.data.checkout_url);
+      const data=await response.json();
+      setCheckoutUrl(data.checkout_url);
     } catch (error) {
       alert('Erro ao iniciar pagamento');
     } finally {

@@ -30,6 +30,7 @@ import { ProductSort } from '../product-sort';
 import { CartIcon } from '../product-cart-widget';
 import { ProductFilters } from '../product-filters';
 import type { FiltersProps } from '../product-filters';
+import { fetchWithToken } from '../../../../authService';
 
 import 'leaflet/dist/leaflet.css';
 
@@ -188,20 +189,23 @@ export function ProductsView() {
   }, []); // Mantenha vazio se `empresaId` não mudar
   const fetchCategories = useCallback(async () => {
     try {
-      const response = await axios.get('https://dce9-154-71-159-172.ngrok-free.app/api/categorias/', {
+      const response = await fetchWithToken('api/categorias/', {
+        method:'GET',
         headers: {
           "ngrok-skip-browser-warning": "true", // Evita bloqueios do ngrok
         },
       }); // Substitua pela URL da API
-      setCategories(response.data);
+      const data =await response.json();
+      setCategories(data);
     } catch (error) {
       console.error('Erro ao buscar categorias:', error);
     }
   }, []);
   const fetchAnuncios = async () => {
     try {
-      const url = `${API_BASE_URL}/api/anuncios-app/`;
-      const response = await fetch(url, {
+      const url = `api/anuncios-app/`;
+      const response = await fetchWithToken(url, {
+        method:'GET',
         headers: {
           "ngrok-skip-browser-warning": "true",
         },
@@ -238,17 +242,19 @@ export function ProductsView() {
     }
     try {
       setLoading(true);
-      const response = await axios.get(`https://dce9-154-71-159-172.ngrok-free.app/api/produtos/empresa/${empresaId}/?page=${pagination.pageIndex + 1}`, {
+      const response = await fetchWithToken(`api/produtos/empresa/${empresaId}/?page=${pagination.pageIndex + 1}`, {
         headers: {
           "ngrok-skip-browser-warning": "true", // Evita bloqueios do ngrok
         },
       });
-      console.log('Produtos recebidos:', response.data);
+      const data = await response.json();
 
-      setProducts(response.data.results);
+      console.log('Produtos recebidos:', data);
+
+      setProducts(data.results);
       setPagination((prev) => ({
         ...prev,
-        totalPages: Math.ceil(response.data.count / prev.pageSize),
+        totalPages: Math.ceil(data.count / prev.pageSize),
       }));
     } catch (error) {
       console.error('Erro ao buscar produtos:', error);
@@ -287,20 +293,28 @@ export function ProductsView() {
     });
 
     try {
-      const response = await axios.post(`https://dce9-154-71-159-172.ngrok-free.app/api/produto/create/`, formData, {
+      setLoading(true);
+
+      const response = await fetchWithToken(`api/produto/create/`,  {
+        method:'POST',
         headers: {
-          'Content-Type': 'multipart/form-data',
           "ngrok-skip-browser-warning": "true", // Evita bloqueios do ngrok
 
 
         },
+        body:formData,
       });
-      console.log('Produto criado com sucesso:', response.data);
+      const data = await response.json();
+
+      console.log('Produto criado com sucesso:', data);
       setOpenModal(false);
+      setLoading(false);
       window.location.reload();
       fetchProducts(); // Atualizar a lista de produtos
     } catch (error) {
       console.error('Erro ao criar produto:', error);
+      setLoading(false);
+
     }
   };
 

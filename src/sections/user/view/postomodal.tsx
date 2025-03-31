@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Modal, Box, Button, Typography, MenuItem, TextField, CircularProgress } from '@mui/material';
 import axios from 'axios';
+import { fetchWithToken } from '../../../../authService';
+
 
 
 type Posto = {
@@ -20,12 +22,16 @@ const  AddPostoModal: React.FC<AddPostoModalProps> = ({ open, onClose }) => {
   const fetchPostos = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await axios.get('https://dce9-154-71-159-172.ngrok-free.app/api/postos/',{
+      const response = await fetchWithToken('api/postos/',{
+        method: 'GET',
         headers: {
-          "ngrok-skip-browser-warning": "true", // Evita bloqueios do ngrok
+         
+          'Content-Type': 'multipart/form-data',
+          "ngrok-skip-browser-warning": "true"
         },
       });
-      setPostos(response.data);
+      const data=await response.json();
+      setPostos(data);
     } catch (error) {
       console.error('Erro ao buscar postos:', error);
     } finally {
@@ -47,15 +53,18 @@ const  AddPostoModal: React.FC<AddPostoModalProps> = ({ open, onClose }) => {
       alert('Selecione um posto.');
       return;
     }
+    const formData = new FormData();
+    formData.append('empresa_id',empresaId);
+    formData.append('posto_id',selectedPosto);
+
 
     try {
-      const response = await axios.post('https://dce9-154-71-159-172.ngrok-free.app/api/empresa-posto/create/', {
-        empresa_id: empresaId,
-        posto_id: selectedPosto,
-      },{
+      const response = await fetchWithToken('api/empresa-posto/create/', {
+        method:'POST',
         headers: {
           "ngrok-skip-browser-warning": "true", // Evita bloqueios do ngrok
         },
+        body:formData
       });
 
       alert('Posto adicionado com sucesso!');
