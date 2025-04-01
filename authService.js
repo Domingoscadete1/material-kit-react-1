@@ -69,10 +69,12 @@ const refreshAccessToken = async () => {
     return data.access;
   } catch (error) {
     console.error('Erro ao renovar o token JWT:', error.message);
-    await webStorage.removeItem('accessToken');
-    await webStorage.removeItem('refreshToken');
-    // Redireciona para login na web
-    window.location.href = '/login';
+    localStorage.removeItem('custom-auth-token');
+    localStorage.removeItem('userData');
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('registeredDeviceToken');
+    window.location.reload();
     return null;
   }
 };
