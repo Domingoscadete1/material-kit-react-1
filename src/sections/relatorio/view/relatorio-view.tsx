@@ -14,9 +14,14 @@ import axios from 'axios';
 
 import { DashboardContent } from 'src/layouts/dashboard';
 
+import { fetchWithToken } from '../../../../authService';
+import Config from '../../../../Config';
+
 // Mock data for reports
 
 export function RelatorioView() {
+  const mediaUrl=Config.getApiUrlMedia();
+  const baseUrl=Config.getApiUrl();
   const [empresaId, setEmpresaId] = useState<string | null>(null);
   const [transacoes, setTransacoes] = useState<any[]>([]); // Armazenar produtos da API
   const [loading, setLoading] = useState(true); // Para gerenciar o estado de carregamento
@@ -39,13 +44,15 @@ export function RelatorioView() {
   const fetchEmpresaData = useCallback(async () => {
     if (!empresaId) return;
     try {
-      const response = await axios.get(`https://dce9-154-71-159-172.ngrok-free.app/api/empresa/${empresaId}/`, {
+      const response = await fetchWithToken(`api/empresa/${empresaId}/`, {
+        method:'GET',
         headers: {
           "ngrok-skip-browser-warning": "true", // Evita bloqueios do ngrok
         },
       });
-      console.log('Dados da empresa:', response.data);
-      setEmpresaData(response.data);
+      const data=await response.json();
+      console.log('Dados da empresa:', data);
+      setEmpresaData(data);
     } catch (error) {
       console.error('Erro ao buscar dados da empresa:', error);
     }
@@ -65,18 +72,19 @@ export function RelatorioView() {
     }
     try {
       setLoading(true);
-      const response = await axios.get(`https://dce9-154-71-159-172.ngrok-free.app/api/empresa/transacoes/${empresaId}/?page=${page}`, {
+      const response = await fetchWithToken(`api/empresa/transacoes/${empresaId}/?page=${page}`, {
+        method:'GET',
         headers: {
           "ngrok-skip-browser-warning": "true", // Evita bloqueios do ngrok
         },
       });
-
-      console.log('Dados recebidos da API:', response.data);
+      const data=await response.json();
+      console.log('Dados recebidos da API:', data);
 
       // Certifique-se de acessar `results.transacoes`
-      const transacoesRecebidas = response.data.results?.transacoes || [];
+      const transacoesRecebidas = data.results?.transacoes || [];
       setTransacoes(transacoesRecebidas);
-      const total = response.data?.count ?? 0; // Garante que count nunca seja undefined
+      const total = data?.count ?? 0; // Garante que count nunca seja undefined
       setTotalPages(total > 0 ? Math.ceil(total / 10) : 1);
     } catch (error) {
       console.error('Erro ao buscar produtos:', error);
@@ -95,7 +103,7 @@ export function RelatorioView() {
   }, [empresaId, fetchProducts]);
   const downloadInvoice = async (transacaoId: number) => {
     try {
-      const apiUrl = `https://dce9-154-71-159-172.ngrok-free.app/api/fatura/${transacaoId}/`;
+      const apiUrl = `${baseUrl}api/fatura/${transacaoId}/`;
       window.open(apiUrl, '_blank'); // Abre a fatura em uma nova aba
     } catch (error) {
       console.error('Erro ao baixar fatura:', error);
@@ -149,7 +157,7 @@ export function RelatorioView() {
               <Card>
                 <Box
                   component="img"
-                  src={`https://dce9-154-71-159-172.ngrok-free.app${report.produto.imagens[0]?.imagem}`}
+                  src={`${mediaUrl}${report.produto.imagens[0]?.imagem}`}
                   alt={report.produto.nome}
                   sx={{
                     width: '100%',

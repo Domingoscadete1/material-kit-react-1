@@ -15,6 +15,10 @@ import { CircularProgress,IconButton,Modal } from '@mui/material';
 
 import { DashboardContent } from 'src/layouts/dashboard';
 
+import { fetchWithToken } from '../../../../authService';
+import Config from '../../../../Config';
+
+
 // ----------------------------------------------------------------------
 
 
@@ -56,13 +60,15 @@ export function DetalhesView() {
     const fetchPostos = async () => {
       setLoading(true);
       try {
-        const response = await axios.get(`https://dce9-154-71-159-172.ngrok-free.app/api/postos/empresa/${dados?.empresa.id}/`,{
+        const response = await fetchWithToken(`api/postos/empresa/${dados?.empresa.id}/`,{
+          method:'GET',
           headers: {
             "ngrok-skip-browser-warning": "true", // Evita bloqueios do ngrok
           },
           
         });
-        setPostos(response.data.postos || []);
+        const data =await response.json();
+        setPostos(data.postos || []);
       } catch (err) {
         alert(err.message);
       } finally {
@@ -77,7 +83,8 @@ export function DetalhesView() {
 
   const checkPostoAvailability = async (postoId) => {
     try {
-      const response = await axios.get(`https://dce9-154-71-159-172.ngrok-free.app/api/posto/available/${postoId}/`, {
+      const response = await fetchWithToken(`api/posto/available/${postoId}/`, {
+        method:'GET',
         headers: {
           "ngrok-skip-browser-warning": "true", // Evita bloqueios do ngrok
         },
@@ -106,15 +113,26 @@ export function DetalhesView() {
       
     setLoading(true);
     try {
-      const response = await axios.post('https://dce9-154-71-159-172.ngrok-free.app/api/stripe/create-payment/bussiness-bussiness/', {
+      const response = await fetchWithToken('api/stripe/create-payment/bussiness-bussiness/', {
+        method:'POST',
+        headers: {
+          'Content-Type': 'application/json',
+
+          "ngrok-skip-browser-warning": "true", // Evita bloqueios do ngrok
+        },
+        body:JSON.stringify(
+          {
         produto_id: dados.id,
         empresa_id: userData?.empresa?.id,
         posto_id: selectedPosto,
         descricao: dados.descricao,
         currency: 'AOA',
         quantidade,
+          }
+        ),
       });
-      setCheckoutUrl(response.data.checkout_url);
+      const data=await response.json();
+      setCheckoutUrl(data.checkout_url);
     } catch (error) {
       alert('Erro ao iniciar pagamento');
     } finally {
@@ -127,19 +145,22 @@ export function DetalhesView() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(`https://dce9-154-71-159-172.ngrok-free.app/api/produto/${id}/`, {
+        const response = await fetchWithToken(`api/produto/${id}/`, {
+          method:'GET',
           headers: {
             "ngrok-skip-browser-warning": "true",
           },
         });
-        setDados(response.data);
-        console.log(response.data);
+        const data=await response.json();
+
+        setDados(data);
+        console.log(data);
         // Define a primeira imagem ou vídeo como mídia principal
-        if (response.data.imagens.length > 0) {
-          setMainMedia(response.data.imagens[0].imagem);
+        if (data.imagens.length > 0) {
+          setMainMedia(data.imagens[0].imagem);
           setMediaType('image');
-        } else if (response.data.videos.length > 0) {
-          setMainMedia(response.data.videos[0].video);
+        } else if (data.videos.length > 0) {
+          setMainMedia(data.videos[0].video);
           setMediaType('video');
         }
         

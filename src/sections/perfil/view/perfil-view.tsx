@@ -14,6 +14,11 @@ import { DashboardContent } from 'src/layouts/dashboard';
 
 import React,{ useState, useEffect, useRef, useCallback } from 'react';
 import axios from 'axios';
+import { fetchWithToken } from '../../../../authService';
+
+import Config from '../../../../Config';
+import { resolve } from 'path';
+
 
 
 // ----------------------------------------------------------------------
@@ -51,6 +56,8 @@ export function PerfilView() {
   const [openChat, setOpenChat] = useState(false);
   const [chatExistente, setChatExistente] = useState<boolean>(false);
   const [chatId1, setChatId] = useState<number | null>(null);
+  const  wssUrl=Config.getApiUrlWs();
+  const mediaUrl=Config.getApiUrlMedia();
 
   const [mensagens, setMensagens] = useState<MensagemSuporte[]>([]);
   const [loadingMessages, setLoadingMessages] = useState(false); // Estado de carregamento das mensagens
@@ -77,7 +84,7 @@ export function PerfilView() {
     setOpenModal(true);
   
     if (!chatId1) {
-      const socketUrl = `wss://dce9-154-71-159-172.ngrok-free.app/ws/suporte/chat/${empresa?.empresa?.id}/`;
+      const socketUrl = `wss://${wssUrl}/ws/suporte/chat/${empresa?.empresa?.id}/`;
       socketRef.current = new WebSocket(socketUrl);
   
       socketRef.current.onopen = () => console.log("WebSocket conectado para novo chat");
@@ -91,21 +98,23 @@ export function PerfilView() {
   };
   
   const verificarChat = useCallback(() => {
-    axios.get(`https://dce9-154-71-159-172.ngrok-free.app/api/empresa/chat-suport/${empresa?.empresa?.id}/`, {
+    fetchWithToken(`api/empresa/chat-suport/${empresa?.empresa?.id}/`, {
+      method:'GET',
       headers: {
         "ngrok-skip-browser-warning": "true",
         "Content-Type": "application/json"
       }
     })
-    .then(response => {
-      console.log(response.data);
-      if (response.data.chats) {
-        setChatId(response.data.chats.id);
-        carregarMensagens(response.data.chats.id);
+    .then(response => response.json()) 
+    .then(data=> {
+      console.log(data);
+      if (data?.chats) {
+        setChatId(data?.chats.id);
+        carregarMensagens(data?.chats.id);
       }
     })
     .catch(error => console.error('Erro ao buscar chat:', error));
-  }, [empresa?.empresa?.id]);
+  }, [empresa?.empresa?.id,wssUrl]);
   
   useEffect(() => {
     verificarChat();
@@ -114,19 +123,21 @@ export function PerfilView() {
   
 
   const carregarMensagens = (chatId:number) => {
-    axios.get(`https://dce9-154-71-159-172.ngrok-free.app/api/chat-suporte/mensagens/${chatId}/`,{
+    fetchWithToken(`api/chat-suporte/mensagens/${chatId}/`,{
+      method:'GET',
       headers: {
         "ngrok-skip-browser-warning": "true", // Evita bloqueios do ngrok
         "Content-Type": "application/json" // Define o tipo de conteúdo esperado
       }
     })
-      .then(response => setMensagens(response.data.mensagens))
+    .then(response => response.json()) // Primeiro converte a resposta para JSON
+    .then(data => setMensagens(data.mensagens)) // Depois acessa a propriedade mensagens
       .catch(error => console.error('Erro ao buscar mensagens:', error));
   };
   const conectarWebSocket = useCallback((chatId: number) => {
     const socketUrl = chatId
-      ? `wss://dce9-154-71-159-172.ngrok-free.app/ws/suporte/empresa/${empresa?.empresa?.id}/`
-      : `wss://dce9-154-71-159-172.ngrok-free.app/ws/suporte/chat/${empresa?.empresa?.id}/`;
+      ? `wss://${wssUrl}/ws/suporte/empresa/${empresa?.empresa?.id}/`
+      : `wss://${wssUrl}/ws/suporte/chat/${empresa?.empresa?.id}/`;
   
     socketRef.current = new WebSocket(socketUrl);
   
@@ -185,7 +196,7 @@ export function PerfilView() {
           <Paper elevation={4} sx={{ p: 4, textAlign: 'center' }}>
             {/* Profile Picture */}
             <Avatar
-              src={`https://dce9-154-71-159-172.ngrok-free.app${empresa.foto}`}
+              src={`${mediaUrl}${empresa.foto}`}
               alt="Profile"
               sx={{ width: 120, height: 120, mx: 'auto', mb: 2 }}
             />

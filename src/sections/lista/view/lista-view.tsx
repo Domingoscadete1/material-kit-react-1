@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { Box, Typography, Paper, Avatar, TextField, Button, CircularProgress } from '@mui/material';
+import { fetchWithToken } from '../../../../authService';
+import Config from '../../../../Config';
 
 
 // Defina o tipo para as mensagens
@@ -96,8 +98,10 @@ export interface Mensagem {
 }
 
 export function ListaView() {
-  const baseUrl = 'http://127.0.0.1:8000';
-  const baseWsUrl = 'ws://127.0.0.1:8000'; // Substitua pelo URL correto
+  const baseUrl = Config.getApiUrl();
+  const mediaUrl = Config.getApiUrlMedia();
+
+  const baseWsUrl = Config.getApiUrlWs(); // Substitua pelo URL correto
 
   const [conversations, setConversations] = useState<ChatRoom[]>([]); // Tipo aplicado
   const [activeConversation, setActiveConversation] = useState<ChatRoom | null>(null); // Tipo aplicado
@@ -125,8 +129,16 @@ export function ListaView() {
       if (!empresaId) return;
 
       try {
-        const response = await axios.get(`${baseUrl}/api/chatrooms/empresa-list/${empresaId}/`);
-        const { chats } = response.data;
+        const response = await fetchWithToken(`api/chatrooms/empresa-list/${empresaId}/`,{
+          method:'GET',
+          headers: {
+         
+            'Content-Type': 'multipart/form-data',
+            "ngrok-skip-browser-warning": "true"
+          },
+        });
+        const data=await response.json();
+        const { chats } = data;
         setConversations(chats);
 
         // Define a primeira conversa como ativa (opcional)
@@ -192,7 +204,7 @@ export function ListaView() {
     return () => {
       socket.close();
     };
-  }, [activeConversation]);
+  }, [activeConversation,baseWsUrl]);
 
   // Busca as mensagens do chat ativo
   useEffect(() => {
@@ -200,8 +212,16 @@ export function ListaView() {
       if (!activeConversation) return;
 
       try {
-        const response = await axios.get(`${baseUrl}/api/chatrooms/messages/${activeConversation.id}/`);
-        const { mensagens } = response.data;
+        const response = await fetchWithToken(`api/chatrooms/messages/${activeConversation.id}/`,{
+          method: 'GET',
+        headers: {
+         
+          'Content-Type': 'multipart/form-data',
+          "ngrok-skip-browser-warning": "true"
+        },
+        });
+        const data=await response.json();
+        const { mensagens } = data;
         setMessages(mensagens);
       } catch (error) {
         console.error('Erro ao buscar mensagens:', error);
@@ -211,10 +231,7 @@ export function ListaView() {
     // Chamada inicial
     fetchMessages();
 
-    // Define um intervalo para buscar mensagens a cada 3 segundos
-    const interval = setInterval(fetchMessages, 3000);
-
-    return () => clearInterval(interval);
+    
   }, [activeConversation]);
 
   // Envia uma nova mensagem
@@ -229,6 +246,22 @@ export function ListaView() {
       // Envia a mensagem via WebSocket
       if (socketRef.current instanceof WebSocket) {
         socketRef.current.send(JSON.stringify(messageData));
+      }
+      socketRef.current.onmessage = (event) => {
+        const novaMensagem = JSON.parse(event.data);
+        console.log("Nova mensagem recebida:", novaMensagem);
+        setMessages((prevMessages) => [
+          ...prevMessages,
+          {
+            id: novaMensagem.mensagem_id || prevMessages.length + 1,
+            conteudo: novaMensagem.conteudo,
+            remetente_id: novaMensagem.remetente_id,
+            empresa_id:novaMensagem.empresa_id,
+            created_at: novaMensagem.created_at || new Date().toISOString(),
+            chat_room: activeConversation, // Garante a referência ao chat
+            remetente: activeConversation?.comprador || activeConversation?.vendedor, // Evita erros
+          },
+        ]);
       }
       setNewMessage('');
     }
@@ -266,9 +299,9 @@ export function ListaView() {
               <Avatar
               src={
                 conversation.comprador?.foto
-                  ? `${baseUrl}${conversation.comprador.foto}`
+                  ? `${mediaUrl}${conversation.comprador.foto}`
                   : conversation.empresa?.imagens?.[0]?.imagem
-                  ? `${baseUrl}${conversation.empresa.imagens[0].imagem}`
+                  ? `${mediaUrl}${conversation.empresa.imagens[0].imagem}`
                   : "https://via.placeholder.com/50"
               }                sx={{ width: 48, height: 48, mr: 2 }}
               />
@@ -299,9 +332,9 @@ export function ListaView() {
                 <Avatar
                    src={
                     activeConversation.comprador?.foto
-                      ? `${baseUrl}${activeConversation.comprador.foto}`
+                      ? `${mediaUrl}${activeConversation.comprador.foto}`
                       : activeConversation.empresa?.imagens?.[0]?.imagem
-                      ? `${baseUrl}${activeConversation.empresa.imagens[0].imagem}`
+                      ? `${mediaUrl}${activeConversation.empresa.imagens[0].imagem}`
                       : "https://via.placeholder.com/50"
                   }
                   sx={{ width: 38, height: 38, mr: 2 }}

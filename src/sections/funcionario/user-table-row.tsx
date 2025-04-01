@@ -13,6 +13,10 @@ import axios from 'axios';
 import { Label } from 'src/components/label';
 import { Iconify } from 'src/components/iconify';
 
+import { fetchWithToken } from '../../../authService';
+import Config from '../../../Config';
+
+
 // ----------------------------------------------------------------------
 
 export type UserProps = {
@@ -63,7 +67,8 @@ type FuncionarioProps = {
 export function UserTableRow({ row, selected, onSelectRow }: UserTableRowProps) {
   const [openPopover, setOpenPopover] = useState<HTMLButtonElement | null>(null);
   const [empresaId, setEmpresaId] = useState<string | null>(null);
-  const baseUrl = "http://127.0.0.1:8000/";
+  const baseUrl = Config.getApiUrl();
+  const mediaUrl=Config.getApiUrlMedia();
   const [loading, setLoading] = useState(true);
   const [postos, setPostos] = useState<PostoProps[]>([]);
   const [postoAtual, setPostoAtual] = useState<PostoProps | null>(null);
@@ -103,11 +108,20 @@ export function UserTableRow({ row, selected, onSelectRow }: UserTableRowProps) 
       setLoading(true);
       console.log("Chamando fetchFuncionarios()");
 
-      const response = await axios.get(`${baseUrl}api/empresa/funcionarios/${empresaId}/`);
-      console.log("Funcionários recebidos:", response.data.funcionarios);
+      const response = await fetchWithToken(`api/empresa/funcionarios/${empresaId}/`,{
+        method:'GET',
+        headers: {
+         
+          'Content-Type': 'multipart/form-data',
+          "ngrok-skip-browser-warning": "true"
+        },
+
+      });
+      const data = await response.json();
+      console.log("Funcionários recebidos:", data.funcionarios);
 
       // Substitui a lista de funcionários pelos novos dados
-      setFuncionarios(response.data.funcionarios);
+      setFuncionarios(data.funcionarios);
 
       setIsFetched(true);
     } catch (error) {
@@ -134,7 +148,7 @@ export function UserTableRow({ row, selected, onSelectRow }: UserTableRowProps) 
 
           <TableCell component="th" scope="row">
             <Box gap={2} display="flex" alignItems="center">
-              <Avatar src={`http://127.0.0.1:8000${funcionario.foto}`} />
+              <Avatar src={`${mediaUrl}${funcionario.foto}`} />
               {funcionario.usuario_username}
             </Box>
           </TableCell>

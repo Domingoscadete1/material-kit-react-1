@@ -15,6 +15,7 @@ import { Label } from 'src/components/label';
 import { Iconify } from 'src/components/iconify';
 import { fetchWithToken } from '../../../authService';
 
+import Config from '../../../Config';
 
 // ----------------------------------------------------------------------
 
@@ -54,7 +55,8 @@ type UserTableRowProps = {
 export function UserTableRow({ row, selected, onSelectRow }: UserTableRowProps) {
   const [openPopover, setOpenPopover] = useState<HTMLButtonElement | null>(null);
   const [empresaId, setEmpresaId] = useState<string | null>(null);
-  const baseUrl = "https://dce9-154-71-159-172.ngrok-free.app/";
+  const baseUrl = Config.getApiUrl();
+  const mediaUrl=Config.getApiUrlMedia();
   const [loading, setLoading] = useState(true);
   const [postos, setPostos] = useState<PostoProps[]>([]); // Armazenar produtos da API
   const [postoAtual, setPostoAtual] = useState<PostoProps | null>(null);
@@ -188,7 +190,7 @@ export function UserTableRow({ row, selected, onSelectRow }: UserTableRowProps) 
       <Box gap={2} display="flex" alignItems="center">
         <Avatar
           alt={postoAceite.posto?.nome}
-          src={`https://dce9-154-71-159-172.ngrok-free.app${postoAceite.posto?.imagem}`}
+          src={`${mediaUrl}${postoAceite.posto?.imagem}`}
         />
         {postoAceite.posto?.nome}
       </Box>

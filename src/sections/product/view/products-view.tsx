@@ -24,19 +24,19 @@ import axios from 'axios';
 import L from 'leaflet';
 import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
 
-import Config from '../Config';
 import { ProductItem } from '../product-item';
 import { ProductSort } from '../product-sort';
 import { CartIcon } from '../product-cart-widget';
 import { ProductFilters } from '../product-filters';
 import type { FiltersProps } from '../product-filters';
 import { fetchWithToken } from '../../../../authService';
+import Config from '../../../../Config';
 
 import 'leaflet/dist/leaflet.css';
 
 // ----------------------------------------------------------------------
 
-const API_BASE_URL = "https://dce9-154-71-159-172.ngrok-free.app";
+const API_BASE_URL = Config.getApiUrl();
 
 const GENDER_OPTIONS = [
   { value: 'men', label: 'Men' },
@@ -86,7 +86,7 @@ export function ProductsView() {
   const [page, setPage] = useState(1); // Para controle de paginação
   const [openFilter, setOpenFilter] = useState(false);
   const [empresaId, setEmpresaId] = React.useState<string | null>(null);
-  const baseUrl = "https://dce9-154-71-159-172.ngrok-free.app";
+  const baseUrl = Config.getApiUrl();
   const [openModal, setOpenModal] = useState(false);
   const [categories, setCategories] = useState<any[]>([]); // Armazenar categorias da API
   const token2 = localStorage.getItem('refreshToken'); // Token salvo ao logar
@@ -194,7 +194,7 @@ export function ProductsView() {
         headers: {
           "ngrok-skip-browser-warning": "true", // Evita bloqueios do ngrok
         },
-      }); // Substitua pela URL da API
+      }); 
       const data =await response.json();
       setCategories(data);
     } catch (error) {
@@ -233,7 +233,7 @@ export function ProductsView() {
     if (empresaId) {
       console.log(empresaId);
     }
-  }, [empresaId, fetchCategories]); // Adicione empresaId como dependência
+  }, [empresaId, fetchCategories]); 
 
   const fetchProducts = useCallback(async () => {
     if (!empresaId) {
@@ -283,11 +283,9 @@ export function ProductsView() {
     formData.append('quantidade', String(newProduct.quantidade));
     formData.append('empresa_id', empresaId || '');
 
-    // Adicionar até 5 imagens ao FormData
     newProduct.images.slice(0, 5).forEach((image, index) => {
       formData.append(`imagem${index + 1}`, image);
     });
-    // Adicionar até 5 vídeos ao FormData
     newProduct.videos.slice(0, 5).forEach((video, index) => {
       formData.append(`video${index + 1}`, video);
     });
@@ -298,8 +296,7 @@ export function ProductsView() {
       const response = await fetchWithToken(`api/produto/create/`,  {
         method:'POST',
         headers: {
-          "ngrok-skip-browser-warning": "true", // Evita bloqueios do ngrok
-
+          "ngrok-skip-browser-warning": "true",
 
         },
         body:formData,
@@ -310,7 +307,7 @@ export function ProductsView() {
       setOpenModal(false);
       setLoading(false);
       window.location.reload();
-      fetchProducts(); // Atualizar a lista de produtos
+      fetchProducts(); 
     } catch (error) {
       console.error('Erro ao criar produto:', error);
       setLoading(false);
@@ -351,11 +348,7 @@ export function ProductsView() {
   };
 
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const images = [
-    'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEj7o1UqwTqFhZnCHiL_ImyZSCgEgtFvVZoAqRJWs14MSm9w8zINDOEGUO9jvG6HLrmZajOP4asLgwAfX2sz6uvVEa38ELhPsmHdtEUQVNro3PrMlUlqjN65CWzzSmeBtWxHmjs3gGORwcaGRSB8ktJbbJ63bGusEOf7ibX6ttketOLEetfRyzbipr_HHg/s3840/Spirited%20Away%20Studio%20Ghibli%204K%20PC%20Desktop%20Wallpaper.png',
-    'https://www.chromethemer.com/download/hd-wallpapers/minimalist-spiderman-3840x2160.jpg',
-    'https://wallpapercat.com/w/full/b/8/f/6645-3840x2160-desktop-4k-assassins-creed-background-photo.jpg',
-  ];
+ 
 
   useEffect(() => {
     const interval = setInterval(() => {

@@ -18,9 +18,11 @@ import { PostItem } from '../post-item';
 import { PostSort } from '../post-sort';
 import { PostSearch } from '../post-search';
 import { fetchWithToken } from '../../../../authService';
+import Config from '../../../../Config';
+
 
 // ----------------------------------------------------------------------
-const API_BASE_URL = "https://dce9-154-71-159-172.ngrok-free.app";
+const API_BASE_URL = Config.getApiUrl();
 
 export function BlogView() {
   const [sortBy, setSortBy] = useState('latest');

@@ -8,7 +8,7 @@ import Typography from '@mui/material/Typography';
 import { Button, Modal, TextField } from '@mui/material';
 import { fCurrency } from 'src/utils/format-number';
 import { Label } from 'src/components/label';
-import Config from '../Config';
+import Config from '../../../Config';
 import { fetchWithToken } from '../../../authService';
 
 export type ProductItemProps = {
@@ -20,9 +20,9 @@ export type ProductItemProps = {
   descricao: string;
   localizacao: string;
   imagens: { id: number; imagem: string }[];
-  videos: { id: number; video: string }[]; // Adicionando vídeos
+  videos: { id: number; video: string }[]; 
   precoVenda: number | null;
-  categoria: { nome: string }; // Adicionando categoria
+  categoria: { nome: string }; 
 };
 
 export function ProductItem({ product }: { product: ProductItemProps }) {
@@ -30,11 +30,11 @@ export function ProductItem({ product }: { product: ProductItemProps }) {
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
   const [formData, setFormData] = useState({ ...product });
   const [selectedImages, setSelectedImages] = useState(product.imagens);
-  const [selectedVideos, setSelectedVideos] = useState(product.videos); // Estado para vídeos
+  const [selectedVideos, setSelectedVideos] = useState(product.videos); 
   const [imagensParaRemover, setImagensParaRemover] = useState<number[]>([]);
-  const [videosParaRemover, setVideosParaRemover] = useState<number[]>([]); // Estado para vídeos a remover
+  const [videosParaRemover, setVideosParaRemover] = useState<number[]>([]); 
   const [newImages, setNewImages] = useState<File[]>([]);
-  const [newVideos, setNewVideos] = useState<File[]>([]); // Estado para novos vídeos
+  const [newVideos, setNewVideos] = useState<File[]>([]); 
   const baseUrl = Config.getApiUrl();
   const mediaUrl = Config.getApiUrlMedia();
 
@@ -58,21 +58,16 @@ export function ProductItem({ product }: { product: ProductItemProps }) {
     formDataToSend.append('categoria', formData.categoria.nome);
     formDataToSend.append('quantidade', formData.quantidade.toString());
 
-    // Adiciona as imagens novas
     newImages.forEach((image, index) => {
       formDataToSend.append(`imagem${index + 1}`, image);
     });
 
-    // Adiciona as imagens a remover
     imagensParaRemover.forEach((imageId) => {
       formDataToSend.append('imagens_para_remover[]', imageId.toString());
     });
-    // Adiciona os vídeos novos
     newVideos.forEach((video, index) => {
       formDataToSend.append(`video${index + 1}`, video);
     });
-
-    // Adiciona os vídeos a remover
     videosParaRemover.forEach((videoId) => {
       formDataToSend.append('videos_para_remover[]', videoId.toString());
     });
@@ -84,7 +79,6 @@ export function ProductItem({ product }: { product: ProductItemProps }) {
         {
           method: 'PUT',
           headers: {
-            // Não inclua Content-Type!
             "ngrok-skip-browser-warning": "true"
           },
           body: formDataToSend
@@ -105,7 +99,6 @@ export function ProductItem({ product }: { product: ProductItemProps }) {
         `api/produto/${product.id}/deletar/`,{
           method:'DELETE',
           headers: {
-            // Não inclua Content-Type!
             "ngrok-skip-browser-warning": "true"
           },
 
@@ -183,7 +176,7 @@ export function ProductItem({ product }: { product: ProductItemProps }) {
           <Box
             component="img"
             alt={product.nome}
-            src={`https://dce9-154-71-159-172.ngrok-free.app${product.imagens[0]?.imagem}`}
+            src={`${mediaUrl}${product.imagens[0]?.imagem}`}
             sx={{
               top: 0,
               width: 1,
@@ -287,7 +280,7 @@ export function ProductItem({ product }: { product: ProductItemProps }) {
               <Box key={image.id} sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
                 <Box
                   component="img"
-                  src={`https://dce9-154-71-159-172.ngrok-free.app${image.imagem}`}
+                  src={`${mediaUrl}${image.imagem}`}
                   alt="Produto"
                   sx={{ width: 50, height: 50, objectFit: 'cover', mr: 2 }}
                 />
@@ -325,7 +318,7 @@ export function ProductItem({ product }: { product: ProductItemProps }) {
               <Box key={video.id} sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
 
                 <video
-                  src={`https://dce9-154-71-159-172.ngrok-free.app${video.video}`}
+                  src={`${mediaUrl}${video.video}`}
                   controls
                   style={{ width: 100, height: 100, marginRight: 10 }}
                 >

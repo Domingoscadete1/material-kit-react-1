@@ -25,6 +25,7 @@ import { varAlpha } from 'src/theme/styles';
 import { Iconify } from 'src/components/iconify';
 import { SvgColor } from 'src/components/svg-color';
 import { fetchWithToken } from '../../../authService';
+import Config from '../../../Config';
 
 
 // ----------------------------------------------------------------------
@@ -84,6 +85,8 @@ export function PostItem({
   const [open, setOpen] = useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
+  const wssUrl=Config.getApiUrlWs();
+  const mediaUrl=Config.getApiUrlMedia();
 
   const [openMessageModal, setOpenMessageModal] = useState(false);
   const handleOpenMessageModal = () => setOpenMessageModal(true);
@@ -129,7 +132,7 @@ export function PostItem({
       return undefined; // Retorno explícito para evitar erro do ESLint
     }
 
-    const wsUrl = `wss://dce9-154-71-159-172.ngrok-free.app/ws/new_chat/${userData?.id}/`;
+    const wsUrl = `wss://${wssUrl}/ws/new_chat/${userData?.id}/`;
     const ws = new WebSocket(wsUrl);
     setWebSocket(ws);
 
@@ -177,7 +180,7 @@ export function PostItem({
     return () => {
       ws.close();
     };
-  }, [openMessageModal, userData?.id]);
+  }, [openMessageModal, userData?.id,wssUrl]);
 
   const [openPaymentModal, setOpenPaymentModal] = useState(false);
   const [postos, setPostos] = useState<Posto[]>([]);
@@ -276,7 +279,7 @@ export function PostItem({
   const renderAvatar = (
     <Avatar
       alt={post.empresa.nome}
-      src={`https://dce9-154-71-159-172.ngrok-free.app${post.empresa?.imagens[0]?.imagem}`}
+      src={`${mediaUrl}${post.empresa?.imagens[0]?.imagem}`}
       sx={{
         left: 24,
         zIndex: 9,
@@ -352,7 +355,7 @@ export function PostItem({
       component="img"
       onClick={()=>handleProdutoClick(post.id)}
       alt={post.nome}
-      src={`https://dce9-154-71-159-172.ngrok-free.app${post.imagens[0]?.imagem}`}
+      src={`${mediaUrl}${post.imagens[0]?.imagem}`}
       sx={{
         top: 0,
         width: 1,
@@ -412,7 +415,7 @@ export function PostItem({
       </Box>
       <Box
         component="img"
-        src={`https://dce9-154-71-159-172.ngrok-free.app${post.imagens[0]?.imagem}`}
+        src={`${mediaUrl}${post.imagens[0]?.imagem}`}
         alt={post.nome}
         sx={{
           width: 80,
@@ -517,7 +520,7 @@ export function PostItem({
               <Box
                 key={img.id}
                 component="img"
-                src={`https://dce9-154-71-159-172.ngrok-free.app${img.imagem}`}
+                src={`${mediaUrl}${img.imagem}`}
                 alt={post.nome}
                 sx={{ width: 120, height: 120, borderRadius: 1, objectFit: 'cover', cursor: 'pointer' }}
               />
