@@ -17,6 +17,8 @@ import { AnalyticsTrafficBySite } from '../analytics-traffic-by-site';
 import { AnalyticsCurrentSubject } from '../analytics-current-subject';
 import { AnalyticsConversionRates } from '../analytics-conversion-rates';
 
+import { fetchWithToken } from '../../../../authService';
+import Config from '../../../../Config';
 // ----------------------------------------------------------------------
 
 export function OverviewAnalyticsView() {
@@ -50,12 +52,13 @@ export function OverviewAnalyticsView() {
     const fetchProducts = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(`https://dce9-154-71-159-172.ngrok-free.app/api/produtos-search/bussiness/${empresa.empresa.id}/`,{
+        const response = await fetchWithToken(`api/produtos-search/bussiness/${empresa.empresa.id}/`,{
           headers: {
             "ngrok-skip-browser-warning": "true", // Evita bloqueios do ngrok
           },
         });
-        setProducts(response.data.produtos || []);
+        const data=await response.json();
+        setProducts(data.produtos || []);
       } catch (error) {
         console.error('Erro ao buscar produtos:', error);
       } finally {
@@ -71,12 +74,13 @@ export function OverviewAnalyticsView() {
     const fetchAnalytics = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(`https://dce9-154-71-159-172.ngrok-free.app/api/empresa/analytics/${empresaId}/`,{
+        const response = await fetchWithToken(`api/empresa/analytics/${empresaId}/`,{
           headers: {
             "ngrok-skip-browser-warning": "true", // Evita bloqueios do ngrok
           },
         });
-        setAnalyticsData(response.data);
+        const data=await response.json();
+        setAnalyticsData(data);
       } catch (error) {
         console.error('Erro ao buscar dados analíticos:', error);
       } finally {

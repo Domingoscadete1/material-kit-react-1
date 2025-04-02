@@ -19,6 +19,8 @@ import { fToNow } from 'src/utils/format-time';
 import { Iconify } from 'src/components/iconify';
 import { Scrollbar } from 'src/components/scrollbar';
 
+import { fetchWithToken } from '../../../authService';
+import Config from '../../../Config';
 // Definição do tipo de notificação
 export type NotificationItemProps = {
   id: string;
@@ -73,13 +75,15 @@ export function NotificationsPopover({ data = [], sx, ...other }: NotificationsP
     if (!empresaId) return;
     const fetchNotifications = async () => {
       try {
-        const response = await axios.get(`https://dce9-154-71-159-172.ngrok-free.app/api/notificacoes/empresa-list/${empresaId}/`,{
+        const response = await fetchWithToken(`api/notificacoes/empresa-list/${empresaId}/`,{
+          method:'GET',
           headers: {
             "ngrok-skip-browser-warning": "true", // Evita bloqueios do ngrok
           },
         });
         // Pegando os dados corretamente
-      const notificacoes = response.data.notificacoes || []; 
+        const data1 =await response.json();
+      const notificacoes = data1.notificacoes || []; 
       console.log('notificações',notificacoes);
 
       // Convertendo os dados para o formato esperado
