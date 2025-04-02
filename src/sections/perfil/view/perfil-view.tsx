@@ -14,10 +14,12 @@ import { DashboardContent } from 'src/layouts/dashboard';
 
 import React,{ useState, useEffect, useRef, useCallback } from 'react';
 import axios from 'axios';
+
+import { resolve } from 'path';
 import { fetchWithToken } from '../../../../authService';
 
 import Config from '../../../../Config';
-import { resolve } from 'path';
+
 
 
 
@@ -114,7 +116,7 @@ export function PerfilView() {
       }
     })
     .catch(error => console.error('Erro ao buscar chat:', error));
-  }, [empresa?.empresa?.id,wssUrl]);
+  }, [empresa?.empresa?.id]);
   
   useEffect(() => {
     verificarChat();
@@ -158,7 +160,7 @@ export function PerfilView() {
     socketRef.current.onclose = () => console.log("WebSocket fechado");
   
     return () => socketRef.current?.close();
-  }, [empresa?.empresa?.id]);
+  }, [empresa?.empresa?.id,wssUrl]);
   
 
   const handleSendMessage = () => {
