@@ -2,6 +2,9 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Modal, Box, Button, Typography, MenuItem, TextField, CircularProgress } from '@mui/material';
 import axios from 'axios';
 
+import Config from "../../../../Config";
+import { fetchWithToken } from '../../../../authService';
+
 type AddFuncionarioModalProps = {
   open: boolean;
   onClose: () => void;
@@ -47,11 +50,13 @@ const AddFuncionarioModal: React.FC<AddFuncionarioModalProps> = ({ open, onClose
       }
       
 
-      await axios.post('https://dce9-154-71-159-172.ngrok-free.app/api/empresa-user-add/', formData, {
+       const response=await fetchWithToken('api/empresa-user-add/',  {
+        method:'POST',
         headers: {
-          'Content-Type': 'multipart/form-data',
+         
           "ngrok-skip-browser-warning": "true",
-        }
+        },
+        body:formData,
       });
 
       alert('Funcionário adicionado com sucesso!');
