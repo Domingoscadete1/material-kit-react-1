@@ -69,11 +69,21 @@ const refreshAccessToken = async () => {
     return data.access;
   } catch (error) {
     console.error('Erro ao renovar o token JWT:', error.message);
+    const refreshToken = await webStorage.getItem('refreshToken');
+
     localStorage.removeItem('custom-auth-token');
-    localStorage.removeItem('userData');
-    localStorage.removeItem('refreshToken');
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('registeredDeviceToken');
+        localStorage.removeItem('userData');
+        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('registeredDeviceToken');
+        const response = await fetch(`${baseUrl}api/logout/`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ refresh: refreshToken }),
+        });
+    // Redireciona para login na web
     window.location.reload();
     return null;
   }

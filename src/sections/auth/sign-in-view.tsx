@@ -22,7 +22,7 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import Button from '@mui/material/Button';
 import { MenuItem } from '@mui/material';
-import Config from '../Config';
+import Config from '../../../Config';
 
 // ----------------------------------------------------------------------
 
@@ -176,7 +176,7 @@ const handlecadastro = async () => {
                 console.log("Iniciando requisição para buscar dados do usuário...");
 
                 try {
-                    const response = await axios.get(`https://dce9-154-71-159-172.ngrok-free.app/api/user/`, {
+                    const response = await axios.get(`${Config.getApiUrl()}api/user/`, {
                         headers: {
                             'Authorization': `Bearer ${token}`,
                             "ngrok-skip-browser-warning": "true",
