@@ -71,11 +71,7 @@ const refreshAccessToken = async () => {
     console.error('Erro ao renovar o token JWT:', error.message);
     const refreshToken = await webStorage.getItem('refreshToken');
 
-    localStorage.removeItem('custom-auth-token');
-        localStorage.removeItem('userData');
-        localStorage.removeItem('refreshToken');
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('registeredDeviceToken');
+    
         const response = await fetch(`${baseUrl}api/logout/`, {
           method: 'POST',
           headers: {
@@ -84,6 +80,11 @@ const refreshAccessToken = async () => {
           body: JSON.stringify({ refresh: refreshToken }),
         });
     // Redireciona para login na web
+    await localStorage.removeItem('custom-auth-token');
+        await localStorage.removeItem('userData');
+        await localStorage.removeItem('refreshToken');
+        await localStorage.removeItem('accessToken');
+        await localStorage.removeItem('registeredDeviceToken');
     window.location.reload();
     return null;
   }
