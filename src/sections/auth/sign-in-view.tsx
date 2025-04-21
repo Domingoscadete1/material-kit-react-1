@@ -73,7 +73,7 @@ export function SignInView() {
     const [isPending, setIsPending] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const [userData, setUserData] = React.useState < UserData | null > (null);
-    const [open, setOpen] = useState(false); // Estado para controlar a abertura do modal
+    const [open, setOpen] = useState(false)
     const [form, setForm] = useState<FormDataType>({
       nome: '',
       email: '',
@@ -88,6 +88,11 @@ export function SignInView() {
       alvara_comercial: null,
       certidao_registro_comercial: null,
     });
+    const [openReset, setOpenReset] = useState(false); 
+    const [resetEmail, setResetEmail] = useState('');
+    const [resetLoading, setResetLoading] = useState(false);
+    const [resetMessage, setResetMessage] = useState('');
+    const [resetError, setResetError] = useState('');
     
   const [loading, setLoading] = useState(false);
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -168,6 +173,44 @@ const handlecadastro = async () => {
 
     const handleClose = () => {
         setOpen(false);
+    };
+    const handleOpenReset = () => {
+        setOpenReset(true);
+    };
+
+    const handleCloseReset = () => {
+        setOpenReset(false);
+        setResetEmail('');
+        setResetMessage('');
+        setResetError('');
+    };
+
+    const handleResetPassword = async () => {
+        if (!resetEmail) {
+            setResetError('Por favor, insira seu e-mail');
+            return;
+        }
+
+        try {
+            setResetLoading(true);
+            setResetError('');
+            setResetMessage('');
+
+            const response = await axios.post(
+                `${baseUrl}api/password-reset/`,
+                { email: resetEmail },
+                { headers: { 'Content-Type': 'application/json', "ngrok-skip-browser-warning": "true" } }
+            );
+
+            if (response.status === 200) {
+                setResetMessage('E-mail de redefinição enviado. Verifique sua caixa de entrada.');
+            }
+        } catch (error) {
+            console.error("Erro ao solicitar redefinição:", error);
+            setResetError(error.response?.data?.error || 'Erro ao solicitar redefinição de senha');
+        } finally {
+            setResetLoading(false);
+        }
     };
 
     const onSubmit = useCallback(
@@ -316,6 +359,13 @@ const handlecadastro = async () => {
                     Cadastrar
                 </Link>
             </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                Esqueceu sua senha?
+                <Link variant="subtitle2" sx={{ ml: 0.5, cursor: 'pointer' }} onClick={handleOpenReset}>
+                    Redefinir senha
+                </Link>
+            </Typography>
+
 
             <Divider sx={{ my: 1, '&::before, &::after': { borderTopStyle: 'dashed' } }}>
                 <Typography
@@ -390,6 +440,52 @@ const handlecadastro = async () => {
 
             </DialogActions>
         </Dialog>
+
+
+        {/* Modal de Redefinição de Senha */}
+        <Dialog open={openReset} onClose={handleCloseReset}>
+                <DialogTitle>Redefinir Senha</DialogTitle>
+                <DialogContent>
+                    <Typography variant="body1" sx={{ mb: 2 }}>
+                        Insira seu e-mail cadastrado para receber o link de redefinição de senha
+                    </Typography>
+                    
+                    {resetError && (
+                        <Typography color="error" variant="body2" sx={{ mb: 2 }}>
+                            {resetError}
+                        </Typography>
+                    )}
+                    
+                    {resetMessage && (
+                        <Typography color="success.main" variant="body2" sx={{ mb: 2 }}>
+                            {resetMessage}
+                        </Typography>
+                    )}
+                    
+                    <TextField
+                        fullWidth
+                        margin="normal"
+                        label="E-mail"
+                        type="email"
+                        value={resetEmail}
+                        onChange={(e) => setResetEmail(e.target.value)}
+                        disabled={resetLoading}
+                    />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleCloseReset} disabled={resetLoading}>
+                        Cancelar
+                    </Button>
+                    <Button 
+                        onClick={handleResetPassword} 
+                        variant="contained" 
+                        color="primary" 
+                        disabled={resetLoading}
+                    >
+                        {resetLoading ? 'Enviando...' : 'Enviar Link'}
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </Box>
     );
 }
