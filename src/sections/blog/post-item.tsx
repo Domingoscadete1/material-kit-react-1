@@ -85,8 +85,8 @@ export function PostItem({
   const [open, setOpen] = useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
-  const wssUrl=Config.getApiUrlWs();
-  const mediaUrl=Config.getApiUrlMedia();
+  const wssUrl = Config.getApiUrlWs();
+  const mediaUrl = Config.getApiUrlMedia();
 
   const [openMessageModal, setOpenMessageModal] = useState(false);
   const handleOpenMessageModal = () => setOpenMessageModal(true);
@@ -101,7 +101,7 @@ export function PostItem({
   const handleAvatarClick = () => {
     navigate(`/perfil2/${post.empresa.id}/empresa`);
   };
-  const handleProdutoClick = (id:any) => {
+  const handleProdutoClick = (id: any) => {
     navigate(`/detalhes/${id}/`);
   };
 
@@ -180,7 +180,7 @@ export function PostItem({
     return () => {
       ws.close();
     };
-  }, [openMessageModal, userData?.id,wssUrl]);
+  }, [openMessageModal, userData?.id, wssUrl]);
 
   const [openPaymentModal, setOpenPaymentModal] = useState(false);
   const [postos, setPostos] = useState<Posto[]>([]);
@@ -197,14 +197,14 @@ export function PostItem({
     const fetchPostos = async () => {
       setLoading(true);
       try {
-        const response = await fetchWithToken(`api/postos/empresa/${post.empresa.id}/`,{
-          method:'GET',
-        headers: {
-          "ngrok-skip-browser-warning": "true", // Evita bloqueios do ngrok
-        },
-        
-      });
-      const data=await response.json();
+        const response = await fetchWithToken(`api/postos/empresa/${post.empresa.id}/`, {
+          method: 'GET',
+          headers: {
+            "ngrok-skip-browser-warning": "true",
+          },
+
+        });
+        const data = await response.json();
         setPostos(data.postos || []);
       } catch (err) {
         alert(err.message);
@@ -221,17 +221,17 @@ export function PostItem({
   const checkPostoAvailability = async (postoId: number) => {
     try {
       const response = await fetchWithToken(`api/posto/available/${postoId}/`, {
-        method:'GET',
+        method: 'GET',
         headers: {
-          "ngrok-skip-browser-warning": "true", // Evita bloqueios do ngrok
+          "ngrok-skip-browser-warning": "true",
         },
-        validateStatus: (status:any) => status === 200 || status === 303,
+        validateStatus: (status: any) => status === 200 || status === 303,
       });
       setPostoDisponivel(response.status === 200);
-      if (response.status === 303){
+      if (response.status === 303) {
         alert('Não há espaço neste posto.');
         setPostoDisponivel(false);
-        
+
       }
     } catch {
       alert('Erro ao verificar disponibilidade do posto');
@@ -243,31 +243,31 @@ export function PostItem({
       alert('Por favor, selecione um posto antes de prosseguir.');
       return;
     }
-    if(Number(quantidade) > post.quantidade){
+    if (Number(quantidade) > post.quantidade) {
       alert('A quantidade selecionada não pode ser superior à quantidade disponivel do produto.');
       return;
     }
     setLoading(true);
     try {
       const response = await fetchWithToken('api/stripe/create-payment/bussiness-bussiness/', {
-        method:'POST',
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
 
-          "ngrok-skip-browser-warning": "true", // Evita bloqueios do ngrok
+          "ngrok-skip-browser-warning": "true",
         },
-        body:JSON.stringify(
+        body: JSON.stringify(
           {
-        produto_id: post.id,
-        empresa_id: userData?.empresa?.id,
-        posto_id: selectedPosto,
-        descricao: post.descricao,
-        currency: 'AOA',
-        quantidade,
+            produto_id: post.id,
+            empresa_id: userData?.empresa?.id,
+            posto_id: selectedPosto,
+            descricao: post.descricao,
+            currency: 'AOA',
+            quantidade,
           }
         ),
       });
-      const data=await response.json();
+      const data = await response.json();
       setCheckoutUrl(data.checkout_url);
     } catch (error) {
       alert('Erro ao iniciar pagamento');
@@ -290,7 +290,7 @@ export function PostItem({
           top: 24,
         }),
       }}
-      onClick={handleAvatarClick} // Adicionando o redirecionamento com ID e Tipo
+      onClick={handleAvatarClick}
     />
   );
 
@@ -330,7 +330,7 @@ export function PostItem({
         { icon: 'solar:chat-round-dots-bold', onClick: handleOpenMessageModal },
         { number: post.quantidade, icon: 'mdi:package-variant' },
         // { number: post.quantidade, icon: 'solar:share-bold' },
-        { icon: 'mdi:credit-card-outline', onClick: handleOpenPaymentModal }, // 
+        { icon: 'mdi:credit-card-outline', onClick: handleOpenPaymentModal }, 
       ].map((info, _index) => (
         <Box
           key={_index}
@@ -353,7 +353,7 @@ export function PostItem({
   const renderCover = (
     <Box
       component="img"
-      onClick={()=>handleProdutoClick(post.id)}
+      onClick={() => handleProdutoClick(post.id)}
       alt={post.nome}
       src={`${mediaUrl}${post.imagens[0]?.imagem}`}
       sx={{

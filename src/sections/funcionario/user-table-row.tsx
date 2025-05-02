@@ -68,14 +68,14 @@ export function UserTableRow({ row, selected, onSelectRow }: UserTableRowProps) 
   const [openPopover, setOpenPopover] = useState<HTMLButtonElement | null>(null);
   const [empresaId, setEmpresaId] = useState<string | null>(null);
   const baseUrl = Config.getApiUrl();
-  const mediaUrl=Config.getApiUrlMedia();
+  const mediaUrl = Config.getApiUrlMedia();
   const [loading, setLoading] = useState(true);
   const [postos, setPostos] = useState<PostoProps[]>([]);
   const [postoAtual, setPostoAtual] = useState<PostoProps | null>(null);
   const [funcionarios, setFuncionarios] = useState<FuncionarioProps[]>([]);
   const [funcionarioAtual, setFuncionarioAtual] = useState<FuncionarioProps | null>(null);
   const [isFetched, setIsFetched] = useState(false);
-  const hasFetched = useRef(false); // Rastreia se a função já foi chamada
+  const hasFetched = useRef(false);
 
   const handleOpenPopover = useCallback(
     (event: React.MouseEvent<HTMLButtonElement>, posto: PostoProps) => {
@@ -108,10 +108,10 @@ export function UserTableRow({ row, selected, onSelectRow }: UserTableRowProps) 
       setLoading(true);
       console.log("Chamando fetchFuncionarios()");
 
-      const response = await fetchWithToken(`api/empresa/funcionarios/${empresaId}/`,{
-        method:'GET',
+      const response = await fetchWithToken(`api/empresa/funcionarios/${empresaId}/`, {
+        method: 'GET',
         headers: {
-         
+
           'Content-Type': 'multipart/form-data',
           "ngrok-skip-browser-warning": "true"
         },
@@ -119,10 +119,7 @@ export function UserTableRow({ row, selected, onSelectRow }: UserTableRowProps) 
       });
       const data = await response.json();
       console.log("Funcionários recebidos:", data.funcionarios);
-
-      // Substitui a lista de funcionários pelos novos dados
       setFuncionarios(data.funcionarios);
-
       setIsFetched(true);
     } catch (error) {
       console.error("Erro ao buscar funcionários:", error);

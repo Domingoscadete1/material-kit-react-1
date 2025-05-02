@@ -22,8 +22,11 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import Button from '@mui/material/Button';
 import { MenuItem } from '@mui/material';
-import Config from '../../../Config';
 
+import L from 'leaflet';
+import { MapContainer, Marker, TileLayer, useMapEvents } from 'react-leaflet';
+
+import Config from '../../../Config';
 // ----------------------------------------------------------------------
 
 interface CustomJwtPayload extends JwtPayload {
@@ -37,18 +40,18 @@ interface UserData {
     status: string;
 }
 interface FormDataType {
-  nome: string;
-  email: string;
-  senha: string;
-  telefone1: string;
-  telefone2: string;
-  endereco: string;
-  categoria: string;
-  descricao: string;
-  imagens: File[];
-  nif: string;
-  alvara_comercial: File | null;
-  certidao_registro_comercial: File | null;
+    nome: string;
+    email: string;
+    senha: string;
+    telefone1: string;
+    telefone2: string;
+    endereco: string;
+    categoria: string;
+    descricao: string;
+    imagens: File[];
+    nif: string;
+    alvara_comercial: File | null;
+    certidao_registro_comercial: File | null;
 }
 
 
@@ -62,9 +65,9 @@ type Values = zod.infer<typeof schema>;
 const defaultValues = { username: '', password: '' };
 
 const categorias = [
-  { value: 'moda', label: 'Moda' },
-  { value: 'tecnologia', label: 'Tecnologia' },
-  { value: 'cosmeticos', label: 'Cosméticos' },
+    { value: 'moda', label: 'Moda' },
+    { value: 'tecnologia', label: 'Tecnologia' },
+    { value: 'cosmeticos', label: 'Cosméticos' },
 ];
 
 export function SignInView() {
@@ -72,75 +75,119 @@ export function SignInView() {
     const baseUrl = Config.getApiUrl();
     const [isPending, setIsPending] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
-    const [userData, setUserData] = React.useState < UserData | null > (null);
+    const [userData, setUserData] = React.useState<UserData | null>(null);
     const [open, setOpen] = useState(false)
+    const [location, setLocation] = useState<{ lat: number; lng: number }>({ lat: 0, lng: 0 });
+    const [openMapModal, setOpenMapModal] = useState(false);
     const [form, setForm] = useState<FormDataType>({
-      nome: '',
-      email: '',
-      senha: '',
-      telefone1: '',
-      telefone2: '',
-      endereco: '',
-      categoria: '',
-      descricao: '',
-      imagens: [],
-      nif: '',
-      alvara_comercial: null,
-      certidao_registro_comercial: null,
+        nome: '',
+        email: '',
+        senha: '',
+        telefone1: '',
+        telefone2: '',
+        endereco: '',
+        categoria: '',
+        descricao: '',
+        imagens: [],
+        nif: '',
+        alvara_comercial: null,
+        certidao_registro_comercial: null,
     });
-    const [openReset, setOpenReset] = useState(false); 
+    const [openReset, setOpenReset] = useState(false);
     const [resetEmail, setResetEmail] = useState('');
     const [resetLoading, setResetLoading] = useState(false);
     const [resetMessage, setResetMessage] = useState('');
     const [resetError, setResetError] = useState('');
-    
-  const [loading, setLoading] = useState(false);
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-  };
-  
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files) return;
-  
-    const { name } = e.target;
-    const file = e.target.files[0];
-  
-    setForm((prev) => ({ ...prev, [name]: file }));
-  };
-  
-  
-const handlecadastro = async () => {
-  const formData = new FormData();
-  Object.keys(form).forEach((key) => {
-    const fieldKey = key as keyof FormDataType;
 
-    if (fieldKey === 'imagens' && Array.isArray(form[fieldKey])) {
-      form[fieldKey].forEach((file, index) => formData.append(`imagem${index + 1}`, file));
-    } else if (fieldKey === 'alvara_comercial' || fieldKey === 'certidao_registro_comercial') {
-      if (form[fieldKey]) {
-        formData.append(fieldKey, form[fieldKey] as File);
-      }
-    } else {
-      formData.append(fieldKey, String(form[fieldKey]));
+    const [loading, setLoading] = useState(false);
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    };
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (!e.target.files) return;
+
+        const { name } = e.target;
+        const file = e.target.files[0];
+
+        setForm((prev) => ({ ...prev, [name]: file }));
+    };
+
+    const [newProduct, setNewProduct] = useState({
+        nome: '',
+        descricao: '',
+        categoria: '',
+        condicao: 'Novo',
+        preco: '',
+        localizacao: '',
+        quantidade: 1,
+        images: [] as File[], // Para permitir múltiplas imagens
+        videos: [] as File[],
+
+    });
+
+    function LocationMarker() {
+        const map = useMapEvents({
+            click(e) {
+                setLocation({ lat: e.latlng.lat, lng: e.latlng.lng });
+            },
+        });
+
+        return location ? (
+            <Marker position={[location.lat, location.lng]} icon={L.icon({
+                iconUrl: 'https://leafletjs.com/examples/custom-icons/leaf-red.png',
+                iconSize: [25, 41],
+                iconAnchor: [12, 41],
+            })} />
+        ) : null;
     }
-  });
-  
 
-  try {
-      setLoading(true);
-      const response = await axios.post(`${Config.getApiUrl()}api/empresa/create/`, formData, {
-          headers: { 'Content-Type': 'multipart/form-data',"ngrok-skip-browser-warning": "true" },
-      });
+    useEffect(() => {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const { latitude, longitude } = position.coords;
+                    setLocation({ lat: latitude, lng: longitude });
+                },
+                (error) => {
+                    console.error('Erro ao obter localização:', error);
+                }
+            );
+        }
+    }, []);
 
-      alert('Empresa cadastrada com sucesso!');
-      handleClose();
-  } catch (error) {
-      console.error('Erro ao cadastrar empresa:', error.response?.data || error.message);
-      alert(error.response?.data?.detail || 'Erro ao cadastrar empresa.');
-  } finally {
-      setLoading(false);
-  }
-};
+    const handlecadastro = async () => {
+        const formData = new FormData();
+        Object.keys(form).forEach((key) => {
+            const fieldKey = key as keyof FormDataType;
+
+            if (fieldKey === 'imagens' && Array.isArray(form[fieldKey])) {
+                form[fieldKey].forEach((file, index) => formData.append(`imagem${index + 1}`, file));
+            } else if (fieldKey === 'alvara_comercial' || fieldKey === 'certidao_registro_comercial') {
+                if (form[fieldKey]) {
+                    formData.append(fieldKey, form[fieldKey] as File);
+                }
+            } else {
+                formData.append(fieldKey, String(form[fieldKey]));
+            }
+        });
+
+
+        try {
+            setLoading(true);
+            const response = await axios.post(`${Config.getApiUrl()}api/empresa/create/`, formData, {
+                headers: { 'Content-Type': 'multipart/form-data', "ngrok-skip-browser-warning": "true" },
+            });
+
+            alert('Empresa cadastrada com sucesso!');
+            handleClose();
+        } catch (error) {
+            console.error('Erro ao cadastrar empresa:', error.response?.data || error.message);
+            alert(error.response?.data?.detail || 'Erro ao cadastrar empresa.');
+        } finally {
+            setLoading(false);
+        }
+    };
 
 
     const {
@@ -148,7 +195,7 @@ const handlecadastro = async () => {
         handleSubmit,
         setError,
         formState: { errors },
-    } = useForm < Values > ({
+    } = useForm<Values>({
         defaultValues,
         resolver: zodResolver(schema),
     });
@@ -157,7 +204,7 @@ const handlecadastro = async () => {
         const accessToken = localStorage.getItem('accessToken');
         if (accessToken) {
             try {
-                const decodedToken = jwtDecode < CustomJwtPayload > (accessToken);
+                const decodedToken = jwtDecode<CustomJwtPayload>(accessToken);
                 if (decodedToken?.is_funcionario_emppresa) {
                     router.push('/'); // Redireciona para a página inicial caso o token seja válido
                 }
@@ -210,6 +257,40 @@ const handlecadastro = async () => {
             setResetError(error.response?.data?.error || 'Erro ao solicitar redefinição de senha');
         } finally {
             setResetLoading(false);
+        }
+    };
+
+    const handleGetCurrentLocation = () => {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const { latitude, longitude } = position.coords;
+                    setLocation({ lat: latitude, lng: longitude });
+                    setNewProduct((prev) => ({ ...prev, localizacao: `${latitude}, ${longitude}` }));
+                },
+                (error) => {
+                    console.error('Erro ao obter localização:', error);
+                }
+            );
+        } else {
+            alert('Geolocalização não é suportada pelo seu navegador.');
+        }
+    };
+
+    const handleOpenMapModal = () => {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    setLocation({ lat: position.coords.latitude, lng: position.coords.longitude });
+                    setOpenMapModal(true);
+                },
+                (error) => {
+                    console.error('Erro ao obter localização:', error);
+                    setOpenMapModal(true);
+                }
+            );
+        } else {
+            setOpenMapModal(true);
         }
     };
 
@@ -267,7 +348,7 @@ const handlecadastro = async () => {
                 if (response.status === 200) {
 
                     const { access, refresh } = response.data;
-                    const decodedToken = jwtDecode < CustomJwtPayload > (access);
+                    const decodedToken = jwtDecode<CustomJwtPayload>(access);
 
                     if (decodedToken?.is_funcionario_emppresa) {
                         console.log('ola');
@@ -276,7 +357,7 @@ const handlecadastro = async () => {
                         localStorage.setItem('refreshToken', refresh);
                         localStorage.setItem('custom-auth-token', access);
 
-                        
+
                     } else {
                         setError('root', { type: 'server', message: 'Usuário não autorizado.' });
                     }
@@ -290,7 +371,7 @@ const handlecadastro = async () => {
                 setIsPending(false);
             }
         },
-        [baseUrl,  setError,router]
+        [baseUrl, setError, router]
     );
 
     return (
@@ -390,78 +471,124 @@ const handlecadastro = async () => {
 
             {/* Modal de Cadastro de Empresa */}
             <Dialog open={open} onClose={handleClose}>
-            <DialogTitle>Cadastrar Empresa</DialogTitle>
-            <DialogContent>
-                <TextField fullWidth margin="normal" label="Nome da Empresa" name="nome" onChange={handleChange} required />
-                <TextField fullWidth margin="normal" label="Email" name="email" onChange={handleChange} required />
-                <TextField fullWidth margin="normal" label="Numero de identificação fiscal" name="nif" onChange={handleChange} required />
+                <DialogTitle>Cadastrar Empresa</DialogTitle>
+                <DialogContent>
+                    <TextField fullWidth margin="normal" label="Nome da Empresa" name="nome" onChange={handleChange} required />
+                    <TextField fullWidth margin="normal" label="Email" name="email" onChange={handleChange} required />
+                    <TextField fullWidth margin="normal" label="Numero de identificação fiscal" name="nif" onChange={handleChange} required />
 
-                <TextField fullWidth margin="normal" label="Senha" type="password" name="senha" onChange={handleChange} required />
-                <TextField fullWidth margin="normal" label="Telefone 1" name="telefone1" onChange={handleChange} required />
-                <TextField fullWidth margin="normal" label="Telefone 2" name="telefone2" onChange={handleChange} />
-                <TextField fullWidth margin="normal" label="Endereço" name="endereco" onChange={handleChange} required />
-                <TextField
-                    select
-                    fullWidth
-                    margin="normal"
-                    label="Categoria"
-                    name="categoria"
-                    onChange={handleChange}
-                    required
+                    <TextField fullWidth margin="normal" label="Senha" type="password" name="senha" onChange={handleChange} required />
+                    <TextField fullWidth margin="normal" label="Telefone 1" name="telefone1" onChange={handleChange} required />
+                    <TextField fullWidth margin="normal" label="Telefone 2" name="telefone2" onChange={handleChange} />
+                    <Button variant="outlined" onClick={handleGetCurrentLocation} sx={{ mt: 1, mr: 1 }}>
+                        Usar Minha Localização
+                    </Button>
+
+                    <Button variant="outlined" onClick={handleOpenMapModal} sx={{ mt: 1 }}>
+                        Escolher no Mapa
+                    </Button>
+
+                    <TextField
+                        fullWidth
+                        label="Localização"
+                        name="localizacao"
+                        value={newProduct.localizacao}
+                        onChange={handleChange}
+                        margin="normal"
+                    />
+                    <TextField
+                        select
+                        fullWidth
+                        margin="normal"
+                        label="Categoria"
+                        name="categoria"
+                        onChange={handleChange}
+                        required
+                    >
+                        {categorias.map((option) => (
+                            <MenuItem key={option.value} value={option.value}>
+                                {option.label}
+                            </MenuItem>
+                        ))}
+                    </TextField>
+                    <TextField fullWidth margin="normal" label="Descrição" name="descricao" onChange={handleChange} multiline rows={3} required />
+                    <Typography variant="body2" color="text.secondary">
+                        Imagens da empresa
+                    </Typography>
+
+                    <input type="file" multiple accept="image/*" onChange={handleFileChange} />
+                    <Typography variant="body2" color="text.secondary">
+                        Alvará Comercial
+                    </Typography>
+
+                    <input type="file" name="alvara_comercial" accept=".pdf,.doc,.docx" onChange={handleFileChange} />
+                    <Typography variant="body2" color="text.secondary">
+                        Certidão de Registro Comercial
+                    </Typography>
+
+                    <input type="file" name="certidao_registro_comercial" accept=".pdf,.doc,.docx" onChange={handleFileChange} />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleClose}>Cancelar</Button>
+                    <Button onClick={() => handlecadastro()} variant="contained" color="primary" disabled={loading}>
+                        {loading ? 'Cadastrando...' : 'Cadastrar'}
+                    </Button>
+
+                </DialogActions>
+            </Dialog>
+
+            <Modal open={openMapModal} onClose={() => setOpenMapModal(false)}>
+                <Box
+                    sx={{
+                        position: 'absolute',
+                        top: '50%',
+                        left: '50%',
+                        transform: 'translate(-50%, -50%)',
+                        width: 500,
+                        height: 400,
+                        bgcolor: 'background.paper',
+                        boxShadow: 24,
+                        p: 2,
+                        borderRadius: 1,
+                    }}
                 >
-                    {categorias.map((option) => (
-                        <MenuItem key={option.value} value={option.value}>
-                            {option.label}
-                        </MenuItem>
-                    ))}
-                </TextField>
-                <TextField fullWidth margin="normal" label="Descrição" name="descricao" onChange={handleChange} multiline rows={3} required />
-                <Typography variant="body2" color="text.secondary">
-                    Imagens da empresa
-            </Typography>
+                    <Typography variant="h6">Escolha a Localização</Typography>
+                    <MapContainer center={location} zoom={13} style={{ height: '300px', width: '100%' }}>
+                        <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                        <LocationMarker />
+                    </MapContainer>
+                    <Button variant="contained" onClick={() => {
+                        setNewProduct((prev) => ({
+                            ...prev,
+                            localizacao: `${location.lat}, ${location.lng}`,
+                        }));
+                        setOpenMapModal(false);
+                    }} sx={{ mt: 2 }}>
+                        Confirmar Localização
+                    </Button>
+                </Box>
+            </Modal>
 
-                <input type="file" multiple accept="image/*" onChange={handleFileChange} />
-                <Typography variant="body2" color="text.secondary">
-                Alvará Comercial
-            </Typography>
-
-                <input type="file" name="alvara_comercial" accept=".pdf,.doc,.docx" onChange={handleFileChange} />
-                <Typography variant="body2" color="text.secondary">
-                Certidão de Registro Comercial
-            </Typography>
-
-                <input type="file" name="certidao_registro_comercial" accept=".pdf,.doc,.docx" onChange={handleFileChange} />
-            </DialogContent>
-            <DialogActions>
-                <Button onClick={handleClose}>Cancelar</Button>
-                <Button onClick={()=>handlecadastro()} variant="contained" color="primary" disabled={loading}>
-  {loading ? 'Cadastrando...' : 'Cadastrar'}
-</Button>
-
-            </DialogActions>
-        </Dialog>
-
-
-        {/* Modal de Redefinição de Senha */}
-        <Dialog open={openReset} onClose={handleCloseReset}>
+            {/* Modal de Redefinição de Senha */}
+            <Dialog open={openReset} onClose={handleCloseReset}>
                 <DialogTitle>Redefinir Senha</DialogTitle>
                 <DialogContent>
                     <Typography variant="body1" sx={{ mb: 2 }}>
                         Insira seu e-mail cadastrado para receber o link de redefinição de senha
                     </Typography>
-                    
+
                     {resetError && (
                         <Typography color="error" variant="body2" sx={{ mb: 2 }}>
                             {resetError}
                         </Typography>
                     )}
-                    
+
                     {resetMessage && (
                         <Typography color="success.main" variant="body2" sx={{ mb: 2 }}>
                             {resetMessage}
                         </Typography>
                     )}
-                    
+
                     <TextField
                         fullWidth
                         margin="normal"
@@ -476,10 +603,10 @@ const handlecadastro = async () => {
                     <Button onClick={handleCloseReset} disabled={resetLoading}>
                         Cancelar
                     </Button>
-                    <Button 
-                        onClick={handleResetPassword} 
-                        variant="contained" 
-                        color="primary" 
+                    <Button
+                        onClick={handleResetPassword}
+                        variant="contained"
+                        color="primary"
                         disabled={resetLoading}
                     >
                         {resetLoading ? 'Enviando...' : 'Enviar Link'}

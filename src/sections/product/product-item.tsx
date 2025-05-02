@@ -20,9 +20,9 @@ export type ProductItemProps = {
   descricao: string;
   localizacao: string;
   imagens: { id: number; imagem: string }[];
-  videos: { id: number; video: string }[]; 
+  videos: { id: number; video: string }[];
   precoVenda: number | null;
-  categoria: { nome: string }; 
+  categoria: { nome: string };
 };
 
 export function ProductItem({ product }: { product: ProductItemProps }) {
@@ -30,11 +30,11 @@ export function ProductItem({ product }: { product: ProductItemProps }) {
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
   const [formData, setFormData] = useState({ ...product });
   const [selectedImages, setSelectedImages] = useState(product.imagens);
-  const [selectedVideos, setSelectedVideos] = useState(product.videos); 
+  const [selectedVideos, setSelectedVideos] = useState(product.videos);
   const [imagensParaRemover, setImagensParaRemover] = useState<number[]>([]);
-  const [videosParaRemover, setVideosParaRemover] = useState<number[]>([]); 
+  const [videosParaRemover, setVideosParaRemover] = useState<number[]>([]);
   const [newImages, setNewImages] = useState<File[]>([]);
-  const [newVideos, setNewVideos] = useState<File[]>([]); 
+  const [newVideos, setNewVideos] = useState<File[]>([]);
   const baseUrl = Config.getApiUrl();
   const mediaUrl = Config.getApiUrlMedia();
 
@@ -84,7 +84,7 @@ export function ProductItem({ product }: { product: ProductItemProps }) {
           body: formDataToSend
         }
       );
-      const data=await response.json();
+      const data = await response.json();
       console.log(data);
       setOpenUpdateModal(false);
       window.location.reload();
@@ -96,15 +96,15 @@ export function ProductItem({ product }: { product: ProductItemProps }) {
   const handleDeleteProduct = async () => {
     try {
       const response = await fetchWithToken(
-        `api/produto/${product.id}/deletar/`,{
-          method:'DELETE',
-          headers: {
-            "ngrok-skip-browser-warning": "true"
-          },
+        `api/produto/${product.id}/deletar/`, {
+        method: 'DELETE',
+        headers: {
+          "ngrok-skip-browser-warning": "true"
+        },
 
-        }
+      }
       );
-      const data=await response.json();
+      const data = await response.json();
 
       console.log(data);
       setOpenDeleteModal(false);
@@ -220,7 +220,18 @@ export function ProductItem({ product }: { product: ProductItemProps }) {
 
       {/* Modal de Atualização */}
       <Modal open={openUpdateModal} onClose={handleCloseUpdateModal}>
-        <Box sx={{ width: 400, bgcolor: 'white', padding: 3 }}>
+        <Box sx={{
+          position: 'fixed',
+          right: 0,
+          top: 0,
+          width: 500,
+          height: '100vh',
+          bgcolor: 'white',
+          boxShadow: 24,
+          overflowY: 'auto',
+          p: 3
+        }}>
+          
           <Typography variant="h6">Atualizar Produto</Typography>
 
           <TextField
@@ -231,6 +242,7 @@ export function ProductItem({ product }: { product: ProductItemProps }) {
             fullWidth
             sx={{ mt: 2 }}
           />
+
           <TextField
             name="descricao"
             label="Descrição"
@@ -239,6 +251,7 @@ export function ProductItem({ product }: { product: ProductItemProps }) {
             fullWidth
             sx={{ mt: 2 }}
           />
+
           <TextField
             name="preco"
             label="Preço"
@@ -248,6 +261,7 @@ export function ProductItem({ product }: { product: ProductItemProps }) {
             fullWidth
             sx={{ mt: 2 }}
           />
+
           <TextField
             name="quantidade"
             label="Quantidade"
@@ -257,6 +271,7 @@ export function ProductItem({ product }: { product: ProductItemProps }) {
             fullWidth
             sx={{ mt: 2 }}
           />
+
           <TextField
             name="localizacao"
             label="Localização"
@@ -265,6 +280,7 @@ export function ProductItem({ product }: { product: ProductItemProps }) {
             fullWidth
             sx={{ mt: 2 }}
           />
+
           <TextField
             name="categoria"
             label="Categoria"
@@ -290,7 +306,6 @@ export function ProductItem({ product }: { product: ProductItemProps }) {
               </Box>
             ))}
 
-            {/* Adicionar novas imagens */}
             <Button variant="contained" component="label" sx={{ mt: 2 }}>
               Adicionar Imagens
               <input
@@ -309,14 +324,12 @@ export function ProductItem({ product }: { product: ProductItemProps }) {
                 ))}
               </Box>
             )}
-
           </Box>
 
           <Box sx={{ mt: 2 }}>
             <Typography variant="body2">Vídeos:</Typography>
             {selectedVideos.map((video) => (
               <Box key={video.id} sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
-
                 <video
                   src={`${mediaUrl}${video.video}`}
                   controls
@@ -324,7 +337,6 @@ export function ProductItem({ product }: { product: ProductItemProps }) {
                 >
                   <track kind="captions" src="" label="Legendas" />
                 </video>
-
                 <Button color="error" onClick={() => handleVideoDelete(video.id)}>
                   Remover
                 </Button>
@@ -352,11 +364,10 @@ export function ProductItem({ product }: { product: ProductItemProps }) {
             )}
           </Box>
 
-
           <Button onClick={handleUpdateProduct} sx={{ mt: 2 }} variant="contained">
             Atualizar
           </Button>
-          <Button onClick={handleCloseUpdateModal} sx={{ mt: 2 }} variant="contained" >
+          <Button onClick={handleCloseUpdateModal} sx={{ mt: 2, ml: 2 }} variant="outlined">
             Fechar
           </Button>
         </Box>
@@ -364,13 +375,25 @@ export function ProductItem({ product }: { product: ProductItemProps }) {
 
       {/* Modal de Confirmação de Apagar */}
       <Modal open={openDeleteModal} onClose={handleCloseDeleteModal}>
-        <Box sx={{ width: 400, bgcolor: 'white', padding: 3 }}>
+        <Box sx={{
+          padding: 3,
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: 400,
+          maxHeight: '90vh',
+          bgcolor: 'background.paper',
+          boxShadow: 24,
+          p: 4,
+          borderRadius: 1,
+        }}>
           <Typography variant="h6">Confirmar Exclusão</Typography>
           <Typography variant="body2" mt={2}>
             Tem certeza que deseja apagar o produto?
           </Typography>
 
-          <Box display="flex" justifyContent="space-between" mt={2}>
+          <Box display="flex" justifyContent="space-between" mt={2} sx={{marginTop: '1px'}}>
             <Button onClick={handleCloseDeleteModal} variant="contained" >
               Cancelar
             </Button>

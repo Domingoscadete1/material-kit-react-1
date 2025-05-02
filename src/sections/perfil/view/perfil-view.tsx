@@ -8,20 +8,12 @@ import Divider from '@mui/material/Divider';
 import Switch from '@mui/material/Switch';
 import Modal from '@mui/material/Modal';
 import TextField from '@mui/material/TextField';
-
-
 import { DashboardContent } from 'src/layouts/dashboard';
-
-import React,{ useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import axios from 'axios';
-
 import { resolve } from 'path';
 import { fetchWithToken } from '../../../../authService';
-
 import Config from '../../../../Config';
-
-
-
 
 // ----------------------------------------------------------------------
 
@@ -36,9 +28,8 @@ type MensagemSuporte = {
   updated_at?: string | null;
   deleted?: boolean;
   expires_at?: string;
-  remetente:string;
+  remetente: string;
 };
-
 
 const modalStyle = {
   position: 'absolute' as 'absolute',
@@ -51,24 +42,21 @@ const modalStyle = {
   p: 4,
   borderRadius: 2,
 };
+
 export function PerfilView() {
   const [empresaId, setEmpresaId] = React.useState<string | null>(null);
-  const empresa = JSON.parse(localStorage.getItem('userData') || '{}'); // Parse para garantir que seja um objeto
+  const empresa = JSON.parse(localStorage.getItem('userData') || '{}');
   const [openModal, setOpenModal] = useState(false);
   const [openChat, setOpenChat] = useState(false);
   const [chatExistente, setChatExistente] = useState<boolean>(false);
   const [chatId1, setChatId] = useState<number | null>(null);
-  const  wssUrl=Config.getApiUrlWs();
-  const mediaUrl=Config.getApiUrlMedia();
-
+  const wssUrl = Config.getApiUrlWs();
+  const mediaUrl = Config.getApiUrlMedia();
   const [mensagens, setMensagens] = useState<MensagemSuporte[]>([]);
-  const [loadingMessages, setLoadingMessages] = useState(false); // Estado de carregamento das mensagens
+  const [loadingMessages, setLoadingMessages] = useState(false);
   const [mensagem, setMensagem] = useState('');
-
   const socketRef = useRef<WebSocket | null>(null);
 
-  
-  // Recupera o ID da empresa do localStorage
   useEffect(() => {
     const token = localStorage.getItem('userData');
     if (token) {
@@ -78,17 +66,18 @@ export function PerfilView() {
         setEmpresaId(postoId);
 
 
-        
+
       }
     }
   }, []);
+
   const handleOpenModal = () => {
     setOpenModal(true);
-  
+
     if (!chatId1) {
       const socketUrl = `wss://${wssUrl}/ws/suporte/chat/${empresa?.empresa?.id}/`;
       socketRef.current = new WebSocket(socketUrl);
-  
+
       socketRef.current.onopen = () => console.log("WebSocket conectado para novo chat");
       socketRef.current.onmessage = (event) => {
         const novaMensagem = JSON.parse(event.data);
@@ -98,56 +87,55 @@ export function PerfilView() {
       socketRef.current.onclose = () => console.log("WebSocket fechado");
     }
   };
-  
+
   const verificarChat = useCallback(() => {
     fetchWithToken(`api/empresa/chat-suport/${empresa?.empresa?.id}/`, {
-      method:'GET',
+      method: 'GET',
       headers: {
         "ngrok-skip-browser-warning": "true",
         "Content-Type": "application/json"
       }
     })
-    .then(response => response.json()) 
-    .then(data=> {
-      console.log(data);
-      if (data?.chats) {
-        setChatId(data?.chats.id);
-        carregarMensagens(data?.chats.id);
-      }
-    })
-    .catch(error => console.error('Erro ao buscar chat:', error));
+      .then(response => response.json())
+      .then(data => {
+        console.log(data);
+        if (data?.chats) {
+          setChatId(data?.chats.id);
+          carregarMensagens(data?.chats.id);
+        }
+      })
+      .catch(error => console.error('Erro ao buscar chat:', error));
   }, [empresa?.empresa?.id]);
-  
+
   useEffect(() => {
     verificarChat();
   }, [verificarChat]);
-  
-  
 
-  const carregarMensagens = (chatId:number) => {
-    fetchWithToken(`api/chat-suporte/mensagens/${chatId}/`,{
-      method:'GET',
+  const carregarMensagens = (chatId: number) => {
+    fetchWithToken(`api/chat-suporte/mensagens/${chatId}/`, {
+      method: 'GET',
       headers: {
-        "ngrok-skip-browser-warning": "true", // Evita bloqueios do ngrok
-        "Content-Type": "application/json" // Define o tipo de conteúdo esperado
+        "ngrok-skip-browser-warning": "true",
+        "Content-Type": "application/json"
       }
     })
-    .then(response => response.json()) // Primeiro converte a resposta para JSON
-    .then(data => setMensagens(data.mensagens)) // Depois acessa a propriedade mensagens
+      .then(response => response.json())
+      .then(data => setMensagens(data.mensagens))
       .catch(error => console.error('Erro ao buscar mensagens:', error));
   };
+
   const conectarWebSocket = useCallback((chatId: number) => {
     const socketUrl = chatId
       ? `wss://${wssUrl}/ws/suporte/empresa/${empresa?.empresa?.id}/`
       : `wss://${wssUrl}/ws/suporte/chat/${empresa?.empresa?.id}/`;
-  
+
     socketRef.current = new WebSocket(socketUrl);
-  
+
     socketRef.current.onopen = () => console.log("WebSocket conectado");
     socketRef.current.onmessage = (event) => {
       const novaMensagem = JSON.parse(event.data);
       console.log("Nova mensagem recebida:", novaMensagem);
-  
+
       setMensagens((prevMensagens) => [
         ...prevMensagens,
         {
@@ -158,139 +146,129 @@ export function PerfilView() {
     };
     socketRef.current.onerror = (error) => console.error("Erro no WebSocket:", error);
     socketRef.current.onclose = () => console.log("WebSocket fechado");
-  
+
     return () => socketRef.current?.close();
-  }, [empresa?.empresa?.id,wssUrl]);
-  
+  }, [empresa?.empresa?.id, wssUrl]);
 
   const handleSendMessage = () => {
     if (socketRef.current && mensagem.trim()) {
       const data = {
         mensagem,
         empresa_id: empresa?.empresa.id,
-        chat_id:chatId1
-         // Garantir que o backend tenha o remetente correto
+        chat_id: chatId1
       };
-  
+
       socketRef.current.send(JSON.stringify(data));
       setMensagem('');
     }
   };
-  
 
   useEffect(() => {
     if (chatId1) {
       conectarWebSocket(chatId1);
     }
-  }, [chatId1,conectarWebSocket]);
+  }, [chatId1, conectarWebSocket]);
 
-  
   return (
     <DashboardContent>
-      {/* Header */}
       <Typography variant="h4" gutterBottom>
         Perfil
       </Typography>
 
       <Grid container spacing={3}>
-        {/* Profile Section */}
         <Grid xs={12} md={4}>
           <Paper elevation={4} sx={{ p: 4, textAlign: 'center' }}>
-            {/* Profile Picture */}
             <Avatar
               src={`${mediaUrl}${empresa.foto}`}
               alt="Profile"
               sx={{ width: 120, height: 120, mx: 'auto', mb: 2 }}
             />
             <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
-            {empresa.usuario_username}
+              {empresa.usuario_username}
             </Typography>
             {/* <Typography variant="body2" sx={{ color: 'text.secondary', mb: 1 }}>
               Saldo empresa:{empresa.empresa.saldo}
             </Typography> */}
             <Typography variant="body2" sx={{ color: 'text.secondary', mb: 1 }}>
-            Cargo: {empresa.role}
+              Cargo: {empresa.role}
             </Typography>
             <Typography variant="body2" sx={{ color: 'text.secondary', mb: 3 }}>
-            Email: {empresa.email}
+              Email: {empresa.email}
             </Typography>
-            {/* SMS Activation */}
+
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
               <Typography variant="body2">Ativar alertas por SMS</Typography>
               <Switch defaultChecked />
             </Box>
+
             {chatId1 ? (
-          <Button variant="contained" color="primary" fullWidth onClick={() => setOpenChat(true)}>
-            Abrir Chat
-          </Button>
-        ) : (
-          <Button variant="contained" color="secondary" fullWidth onClick={() => handleOpenModal()}>
-            Solicitar Suporte
-          </Button>
-        )}
-            {/* Save Button */}
+              <Button variant="contained" color="primary" fullWidth onClick={() => setOpenChat(true)}>
+                Abrir Chat
+              </Button>
+            ) : (
+              <Button variant="contained" color="secondary" fullWidth onClick={() => handleOpenModal()}>
+                Solicitar Suporte
+              </Button>
+            )}
             <Button variant="contained" color="primary" fullWidth disabled>
               Salvar Alterações
             </Button>
           </Paper>
         </Grid>
 
-        {/* Account and Bills Section */}
         <Grid xs={12} md={8}>
           <Paper elevation={4} sx={{ p: 4 }}>
-            {/* Accounts Section */}
-            <Box sx={{ mb: 4 }}>
-              <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>
-                Minhas Contas xPay
-              </Typography>
-              <Divider sx={{ mb: 2 }} />
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-                <Box>
-                  <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
-                    Conta Ativa
-                  </Typography>
-                  <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                    xxxx-xxxx-4245
-                  </Typography>
-                </Box>
-                <Button variant="contained" color="error">
-                  Bloquear Conta
-                </Button>
-              </Box>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                <Box>
-                  <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
-                    Conta Bloqueada
-                  </Typography>
-                  <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                    xxxx-xxxx-1234
-                  </Typography>
-                </Box>
-                <Button variant="contained" color="success">
-                  Desbloquear Conta
-                </Button>
-              </Box>
-            </Box>
-
-            {/* Bills Section */}
             <Box>
               <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>
-                Minhas Faturas
+                Estatísticas
               </Typography>
               <Divider sx={{ mb: 2 }} />
-              {[
-                { label: 'Conta de telefone', status: 'Pago', color: 'green' },
-                { label: 'Conta de internet', status: 'Não pago', color: 'red' },
-                { label: 'Aluguel da casa', status: 'Pago', color: 'green' },
-                { label: 'Imposto de renda', status: 'Não pago', color: 'red' },
-              ].map((bill, index) => (
-                <Box key={index} sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                  <Typography variant="body2">{bill.label}</Typography>
-                  <Typography variant="body2" sx={{ color: bill.color }}>
-                    {bill.status}
-                  </Typography>
-                </Box>
-              ))}
+
+              <Grid container spacing={3}>
+                <Grid xs={12} sm={6} md={3}>
+                  <Paper sx={{ p: 2, textAlign: 'center' }}>
+                    <Typography variant="h4" color="primary.main">
+                      42
+                    </Typography>
+                    <Typography variant="body2">
+                      Produtos ativos
+                    </Typography>
+                  </Paper>
+                </Grid>
+
+                <Grid xs={12} sm={6} md={3}>
+                  <Paper sx={{ p: 2, textAlign: 'center' }}>
+                    <Typography variant="h4" color="success.main">
+                      28
+                    </Typography>
+                    <Typography variant="body2">
+                      Vendas este mês
+                    </Typography>
+                  </Paper>
+                </Grid>
+
+                <Grid xs={12} sm={6} md={3}>
+                  <Paper sx={{ p: 2, textAlign: 'center' }}>
+                    <Typography variant="h4" color="warning.main">
+                      94%
+                    </Typography>
+                    <Typography variant="body2">
+                      Avaliação positiva
+                    </Typography>
+                  </Paper>
+                </Grid>
+
+                <Grid xs={12} sm={6} md={3}>
+                  <Paper sx={{ p: 2, textAlign: 'center' }}>
+                    <Typography variant="h4" color="error.main">
+                      3
+                    </Typography>
+                    <Typography variant="body2">
+                      Suportes abertos
+                    </Typography>
+                  </Paper>
+                </Grid>
+              </Grid>
             </Box>
           </Paper>
         </Grid>
@@ -315,7 +293,6 @@ export function PerfilView() {
           </Button>
         </Box>
       </Modal>
-
 
       <Modal open={openChat} onClose={() => setOpenChat(false)}>
         <Box sx={modalStyle}>

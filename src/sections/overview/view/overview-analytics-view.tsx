@@ -1,8 +1,9 @@
-import React,{ useState, useCallback,useEffect,useRef } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import axios from 'axios';
 
 import Grid from '@mui/material/Unstable_Grid2';
 import Typography from '@mui/material/Typography';
+import { Box, Button } from '@mui/material';
 
 import { _tasks, _posts, _timeline } from 'src/_mock';
 import { DashboardContent } from 'src/layouts/dashboard';
@@ -31,12 +32,39 @@ export function OverviewAnalyticsView() {
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [empresaId, setEmpresaId] = React.useState<string | null>(null);
-  const empresa = JSON.parse(localStorage.getItem('userData') || '{}'); // Parse para garantir que seja um objeto
-  
-  const [loadingMessages, setLoadingMessages] = useState(false); // Estado de carregamento das mensagens
+  const empresa = JSON.parse(localStorage.getItem('userData') || '{}');
+
+  const [loadingMessages, setLoadingMessages] = useState(false);
   const socketRef = useRef<WebSocket | null>(null);
 
-  // Recupera o ID da empresa do localStorage
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const mensagensSeguranca = [
+    {
+      imagem: 'https://www.fecomercio.com.br/upload/img/2016/05/19/573e38edbdcae-noticia_t_cnico_em_seguran_a_do_trabalho_evita_acidentes_e_melhora_qualidade_de_vida_no_local.jpg',
+      descricao: 'Use sempre os EPIs adequados',
+      detalhe: 'A segurança começa com a proteção individual.',
+    },
+    {
+      imagem: 'https://www.hospedagemsegura.com.br/wp-content/uploads/2016/03/BANNERS_DICAS_022.png',
+      descricao: 'Mantenha a postura correta no ambiente de trabalho',
+      detalhe: 'Evite lesões por esforço repetitivo.',
+    },
+    {
+      imagem: 'https://gruporde.com.br/wp-content/uploads/2019/12/Artigo_Extintor.jpg',
+      descricao: 'Conheça a localização dos extintores',
+      detalhe: 'Esteja preparado para emergências.',
+    },
+  ];
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prevIndex) => (prevIndex + 1) % mensagensSeguranca.length);
+    }, 5000);
+
+    return () => clearInterval(interval);
+  },);
+
+
   useEffect(() => {
     const token = localStorage.getItem('userData');
     if (token) {
@@ -52,12 +80,12 @@ export function OverviewAnalyticsView() {
     const fetchProducts = async () => {
       try {
         setLoading(true);
-        const response = await fetchWithToken(`api/produtos-search/bussiness/${empresa.empresa.id}/`,{
+        const response = await fetchWithToken(`api/produtos-search/bussiness/${empresa.empresa.id}/`, {
           headers: {
-            "ngrok-skip-browser-warning": "true", // Evita bloqueios do ngrok
+            "ngrok-skip-browser-warning": "true", 
           },
         });
-        const data=await response.json();
+        const data = await response.json();
         setProducts(data.produtos || []);
       } catch (error) {
         console.error('Erro ao buscar produtos:', error);
@@ -74,12 +102,12 @@ export function OverviewAnalyticsView() {
     const fetchAnalytics = async () => {
       try {
         setLoading(true);
-        const response = await fetchWithToken(`api/empresa/analytics/${empresaId}/`,{
+        const response = await fetchWithToken(`api/empresa/analytics/${empresaId}/`, {
           headers: {
-            "ngrok-skip-browser-warning": "true", // Evita bloqueios do ngrok
+            "ngrok-skip-browser-warning": "true",
           },
         });
-        const data=await response.json();
+        const data = await response.json();
         setAnalyticsData(data);
       } catch (error) {
         console.error('Erro ao buscar dados analíticos:', error);
@@ -90,6 +118,7 @@ export function OverviewAnalyticsView() {
 
     fetchAnalytics();
   }, [empresaId]);
+  
   return (
     <DashboardContent maxWidth="xl">
       <Typography variant="h4" sx={{ mb: { xs: 3, md: 5 } }}>
@@ -152,85 +181,91 @@ export function OverviewAnalyticsView() {
           />
         </Grid>
 
-        {/* <Grid xs={12} md={6} lg={4}>
-          <AnalyticsCurrentVisits
-            title="Current visits"
-            chart={{
-              series: [
-                { label: 'America', value: 3500 },
-                { label: 'Asia', value: 2500 },
-                { label: 'Europe', value: 1500 },
-                { label: 'Africa', value: 500 },
-              ],
+        <Box
+          sx={{
+            mt: 3,
+            mb: 5,
+            borderRadius: 2,
+            overflow: 'hidden',
+            position: 'relative',
+            width: '100%',
+            height: '380px',
+            boxShadow: 3,
+          }}
+        >
+          {mensagensSeguranca.map((msg, index) => (
+            <Box
+              key={index}
+              sx={{
+                width: '100%',
+                height: '100%',
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                opacity: index === currentImageIndex ? 1 : 0,
+                transition: 'opacity 1s ease-in-out',
+              }}
+            >
+              <Box
+                component="img"
+                src={msg.imagem}
+                alt={`Mensagem ${index + 1}`}
+                sx={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  filter: 'brightness(0.6)',
+                }}
+              />
+
+              <Box
+                sx={{
+                  position: 'absolute',
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  color: 'white',
+                  padding: '16px',
+                  textAlign: 'left',
+                }}
+              >
+                <Typography variant="h6">{msg.descricao}</Typography>
+                <Typography variant="body2">{msg.detalhe}</Typography>
+              </Box>
+            </Box>
+          ))}
+
+          {/* Botões de navegação */}
+          <Box
+            sx={{
+              position: 'absolute',
+              bottom: '10px',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              display: 'flex',
+              gap: '10px',
             }}
-          />
-        </Grid> */}
+          >
+            {mensagensSeguranca.map((_, index) => (
+              <Button
+                key={index}
+                sx={{
+                  minWidth: '10px',
+                  height: '10px',
+                  padding: 0,
+                  borderRadius: '50%',
+                  backgroundColor: index === currentImageIndex ? 'primary.main' : 'grey.500',
+                  '&:hover': {
+                    backgroundColor: 'primary.dark',
+                  },
+                }}
+                onClick={() => setCurrentImageIndex(index)}
+              />
+            ))}
+          </Box>
+        </Box>
 
-        <Grid xs={12} md={6} lg={7}>
-          <AnalyticsWebsiteVisits
-            title="Website visits"
-            subheader="(+43%) than last year"
-            chart={{
-              categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'],
-              series: [
-                { name: 'Team A', data: [43, 33, 22, 37, 67, 68, 37, 24, 55] },
-                { name: 'Team B', data: [51, 70, 47, 67, 40, 37, 24, 70, 24] },
-              ],
-            }}
-          />
-        </Grid>
 
-        <Grid xs={12} md={6} lg={5}>
-          <AnalyticsConversionRates
-            title="Conversion rates"
-            subheader="(+43%) than last year"
-            chart={{
-              categories: ['Italy', 'Japan', 'China', 'Canada', 'France'],
-              series: [
-                { name: '2022', data: [44, 55, 41, 64, 22] },
-                { name: '2023', data: [53, 32, 33, 52, 13] },
-              ],
-            }}
-          />
-        </Grid>
-
-        {/* <Grid xs={12} md={6} lg={5}>
-          <AnalyticsCurrentSubject
-            title="Current subject"
-            chart={{
-              categories: ['English', 'History', 'Physics', 'Geography', 'Chinese', 'Math'],
-              series: [
-                { name: 'Series 1', data: [80, 50, 30, 40, 100, 20] },
-                { name: 'Series 2', data: [20, 30, 40, 80, 20, 80] },
-                { name: 'Series 3', data: [44, 76, 78, 13, 43, 10] },
-              ],
-            }}
-          />
-        </Grid> */}
-
-        <Grid xs={12} md={6} lg={8}>
-          <AnalyticsNews title="Recentemente Divulgados" list={products.slice(0, 5)} />
-        </Grid>
-
-        <Grid xs={12} md={6} lg={4}>
-          <AnalyticsOrderTimeline title="Order timeline" list={_timeline} />
-        </Grid>
-
-        {/* <Grid xs={12} md={6} lg={4}>
-          <AnalyticsTrafficBySite
-            title="Traffic by site"
-            list={[
-              { value: 'facebook', label: 'Facebook', total: 323234 },
-              { value: 'google', label: 'Google', total: 341212 },
-              { value: 'linkedin', label: 'Linkedin', total: 411213 },
-              { value: 'twitter', label: 'Twitter', total: 443232 },
-            ]}
-          />
-        </Grid> */}
-
-        <Grid xs={12} md={6} lg={12}>
-          <AnalyticsTasks title="Tasks" list={_tasks} />
-        </Grid>
       </Grid>
     </DashboardContent>
   );

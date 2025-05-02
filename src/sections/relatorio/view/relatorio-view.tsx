@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from 'react';
-
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Unstable_Grid2';
 import Typography from '@mui/material/Typography';
@@ -17,14 +16,12 @@ import { DashboardContent } from 'src/layouts/dashboard';
 import { fetchWithToken } from '../../../../authService';
 import Config from '../../../../Config';
 
-// Mock data for reports
-
 export function RelatorioView() {
-  const mediaUrl=Config.getApiUrlMedia();
-  const baseUrl=Config.getApiUrl();
+  const mediaUrl = Config.getApiUrlMedia();
+  const baseUrl = Config.getApiUrl();
   const [empresaId, setEmpresaId] = useState<string | null>(null);
-  const [transacoes, setTransacoes] = useState<any[]>([]); // Armazenar produtos da API
-  const [loading, setLoading] = useState(true); // Para gerenciar o estado de carregamento
+  const [transacoes, setTransacoes] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
   const [menuAnchor, setMenuAnchor] = useState<{ [key: number]: HTMLElement | null }>({});
@@ -41,29 +38,29 @@ export function RelatorioView() {
       }
     }
   }, []);
+
   const fetchEmpresaData = useCallback(async () => {
     if (!empresaId) return;
     try {
       const response = await fetchWithToken(`api/empresa/${empresaId}/`, {
-        method:'GET',
+        method: 'GET',
         headers: {
-          "ngrok-skip-browser-warning": "true", // Evita bloqueios do ngrok
+          "ngrok-skip-browser-warning": "true",
         },
       });
-      const data=await response.json();
+      const data = await response.json();
       console.log('Dados da empresa:', data);
       setEmpresaData(data);
     } catch (error) {
       console.error('Erro ao buscar dados da empresa:', error);
     }
   }, [empresaId]);
+
   useEffect(() => {
     if (empresaId) {
       fetchEmpresaData();
     }
   }, [empresaId, fetchEmpresaData]);
-
-
 
   const fetchProducts = useCallback(async () => {
     if (!empresaId) {
@@ -73,18 +70,17 @@ export function RelatorioView() {
     try {
       setLoading(true);
       const response = await fetchWithToken(`api/empresa/transacoes/${empresaId}/?page=${page}`, {
-        method:'GET',
+        method: 'GET',
         headers: {
-          "ngrok-skip-browser-warning": "true", // Evita bloqueios do ngrok
+          "ngrok-skip-browser-warning": "true",
         },
       });
-      const data=await response.json();
+      const data = await response.json();
       console.log('Dados recebidos da API:', data);
 
-      // Certifique-se de acessar `results.transacoes`
       const transacoesRecebidas = data.results?.transacoes || [];
       setTransacoes(transacoesRecebidas);
-      const total = data?.count ?? 0; // Garante que count nunca seja undefined
+      const total = data?.count ?? 0;
       setTotalPages(total > 0 ? Math.ceil(total / 10) : 1);
     } catch (error) {
       console.error('Erro ao buscar produtos:', error);
@@ -92,9 +88,6 @@ export function RelatorioView() {
       setLoading(false);
     }
   }, [empresaId, page]);
-
-
-
 
   useEffect(() => {
     if (empresaId) {
@@ -104,7 +97,7 @@ export function RelatorioView() {
   const downloadInvoice = async (transacaoId: number) => {
     try {
       const apiUrl = `${baseUrl}api/fatura/${transacaoId}/`;
-      window.open(apiUrl, '_blank'); // Abre a fatura em uma nova aba
+      window.open(apiUrl, '_blank');
     } catch (error) {
       console.error('Erro ao baixar fatura:', error);
       alert('Não foi possível baixar a fatura.');
@@ -115,12 +108,9 @@ export function RelatorioView() {
     setMenuAnchor((prev) => ({ ...prev, [id]: event.currentTarget as HTMLElement }));
   };
 
-
   const handleMenuClose = (id: number) => {
     setMenuAnchor((prev) => ({ ...prev, [id]: null }));
   };
-
-
 
   return (
     <DashboardContent>
@@ -142,14 +132,13 @@ export function RelatorioView() {
         )}
       </Box>
 
-
       <Grid container spacing={3}>
         {transacoes.map((report) => {
-          const isVenda = report.empresa?.id === empresaId; // Verifica se a empresa proprietária é a mesma que está logada
+          const isVenda = report.empresa?.id === empresaId;
           const nomePessoa = isVenda
             ? report.comprador?.nome || report.empresa_compradora?.nome
             : report.vendedor?.nome || report.empresa?.nome;
-          const icone = isVenda ? 'arrow_circle_up' : 'arrow_circle_down'; // Ícone de seta para cima (verde) para venda, para baixo (vermelho) para compra
+          const icone = isVenda ? 'arrow_circle_up' : 'arrow_circle_down';
           const iconeCor = isVenda ? 'green' : 'red';
 
           return (
@@ -206,8 +195,6 @@ export function RelatorioView() {
                     />
                   </Box>
 
-                  {/* Botão de opções */}
-
                   <IconButton
                     onClick={(event) => handleMenuOpen(event, report.id)}
                     sx={{ position: 'absolute', top: 10, right: 10 }}
@@ -215,10 +202,8 @@ export function RelatorioView() {
                     <Iconify icon="mdi:dots-vertical" width={24} height={24} color='black' />
                   </IconButton>
 
-
-                  {/* Menu de opções */}
                   <Menu
-                    anchorEl={menuAnchor[report.id] || null} // Garante que nunca será undefined
+                    anchorEl={menuAnchor[report.id] || null}
                     open={Boolean(menuAnchor[report.id])}
                     onClose={() => handleMenuClose(report.id)}
                   >
@@ -232,6 +217,7 @@ export function RelatorioView() {
           );
         })}
       </Grid>
+
       <Box display="flex" justifyContent="center" mt={3}>
         <Button variant="contained" disabled={loading || page === 1} onClick={() => setPage(page - 1)}>
           Anterior
@@ -240,8 +226,6 @@ export function RelatorioView() {
         <Button variant="contained" disabled={loading || page === totalPages} onClick={() => setPage(page + 1)}>
           Próxima
         </Button>
-
-
       </Box>
     </DashboardContent>
   );

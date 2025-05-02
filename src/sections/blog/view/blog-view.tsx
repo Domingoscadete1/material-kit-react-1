@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom'; // Importe o useNavigate
+import { useNavigate } from 'react-router-dom';
 
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -27,23 +27,23 @@ const API_BASE_URL = Config.getApiUrl();
 export function BlogView() {
   const [sortBy, setSortBy] = useState('latest');
   const [empresaId, setEmpresaId] = React.useState<string | null>(null);
-  const empresa = JSON.parse(localStorage.getItem('userData') || '{}'); // Parse para garantir que seja um objeto
-  const [products, setProducts] = useState<any[]>([]); // Armazenar produtos da API
-  const [filteredProducts, setFilteredProducts] = useState<any[]>([]); // Produtos filtrados por categoria
-  const [loading, setLoading] = useState(true); // Para gerenciar o estado de carregamento
-  const [loadingMessages, setLoadingMessages] = useState(false); 
+  const empresa = JSON.parse(localStorage.getItem('userData') || '{}');
+  const [products, setProducts] = useState<any[]>([]);
+  const [filteredProducts, setFilteredProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [loadingMessages, setLoadingMessages] = useState(false);
   const socketRef = useRef<WebSocket | null>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [anuncios, setAnuncios] = useState<any[]>([]);
-  const [categorias, setCategorias] = useState<string[]>([]); 
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null); 
-  const navigate = useNavigate(); // Hook para navegação
+  const [categorias, setCategorias] = useState<string[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   const fetchAnuncios = async () => {
     try {
       const url = `api/anuncios-app/`;
       const response = await fetchWithToken(url, {
-        method:'GET',
+        method: 'GET',
         headers: {
           "ngrok-skip-browser-warning": "true",
         },
@@ -78,7 +78,7 @@ export function BlogView() {
     try {
       const url = `api/categorias/`;
       const response = await fetchWithToken(url, {
-        method:'GET',
+        method: 'GET',
         headers: {
           "ngrok-skip-browser-warning": "true",
         },
@@ -91,15 +91,15 @@ export function BlogView() {
       const data = await response.json();
       console.log("categorias:", data);
 
-      
+
       setCategorias(data);
-      
+
     } catch (error) {
       console.error("Erro ao buscar categorias:", error);
     }
   };
 
-  
+
   useEffect(() => {
     fetchCategorias();
 
@@ -114,12 +114,12 @@ export function BlogView() {
     try {
       setLoading(true);
       const response = await fetchWithToken(`api/produtos-search/bussiness/${empresaId}/`, {
-        method:'GET',
+        method: 'GET',
         headers: {
           "ngrok-skip-browser-warning": "true", // Evita bloqueios do ngrok
         },
       });
-      const data=await response.json();
+      const data = await response.json();
       console.log('Produtos recebidos:', data.produtos);
 
       setProducts(data.produtos);
@@ -144,14 +144,13 @@ export function BlogView() {
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentImageIndex((prevIndex) => (prevIndex + 1) % anuncios.length);
-    }, 4000); // Muda a imagem a cada 4 segundos
+    }, 4000);
 
-    return () => clearInterval(interval); // Limpa o intervalo ao desmontar o componente
+    return () => clearInterval(interval);
   }, [anuncios?.length]);
 
-  // Função para redirecionar para a página de detalhes
   const handleVerDetalhes = (anuncioId: string) => {
-    navigate(`/detalhes/${anuncioId}`); // Redireciona para a rota de detalhes com o ID do anúncio
+    navigate(`/detalhes/${anuncioId}`);
   };
   const filterProductsByCategory = (category: string | null) => {
     setSelectedCategory(category);
@@ -159,7 +158,7 @@ export function BlogView() {
       const filtered = products.filter(product => product.categoria.nome === category);
       setFilteredProducts(filtered);
     } else {
-      setFilteredProducts(products); // Se nenhuma categoria for selecionada, exibe todos os produtos
+      setFilteredProducts(products);
     }
   };
 
@@ -213,7 +212,7 @@ export function BlogView() {
                 variant="contained"
                 color="primary"
                 sx={{ mt: 2 }}
-                onClick={() => handleVerDetalhes(anuncio.id)} 
+                onClick={() => handleVerDetalhes(anuncio.id)}
               >
                 Ver Detalhes
               </Button>
@@ -254,41 +253,28 @@ export function BlogView() {
       <Box sx={{ mb: 5, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2 }}>
         <Typography variant="h6">Categorias</Typography>
         <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-          {categorias.map((categoria:any, index) => (
-             <Button
-             key={index}
-             variant="outlined"
-             sx={{
-               textTransform: 'none',
-               borderRadius: '20px',
-               borderColor: selectedCategory === categoria.nome ? 'primary.main' : 'grey.500',
-               color: selectedCategory === categoria.nome ? 'white' : 'primary.main',
-               backgroundColor: selectedCategory === categoria.nome ? 'primary.main' : 'transparent',
-               '&:hover': {
-                 backgroundColor: 'primary.main',
-                 color: 'white',
-               },
-             }}
-             onClick={() => filterProductsByCategory(categoria.nome)}
-           >
-             {categoria.nome}
-           </Button>
+          {categorias.map((categoria: any, index) => (
+            <Button
+              key={index}
+              variant="outlined"
+              sx={{
+                textTransform: 'none',
+                borderRadius: '20px',
+                borderColor: selectedCategory === categoria.nome ? 'primary.main' : 'grey.500',
+                color: selectedCategory === categoria.nome ? 'white' : 'primary.main',
+                backgroundColor: selectedCategory === categoria.nome ? 'primary.main' : 'transparent',
+                '&:hover': {
+                  backgroundColor: 'primary.main',
+                  color: 'white',
+                },
+              }}
+              onClick={() => filterProductsByCategory(categoria.nome)}
+            >
+              {categoria.nome}
+            </Button>
           ))}
         </Box>
       </Box>
-
-      {/* <Box display="flex" alignItems="center" justifyContent="space-between" sx={{ mb: 5 }}>
-        <PostSearch posts={products} />
-        <PostSort
-          sortBy={sortBy}
-          onSort={handleSort}
-          options={[
-            { value: 'latest', label: 'Latest' },
-            { value: 'popular', label: 'Popular' },
-            // { value: 'oldest', label: 'Oldest' },
-          ]}
-        />
-      </Box> */}
 
       {loading ? (
         <Box display="flex" justifyContent="center" alignItems="center" height="200px">
@@ -315,7 +301,6 @@ export function BlogView() {
         </Grid>
       )}
 
-      {/* <Pagination count={10} color="primary" sx={{ mt: 8, mx: 'auto' }} /> */}
     </DashboardContent>
   );
 }

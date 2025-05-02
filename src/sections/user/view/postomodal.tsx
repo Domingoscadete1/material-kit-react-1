@@ -3,18 +3,17 @@ import { Modal, Box, Button, Typography, MenuItem, TextField, CircularProgress }
 import axios from 'axios';
 import { fetchWithToken } from '../../../../authService';
 
-
-
 type Posto = {
-    id: string;
-    nome: string;
+  id: string;
+  nome: string;
 };
 
 type AddPostoModalProps = {
-    open: boolean; // A propriedade 'open' é um boolean
-    onClose: () => void; // A propriedade 'onClose' é uma função que não retorna nada
-  };
-const  AddPostoModal: React.FC<AddPostoModalProps> = ({ open, onClose }) => {
+  open: boolean;
+  onClose: () => void;
+};
+
+const AddPostoModal: React.FC<AddPostoModalProps> = ({ open, onClose }) => {
   const [postos, setPostos] = useState<Posto[]>([]);
   const [selectedPosto, setSelectedPosto] = useState('');
   const [loading, setLoading] = useState(false);
@@ -22,15 +21,15 @@ const  AddPostoModal: React.FC<AddPostoModalProps> = ({ open, onClose }) => {
   const fetchPostos = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await fetchWithToken('api/postos/',{
+      const response = await fetchWithToken('api/postos/', {
         method: 'GET',
         headers: {
-         
+
           'Content-Type': 'multipart/form-data',
           "ngrok-skip-browser-warning": "true"
         },
       });
-      const data=await response.json();
+      const data = await response.json();
       setPostos(data);
     } catch (error) {
       console.error('Erro ao buscar postos:', error);
@@ -54,21 +53,21 @@ const  AddPostoModal: React.FC<AddPostoModalProps> = ({ open, onClose }) => {
       return;
     }
     const formData = new FormData();
-    formData.append('empresa_id',empresaId);
-    formData.append('posto_id',selectedPosto);
+    formData.append('empresa_id', empresaId);
+    formData.append('posto_id', selectedPosto);
 
 
     try {
       const response = await fetchWithToken('api/empresa-posto/create/', {
-        method:'POST',
+        method: 'POST',
         headers: {
-          "ngrok-skip-browser-warning": "true", // Evita bloqueios do ngrok
+          "ngrok-skip-browser-warning": "true",
         },
-        body:formData
+        body: formData
       });
 
       alert('Posto adicionado com sucesso!');
-      onClose(); // Fecha o modal após sucesso
+      onClose();
     } catch (error) {
       console.error('Erro ao adicionar posto:', error);
       alert('Ocorreu um erro ao adicionar o posto.');

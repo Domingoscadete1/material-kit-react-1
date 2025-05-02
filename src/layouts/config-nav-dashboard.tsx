@@ -1,11 +1,5 @@
 import { Label } from 'src/components/label';
-import { SvgColor } from 'src/components/svg-color';
-
-// ----------------------------------------------------------------------
-
-const icon = (name: string) => (
-  <SvgColor width="100%" height="100%" src={`/assets/icons/navbar/${name}.svg`} />
-);
+import { FiPieChart, FiHome, FiShoppingBag, FiMessageSquare, FiUser, FiDollarSign, FiUsers, FiMapPin } from 'react-icons/fi';
 
 const getUserRole = () => {
   const token = localStorage.getItem('userData');
@@ -22,52 +16,47 @@ const baseNavData = [
   {
     title: 'Dashboard',
     path: '/',
-    icon: icon('ic-analytics'),
+    icon: <FiPieChart size={20} />,
+  },
+  {
+    title: 'Explorar',
+    path: '/blog',
+    icon: <FiHome size={20} />,
   },
   {
     title: 'Postos',
     path: '/user',
-    icon: icon('ic-user'),
+    icon: <FiMapPin size={20} />,
   },
   {
-    title: 'Produtos',
+    title: 'Meus Produtos',
     path: '/products',
-    icon: icon('ic-cart'),
-  },
-  {
-    title: 'Home',
-    path: '/blog',
-    icon: icon('ic-blog'),
+    icon: <FiShoppingBag size={20} />,
   },
   {
     title: 'Mensagens',
     path: '/listasms',
-    icon: icon('ic-disabled'),
+    icon: <FiMessageSquare size={20} />,
+  },
+  {
+    title: 'Transações',
+    path: '/relatorio',
+    icon: <FiDollarSign size={20} />,
   },
   {
     title: 'Perfil',
     path: '/perfil',
-    icon: icon('ic-user'),
-  },
-  // {
-  //   title: 'Perfil de Usuário',
-  //   path: `/perfil2/tipo/id`, 
-  //   icon: icon('ic-user'),
-  // },
-  {
-    title: 'Transações',
-    path: '/relatorio',
-    icon: icon('ic-lock'),
+    icon: <FiUser size={20} />,
   },
 ];
 
 export const navData = role === 'admin'
   ? [
-      ...baseNavData,
-      {
-        title: 'Funcionários',
-        path: '/funcionario',
-        icon: icon('ic-user'),
-      },
-    ]
+    ...baseNavData,
+    {
+      title: 'Funcionários',
+      path: '/funcionario',
+      icon: <FiUsers size={20} />,
+    },
+  ]
   : baseNavData;

@@ -1,5 +1,4 @@
-import { useState, useCallback } from 'react';
-
+import { useState, useCallback, useMemo } from 'react';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Table from '@mui/material/Table';
@@ -10,10 +9,8 @@ import TableContainer from '@mui/material/TableContainer';
 import TablePagination from '@mui/material/TablePagination';
 import { _users } from 'src/_mock';
 import { DashboardContent } from 'src/layouts/dashboard';
-
 import { Iconify } from 'src/components/iconify';
 import { Scrollbar } from 'src/components/scrollbar';
-
 import AddFuncionarioModal from './funcionariomodal';
 import { TableNoData } from '../table-no-data';
 import { UserTableRow } from '../user-table-row';
@@ -21,22 +18,29 @@ import { UserTableHead } from '../user-table-head';
 import { TableEmptyRows } from '../table-empty-rows';
 import { UserTableToolbar } from '../user-table-toolbar';
 import { emptyRows, applyFilter, getComparator } from '../utils';
-
 import type { UserProps } from '../user-table-row';
-
-// ----------------------------------------------------------------------
 
 export function FuncionarioView() {
   const table = useTable();
-
   const [filterName, setFilterName] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
 
-  const dataFiltered: UserProps[] = applyFilter({
-    inputData: _users,
-    comparator: getComparator(table.order, table.orderBy),
-    filterName,
-  });
+  const dataFiltered = useMemo(
+    () => applyFilter({
+      inputData: _users,
+      comparator: getComparator(table.order, table.orderBy),
+      filterName,
+    }),
+    [table.order, table.orderBy, filterName]
+  );
+
+  const paginatedData = useMemo(
+    () => dataFiltered.slice(
+      table.page * table.rowsPerPage,
+      table.page * table.rowsPerPage + table.rowsPerPage
+    ),
+    [dataFiltered, table.page, table.rowsPerPage]
+  );
 
   const notFound = !dataFiltered.length && !!filterName;
 
@@ -44,7 +48,7 @@ export function FuncionarioView() {
     <DashboardContent>
       <Box display="flex" alignItems="center" mb={5}>
         <Typography variant="h4" flexGrow={1}>
-          Funcionarios
+          Funcionários
         </Typography>
         <Button
           variant="contained"
@@ -52,7 +56,7 @@ export function FuncionarioView() {
           startIcon={<Iconify icon="mingcute:add-line" />}
           onClick={() => setModalOpen(true)}
         >
-          Adicionar Funcionario
+          Adicionar Funcionário
         </Button>
         <AddFuncionarioModal open={modalOpen} onClose={() => setModalOpen(false)} />
       </Box>
@@ -73,42 +77,37 @@ export function FuncionarioView() {
               <UserTableHead
                 order={table.order}
                 orderBy={table.orderBy}
-                rowCount={_users.length}
+                rowCount={dataFiltered.length}
                 numSelected={table.selected.length}
                 onSort={table.onSort}
                 onSelectAllRows={(checked) =>
                   table.onSelectAllRows(
                     checked,
-                    _users.map((user) => user.id)
+                    dataFiltered.map((user) => user.id)
                   )
                 }
                 headLabel={[
                   { id: 'name', label: 'Nome' },
-                  { id: 'email', label: 'email' },
+                  { id: 'email', label: 'Email' },
                   { id: 'role', label: 'Cargo' },
-                  { id: 'isVerified', label: 'Verificada', align: 'center' },
+                  { id: 'isVerified', label: 'Verificado', align: 'center' },
                   { id: 'status', label: 'Status' },
                   { id: '' },
                 ]}
               />
               <TableBody>
-                {dataFiltered
-                  .slice(
-                    table.page * table.rowsPerPage,
-                    table.page * table.rowsPerPage + table.rowsPerPage
-                  )
-                  .map((row) => (
-                    <UserTableRow
-                      key={row.id}
-                      row={row}
-                      selected={table.selected.includes(row.id)}
-                      onSelectRow={() => table.onSelectRow(row.id)}
-                    />
-                  ))}
+                {paginatedData.map((row) => (
+                  <UserTableRow
+                    key={row.id}
+                    row={row}
+                    selected={table.selected.includes(row.id)}
+                    onSelectRow={() => table.onSelectRow(row.id)}
+                  />
+                ))}
 
                 <TableEmptyRows
                   height={68}
-                  emptyRows={emptyRows(table.page, table.rowsPerPage, _users.length)}
+                  emptyRows={emptyRows(table.page, table.rowsPerPage, dataFiltered.length)}
                 />
 
                 {notFound && <TableNoData searchQuery={filterName} />}
@@ -120,7 +119,7 @@ export function FuncionarioView() {
         <TablePagination
           component="div"
           page={table.page}
-          count={_users.length}
+          count={dataFiltered.length}
           rowsPerPage={table.rowsPerPage}
           onPageChange={table.onChangePage}
           rowsPerPageOptions={[5, 10, 25]}
@@ -131,8 +130,7 @@ export function FuncionarioView() {
   );
 }
 
-// ----------------------------------------------------------------------
-
+// Hook useTable permanece igual
 export function useTable() {
   const [page, setPage] = useState(0);
   const [orderBy, setOrderBy] = useState('name');

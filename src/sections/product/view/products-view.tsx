@@ -10,12 +10,12 @@ import {
   MenuItem,
   InputLabel,
   FormControl,
-  SelectChangeEvent
+  SelectChangeEvent,
+  IconButton,
 } from '@mui/material';
 
 import { Iconify } from 'src/components/iconify';
 import { useNavigate } from 'react-router-dom';
-
 import Button from '@mui/material/Button';
 
 import { _products } from 'src/_mock';
@@ -23,6 +23,8 @@ import { DashboardContent } from 'src/layouts/dashboard';
 import axios from 'axios';
 import L from 'leaflet';
 import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
+
+import CircularProgress from '@mui/material/CircularProgress';
 
 import { ProductItem } from '../product-item';
 import { ProductSort } from '../product-sort';
@@ -79,17 +81,17 @@ const defaultFilters = {
 };
 
 export function ProductsView() {
-  const navigate = useNavigate(); // Hook para navegação
+  const navigate = useNavigate();
   const [sortBy, setSortBy] = useState('featured');
-  const [products, setProducts] = useState<any[]>([]); // Armazenar produtos da API
-  const [loading, setLoading] = useState(true); // Para gerenciar o estado de carregamento
-  const [page, setPage] = useState(1); // Para controle de paginação
+  const [products, setProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
   const [openFilter, setOpenFilter] = useState(false);
   const [empresaId, setEmpresaId] = React.useState<string | null>(null);
   const baseUrl = Config.getApiUrl();
   const [openModal, setOpenModal] = useState(false);
-  const [categories, setCategories] = useState<any[]>([]); // Armazenar categorias da API
-  const token2 = localStorage.getItem('refreshToken'); // Token salvo ao logar
+  const [categories, setCategories] = useState<any[]>([]);
+  const token2 = localStorage.getItem('refreshToken');
   const [location, setLocation] = useState<{ lat: number; lng: number }>({ lat: 0, lng: 0 });
   const [openMapModal, setOpenMapModal] = useState(false);
   const [anuncios, setAnuncios] = useState([]);
@@ -102,7 +104,7 @@ export function ProductsView() {
     preco: '',
     localizacao: '',
     quantidade: 1,
-    images: [] as File[], // Para permitir múltiplas imagens
+    images: [] as File[],
     videos: [] as File[],
 
   });
@@ -140,8 +142,6 @@ export function ProductsView() {
     }
   }, []);
 
-
-
   const handleGetCurrentLocation = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -158,7 +158,6 @@ export function ProductsView() {
       alert('Geolocalização não é suportada pelo seu navegador.');
     }
   };
-
 
   const [filters, setFilters] = useState<FiltersProps>(defaultFilters);
 
@@ -177,6 +176,7 @@ export function ProductsView() {
   const handleSetFilters = useCallback((updateState: Partial<FiltersProps>) => {
     setFilters((prevValue) => ({ ...prevValue, ...updateState }));
   }, []);
+
   useEffect(() => {
     const token = localStorage.getItem('userData');
     if (token) {
@@ -186,26 +186,28 @@ export function ProductsView() {
         setEmpresaId(postoId);
       }
     }
-  }, []); // Mantenha vazio se `empresaId` não mudar
+  }, []);
+
   const fetchCategories = useCallback(async () => {
     try {
       const response = await fetchWithToken('api/categorias/', {
-        method:'GET',
+        method: 'GET',
         headers: {
-          "ngrok-skip-browser-warning": "true", // Evita bloqueios do ngrok
+          "ngrok-skip-browser-warning": "true",
         },
-      }); 
-      const data =await response.json();
+      });
+      const data = await response.json();
       setCategories(data);
     } catch (error) {
       console.error('Erro ao buscar categorias:', error);
     }
   }, []);
+
   const fetchAnuncios = async () => {
     try {
       const url = `api/anuncios-app/`;
       const response = await fetchWithToken(url, {
-        method:'GET',
+        method: 'GET',
         headers: {
           "ngrok-skip-browser-warning": "true",
         },
@@ -226,14 +228,13 @@ export function ProductsView() {
     }
   };
 
-
   useEffect(() => {
     fetchCategories();
     fetchAnuncios();
     if (empresaId) {
       console.log(empresaId);
     }
-  }, [empresaId, fetchCategories]); 
+  }, [empresaId, fetchCategories]);
 
   const fetchProducts = useCallback(async () => {
     if (!empresaId) {
@@ -263,8 +264,6 @@ export function ProductsView() {
     }
   }, [empresaId, pagination.pageIndex]);
 
-
-
   useEffect(() => {
     if (empresaId) {
       fetchProducts();
@@ -286,6 +285,7 @@ export function ProductsView() {
     newProduct.images.slice(0, 5).forEach((image, index) => {
       formData.append(`imagem${index + 1}`, image);
     });
+
     newProduct.videos.slice(0, 5).forEach((video, index) => {
       formData.append(`video${index + 1}`, video);
     });
@@ -293,13 +293,13 @@ export function ProductsView() {
     try {
       setLoading(true);
 
-      const response = await fetchWithToken(`api/produto/create/`,  {
-        method:'POST',
+      const response = await fetchWithToken(`api/produto/create/`, {
+        method: 'POST',
         headers: {
           "ngrok-skip-browser-warning": "true",
 
         },
-        body:formData,
+        body: formData,
       });
       const data = await response.json();
 
@@ -307,11 +307,10 @@ export function ProductsView() {
       setOpenModal(false);
       setLoading(false);
       window.location.reload();
-      fetchProducts(); 
+      fetchProducts();
     } catch (error) {
       console.error('Erro ao criar produto:', error);
       setLoading(false);
-
     }
   };
 
@@ -330,6 +329,7 @@ export function ProductsView() {
   const canReset = Object.keys(filters).some(
     (key) => filters[key as keyof FiltersProps] !== defaultFilters[key as keyof FiltersProps]
   );
+
   const handleOpenMapModal = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -348,7 +348,6 @@ export function ProductsView() {
   };
 
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
- 
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -359,7 +358,7 @@ export function ProductsView() {
   }, [anuncios.length]);
 
   const handleVerDetalhes = (anuncioId: string) => {
-    navigate(`/detalhes/${anuncioId}`); // Redireciona para a rota de detalhes com o ID do anúncio
+    navigate(`/detalhes/${anuncioId}`);
   };
 
   return (
@@ -418,7 +417,6 @@ export function ProductsView() {
           </Box>
         ))}
 
-        {/* Botões de navegação */}
         <Box
           sx={{
             position: 'absolute',
@@ -459,7 +457,7 @@ export function ProductsView() {
           Criar Novo Produto
         </Button>
       </Box>
-      <CartIcon totalItems={8} />
+
       <Modal open={openModal} onClose={() => setOpenModal(false)}>
         <Box
           sx={{
@@ -467,115 +465,292 @@ export function ProductsView() {
             top: '50%',
             left: '50%',
             transform: 'translate(-50%, -50%)',
-            width: 400,
+            width: { xs: '90vw', sm: '80vw', md: '70vw', lg: '1000px' },
+            maxWidth: '1000px',
+            maxHeight: '90vh',
             bgcolor: 'background.paper',
             boxShadow: 24,
-            p: 4,
+            p: { xs: 2, sm: 4 },
             borderRadius: 1,
+            overflowY: 'auto',
           }}
         >
           <Typography variant="h6" mb={2}>
             Criar Novo Produto
           </Typography>
-          <TextField
-            fullWidth
-            label="Nome"
-            name="nome"
-            value={newProduct.nome}
-            onChange={handleChange}
-            margin="normal"
-          />
-          <TextField
-            fullWidth
-            label="Descrição"
-            name="descricao"
-            value={newProduct.descricao}
-            onChange={handleChange}
-            margin="normal"
-          />
-          <FormControl fullWidth margin="normal">
-            <InputLabel>Categoria</InputLabel>
-            <Select
-              name="categoria"
-              value={newProduct.categoria}
-              onChange={handleSelectChange}
-            >
-              {categories.map((category) => (
-                <MenuItem key={category.id} value={category.nome}>
-                  {category.nome}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-          <TextField
-            fullWidth
-            label="Preço"
-            name="preco"
-            value={newProduct.preco}
-            onChange={handleChange}
-            margin="normal"
-            type="number"
-          />
-          <Button variant="outlined" onClick={handleGetCurrentLocation} sx={{ mt: 1, mr: 1 }}>
-            Usar Minha Localização
-          </Button>
 
-          <Button variant="outlined" onClick={handleOpenMapModal} sx={{ mt: 1 }}>
-            Escolher no Mapa
-          </Button>
-          <TextField
-            fullWidth
-            label="Localização"
-            name="localizacao"
-            value={newProduct.localizacao}
-            onChange={handleChange}
-            margin="normal"
-          />
-          <TextField
-            fullWidth
-            label="Quantidade"
-            name="quantidade"
-            value={newProduct.quantidade}
-            onChange={handleChange}
-            margin="normal"
-            type="number"
-          />
-          <TextField
-            fullWidth
-            type="file"
-            inputProps={{ multiple: true }} // Permitir múltiplos arquivos
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-              const files = Array.from(e.target.files || []);
-              if (files.length > 0) {
-                setNewProduct((prev) => ({ ...prev, images: files }));
+          <Box sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 2,
+            '@media (min-width: 900px)': {
+              flexDirection: 'row',
+              flexWrap: 'wrap',
+              '& > *': {
+                width: 'calc(50% - 16px)'
               }
-            }}
-            margin="normal"
-          />
-          <TextField
-            fullWidth
-            type="file"
-            inputProps={{ multiple: true, accept: 'video/*' }} // Permitir múltiplos vídeos
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-              const files = Array.from(e.target.files || []);
-              if (files.length > 0) {
-                setNewProduct((prev) => ({ ...prev, videos: files }));
-              }
-            }}
-            margin="normal"
-          />
+            }
+          }}>
+            <Box sx={{ flex: 1 }}>
+              <TextField
+                fullWidth
+                label="Nome"
+                name="nome"
+                value={newProduct.nome}
+                onChange={handleChange}
+                margin="normal"
+              />
+            </Box>
+            <Box sx={{ flex: 1 }}>
+              <TextField
+                fullWidth
+                label="Preço"
+                name="preco"
+                value={newProduct.preco}
+                onChange={handleChange}
+                margin="normal"
+                type="number"
+              />
+            </Box>
+
+            <Box sx={{ width: '100%' }}>
+              <TextField
+                fullWidth
+                label="Descrição"
+                name="descricao"
+                value={newProduct.descricao}
+                onChange={handleChange}
+                margin="normal"
+                multiline
+                rows={3}
+              />
+            </Box>
+
+            <Box sx={{ flex: 1 }}>
+              <FormControl fullWidth margin="normal">
+                <InputLabel>Categoria</InputLabel>
+                <Select
+                  name="categoria"
+                  value={newProduct.categoria}
+                  onChange={handleSelectChange}
+                >
+                  {categories.map((category) => (
+                    <MenuItem key={category.id} value={category.nome}>
+                      {category.nome}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Box>
+            <Box sx={{ flex: 1 }}>
+              <TextField
+                fullWidth
+                label="Quantidade"
+                name="quantidade"
+                value={newProduct.quantidade}
+                onChange={handleChange}
+                margin="normal"
+                type="number"
+              />
+            </Box>
+
+            <Box sx={{ width: '100%' }}>
+              <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 1 }}>
+                <Button variant="outlined" onClick={handleGetCurrentLocation} sx={{ mt: 1 }}>
+                  Usar Minha Localização
+                </Button>
+                <Button variant="outlined" onClick={handleOpenMapModal} sx={{ mt: 1 }}>
+                  Escolher no Mapa
+                </Button>
+              </Box>
+              <TextField
+                fullWidth
+                label="Localização"
+                name="localizacao"
+                value={newProduct.localizacao}
+                onChange={handleChange}
+                margin="normal"
+              />
+            </Box>
+          </Box>
+
+          <Box sx={{ mt: 3 }}>
+            <Typography variant="subtitle1" gutterBottom>
+              Imagens do Produto (Máximo 5)
+            </Typography>
+
+            {newProduct.images?.length >= 5 && (
+              <Typography color="error" variant="body2" sx={{ mb: 1 }}>
+                Você atingiu o limite máximo de 5 imagens
+              </Typography>
+            )}
+
+            <Button
+              variant="contained"
+              component="label"
+              disabled={newProduct.images?.length >= 5}
+              sx={{ mb: 2 }}
+            >
+              Selecionar Imagens
+              <input
+                type="file"
+                multiple
+                hidden
+                accept="image/*"
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                  const files = Array.from(e.target.files || []);
+                  const currentImages = newProduct.images || [];
+                  const availableSlots = 5 - currentImages.length;
+
+                  if (files.length > 0) {
+                    const newImages = files.slice(0, availableSlots);
+                    setNewProduct(prev => ({
+                      ...prev,
+                      images: [...currentImages, ...newImages]
+                    }));
+                  }
+                }}
+              />
+            </Button>
+
+            {newProduct.images && newProduct.images.length > 0 && (
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mt: 2 }}>
+                {newProduct.images.map((file, index) => (
+                  <Box key={index} sx={{ position: 'relative' }}>
+                    <img
+                      src={URL.createObjectURL(file)}
+                      alt={`Preview ${index}`}
+                      style={{
+                        width: 100,
+                        height: 100,
+                        objectFit: 'cover',
+                        borderRadius: 4
+                      }}
+                    />
+                    <IconButton
+                      size="small"
+                      onClick={() => {
+                        const updatedImages = [...newProduct.images];
+                        updatedImages.splice(index, 1);
+                        setNewProduct(prev => ({ ...prev, images: updatedImages }));
+                      }}
+                      sx={{
+                        position: 'absolute',
+                        top: 0,
+                        right: 0,
+                        backgroundColor: 'rgba(0,0,0,0.5)',
+                        color: 'white',
+                        '&:hover': {
+                          backgroundColor: 'rgba(0,0,0,0.7)'
+                        }
+                      }}
+                    >
+                      x
+                    </IconButton>
+                  </Box>
+                ))}
+              </Box>
+            )}
+          </Box>
+
+          <Box sx={{ mt: 4 }}>
+            <Typography variant="subtitle1" gutterBottom>
+              Vídeos do Produto (Máximo 5)
+            </Typography>
+
+            {newProduct.videos?.length >= 5 && (
+              <Typography color="error" variant="body2" sx={{ mb: 1 }}>
+                Você atingiu o limite máximo de 5 vídeos
+              </Typography>
+            )}
+
+            <Button
+              variant="contained"
+              component="label"
+              disabled={newProduct.videos?.length >= 5}
+              sx={{ mb: 2 }}
+            >
+              Selecionar Vídeos
+              <input
+                type="file"
+                multiple
+                hidden
+                accept="video/*"
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                  const files = Array.from(e.target.files || []);
+                  const currentVideos = newProduct.videos || [];
+                  const availableSlots = 5 - currentVideos.length;
+
+                  if (files.length > 0) {
+                    const newVideos = files.slice(0, availableSlots);
+                    setNewProduct(prev => ({
+                      ...prev,
+                      videos: [...currentVideos, ...newVideos]
+                    }));
+                  }
+                }}
+              />
+            </Button>
+
+            {newProduct.videos && newProduct.videos.length > 0 && (
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mt: 2 }}>
+                {newProduct.videos.map((file, index) => (
+                  <Box key={index} sx={{ position: 'relative' }}>
+                    <video
+                      src={URL.createObjectURL(file)}
+                      style={{
+                        width: 150,
+                        height: 100,
+                        objectFit: 'cover',
+                        borderRadius: 4
+                      }}
+                      controls
+                    >
+                      <track
+                        kind="captions"
+                        src=""
+                        srcLang="pt"
+                        label="Legendas"
+                        default
+                      />
+                    </video>
+                    <IconButton
+                      size="small"
+                      onClick={() => {
+                        const updatedVideos = [...newProduct.videos];
+                        updatedVideos.splice(index, 1);
+                        setNewProduct(prev => ({ ...prev, videos: updatedVideos }));
+                      }}
+                      sx={{
+                        position: 'absolute',
+                        top: 0,
+                        right: 0,
+                        backgroundColor: 'rgba(0,0,0,0.5)',
+                        color: 'white',
+                        '&:hover': {
+                          backgroundColor: 'rgba(0,0,0,0.7)'
+                        }
+                      }}
+                    >
+                      x
+                    </IconButton>
+                  </Box>
+                ))}
+              </Box>
+            )}
+          </Box>
+
           <Button
             variant="contained"
             color="primary"
             fullWidth
             onClick={handleCreateProduct}
-            sx={{ mt: 2 }}
+            sx={{ mt: 4 }}
           >
             Salvar Produto
           </Button>
         </Box>
       </Modal>
-
 
       <Modal open={openMapModal} onClose={() => setOpenMapModal(false)}>
         <Box
@@ -609,53 +784,14 @@ export function ProductsView() {
         </Box>
       </Modal>
 
-
-      <Box
-        display="flex"
-        alignItems="center"
-        flexWrap="wrap-reverse"
-        justifyContent="flex-end"
-        sx={{ mb: 5 }}
-      >
-        <Box gap={1} display="flex" flexShrink={0} sx={{ my: 1 }}>
-          <ProductFilters
-            canReset={canReset}
-            filters={filters}
-            onSetFilters={handleSetFilters}
-            openFilter={openFilter}
-            onOpenFilter={handleOpenFilter}
-            onCloseFilter={handleCloseFilter}
-            onResetFilter={() => setFilters(defaultFilters)}
-            options={{
-              genders: GENDER_OPTIONS,
-              categories: CATEGORY_OPTIONS,
-              ratings: RATING_OPTIONS,
-              price: PRICE_OPTIONS,
-              colors: COLOR_OPTIONS,
-            }}
-          />
-
-          <ProductSort
-            sortBy={sortBy}
-            onSort={handleSort}
-            options={[
-              { value: 'featured', label: 'Featured' },
-              { value: 'newest', label: 'Newest' },
-              { value: 'priceDesc', label: 'Price: High-Low' },
-              { value: 'priceAsc', label: 'Price: Low-High' },
-            ]}
-          />
-        </Box>
-      </Box>
-
       <Grid container spacing={3}>
         {loading ? (
           <Typography variant="h6" sx={{ width: '100%', textAlign: 'center' }}>
-            Loading products...
+            Aguarde um momento...
           </Typography>
         ) : products?.length === 0 ? (
           <Typography variant="h6" sx={{ width: '100%', textAlign: 'center' }}>
-            No products found for the selected filters.
+            Sem produtos.
           </Typography>
         ) : (
           products?.map((product) => (
@@ -666,8 +802,6 @@ export function ProductsView() {
         )}
       </Grid>
 
-      <Pagination count={pagination.totalPages} color="primary" sx={{ mt: 8, mx: 'auto' }} />
-
       <Button
         className="px-4 py-2 text-sm font-medium text-white bg-brand-900 rounded-[20px] hover:bg-brand-800 flex items-center justify-center"
         onClick={() => setPagination((p) => ({ ...p, pageIndex: p.pageIndex - 1 }))}
@@ -675,6 +809,11 @@ export function ProductsView() {
       >
         Anterior
       </Button>
+
+      <Typography variant="h6" sx={{ width: '100%', textAlign: 'center' }}>
+        Página {pagination.pageIndex + 1} de {pagination.totalPages}
+      </Typography>
+
       <Button
         className="px-4 py-2 text-sm font-medium text-white bg-brand-900 rounded-[20px] hover:bg-brand-800 flex items-center justify-center"
         onClick={() => setPagination((p) => ({ ...p, pageIndex: p.pageIndex + 1 }))}
@@ -682,10 +821,6 @@ export function ProductsView() {
       >
         Próxima
       </Button>
-
-      <Typography variant="h6" sx={{ width: '100%', textAlign: 'center' }}>
-        Página {pagination.pageIndex + 1} de {pagination.totalPages}
-      </Typography>
     </DashboardContent>
   );
 }

@@ -11,23 +11,22 @@ import { ThemeProvider } from 'src/theme/theme-provider';
 import { Iconify } from 'src/components/iconify';
 
 import { useEffect, useCallback } from "react";
+
 import { messaging, getToken, onMessage } from "../firebaseConfig";
+
 
 // ----------------------------------------------------------------------
 
 export default function App() {
   useScrollToTop();
-  
-  const empresa = JSON.parse(localStorage.getItem('userData') || '{}'); // Parse para garantir que seja um objeto
-  
-  // Usar useCallback para memorizar a função registerDevice
+
+  const empresa = JSON.parse(localStorage.getItem('userData') || '{}');
   const registerDevice = useCallback(async (token: string) => {
     try {
       const tokenFirebase = token;
       const plataforma = window.navigator.userAgent;
 
       if (!empresa?.id || !tokenFirebase || !plataforma) {
-        // alert('Dados incompletos para registrar dispositivo.');
         return;
       }
       const storedToken = localStorage.getItem('registeredDeviceToken');
@@ -35,7 +34,6 @@ export default function App() {
         console.log('Dispositivo já registrado.');
         return;
       }
-
 
       const response = await fetch(`https://dce9-154-71-159-172.ngrok-free.app/api/dispositivo-create/`, {
         method: 'POST',
@@ -52,7 +50,7 @@ export default function App() {
 
       if (response.ok) {
         console.log('Dispositivo registrado com sucesso!');
-        localStorage.setItem('registeredDeviceToken', token); 
+        localStorage.setItem('registeredDeviceToken', token);
       } else {
         const data = await response.json();
         console.log('Erro:', data.erro || 'Erro ao registrar dispositivo');
@@ -60,19 +58,17 @@ export default function App() {
     } catch (error) {
       console.error('Erro ao registrar dispositivo:', error);
     }
-  }, [empresa?.id]); // Garantir que depende de empresa?.id
+  }, [empresa?.id]);
 
-  // Usar useCallback para memorizar a função requestPermission
   const requestPermission = useCallback(async () => {
     try {
       const permission = await Notification.requestPermission();
       if (permission === "granted") {
         const token = await getToken(messaging, {
-          vapidKey: "BK3Lsdw0NBWEzjAQcPI1TxopGrg-NVlwUOtxVOGrSeGXj8hihnQlOXQ8tZEvyQ3AwCE-Y9oJCi9GvJMP_zIpeyk", // Configure no Firebase Console
+          vapidKey: "BK3Lsdw0NBWEzjAQcPI1TxopGrg-NVlwUOtxVOGrSeGXj8hihnQlOXQ8tZEvyQ3AwCE-Y9oJCi9GvJMP_zIpeyk",
         });
         console.log("Token FCM:", token);
         localStorage.setItem('accessTokenFirebase', token);
-        // Enviar o token para a API para associar ao usuário
         registerDevice(token);
       } else {
         console.log("Permissão negada");
@@ -80,8 +76,8 @@ export default function App() {
     } catch (error) {
       console.error("Erro ao obter permissão:", error);
     }
-  }, [registerDevice]); // Adicionar registerDevice como dependência de useCallback
-  
+  }, [registerDevice]);
+
   useEffect(() => {
     requestPermission();
     onMessage(messaging, (payload) => {
@@ -92,7 +88,7 @@ export default function App() {
         console.warn("Notificação sem conteúdo.");
       }
     });
-  }, [requestPermission]); // Agora, requestPermission é uma dependência estável
+  }, [requestPermission]);
 
   return (
     <ThemeProvider>
