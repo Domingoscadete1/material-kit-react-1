@@ -64,9 +64,6 @@ export function PerfilView() {
       const postoId = userData.empresa;
       if (postoId) {
         setEmpresaId(postoId);
-
-
-
       }
     }
   }, []);
@@ -171,12 +168,9 @@ export function PerfilView() {
 
   return (
     <DashboardContent>
-      <Typography variant="h4" gutterBottom>
-        Perfil
-      </Typography>
-
       <Grid container spacing={3}>
-        <Grid xs={12} md={4}>
+        {/* Card Principal */}
+        <Grid xs={12}>
           <Paper elevation={4} sx={{ p: 4, textAlign: 'center' }}>
             <Avatar
               src={`${mediaUrl}${empresa.foto}`}
@@ -186,20 +180,47 @@ export function PerfilView() {
             <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
               {empresa.usuario_username}
             </Typography>
-            {/* <Typography variant="body2" sx={{ color: 'text.secondary', mb: 1 }}>
-              Saldo empresa:{empresa.empresa.saldo}
-            </Typography> */}
             <Typography variant="body2" sx={{ color: 'text.secondary', mb: 1 }}>
               Cargo: {empresa.role}
             </Typography>
-            <Typography variant="body2" sx={{ color: 'text.secondary', mb: 3 }}>
+            {/* <Typography variant="body2" sx={{ color: 'text.secondary', mb: 3 }}>
               Email: {empresa.email}
-            </Typography>
+            </Typography> */}
 
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-              <Typography variant="body2">Ativar alertas por SMS</Typography>
-              <Switch defaultChecked />
-            </Box>
+            <Grid container spacing={3}>
+              <Grid xs={12} sm={6} md={4}>
+                <Paper sx={{ p: 2, textAlign: 'center' }}>
+                  <Typography variant="h4" color="primary.main">
+                    42
+                  </Typography>
+                  <Typography variant="body2">
+                    Produtos ativos
+                  </Typography>
+                </Paper>
+              </Grid>
+
+              <Grid xs={12} sm={6} md={4}>
+                <Paper sx={{ p: 2, textAlign: 'center' }}>
+                  <Typography variant="h4" color="success.main">
+                    28
+                  </Typography>
+                  <Typography variant="body2">
+                    Produtos Vendidos
+                  </Typography>
+                </Paper>
+              </Grid>
+
+              <Grid xs={12} sm={6} md={4}>
+                <Paper sx={{ p: 2, textAlign: 'center' }}>
+                  <Typography variant="h4" color="error.main">
+                    3
+                  </Typography>
+                  <Typography variant="body2">
+                    Suportes abertos
+                  </Typography>
+                </Paper>
+              </Grid>
+            </Grid>
 
             {chatId1 ? (
               <Button variant="contained" color="primary" fullWidth onClick={() => setOpenChat(true)}>
@@ -210,68 +231,144 @@ export function PerfilView() {
                 Solicitar Suporte
               </Button>
             )}
-            <Button variant="contained" color="primary" fullWidth disabled>
-              Salvar Alterações
+          </Paper>
+        </Grid>
+
+
+
+        <Grid xs={12} md={6}>
+          <Paper elevation={3} sx={{
+            p: 3,
+            borderRadius: '16px',
+            height: '100%',
+            display: 'flex',
+            flexDirection: 'column'
+          }}>
+            <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>
+              Fotos da Empresa
+            </Typography>
+            <Divider sx={{ mb: 2 }} />
+            <Box sx={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: 2,
+              flexGrow: 1
+            }}>
+              <Box sx={{
+                width: 150,
+                height: 150,
+                borderRadius: '12px',
+                overflow: 'hidden',
+                position: 'relative'
+              }}>
+                <img
+                  src={`${mediaUrl}${empresa.foto}`}
+                  alt="Foto 1"
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover'
+                  }}
+                />
+              </Box>
+              <Box sx={{
+                width: 150,
+                height: 150,
+                borderRadius: '12px',
+                overflow: 'hidden',
+                position: 'relative'
+              }}>
+                <img
+                  src={`${mediaUrl}${empresa.foto}`}
+                  alt="Foto 2"
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover'
+                  }}
+                />
+              </Box>
+              <Box sx={{
+                width: 150,
+                height: 150,
+                borderRadius: '12px',
+                overflow: 'hidden',
+                position: 'relative'
+              }}>
+                <img
+                  src={`${mediaUrl}${empresa.foto}`}
+                  alt="Foto 3"
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover'
+                  }}
+                />
+              </Box>
+            </Box>
+            <Button
+              variant="outlined"
+              sx={{
+                mt: 2,
+                borderRadius: '12px'
+              }}
+            >
+              Adicionar Mais Fotos
             </Button>
           </Paper>
         </Grid>
 
-        <Grid xs={12} md={8}>
-          <Paper elevation={4} sx={{ p: 4 }}>
-            <Box>
-              <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>
-                Estatísticas
+        <Grid xs={12} md={6}>
+          <Paper elevation={3} sx={{
+            p: 3,
+            borderRadius: '16px',
+            height: '100%'
+          }}>
+            <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>
+              Dados do Cadastro
+            </Typography>
+            <Divider sx={{ mb: 2 }} />
+            <Box sx={{
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr',
+              gap: 2,
+              '& > *': {
+                p: 1.5,
+                backgroundColor: 'background.default',
+                borderRadius: '8px' 
+              }
+            }}>
+              <Typography variant="body1">
+                <strong>Empresa:</strong> 
               </Typography>
-              <Divider sx={{ mb: 2 }} />
-
-              <Grid container spacing={3}>
-                <Grid xs={12} sm={6} md={3}>
-                  <Paper sx={{ p: 2, textAlign: 'center' }}>
-                    <Typography variant="h4" color="primary.main">
-                      42
-                    </Typography>
-                    <Typography variant="body2">
-                      Produtos ativos
-                    </Typography>
-                  </Paper>
-                </Grid>
-
-                <Grid xs={12} sm={6} md={3}>
-                  <Paper sx={{ p: 2, textAlign: 'center' }}>
-                    <Typography variant="h4" color="success.main">
-                      28
-                    </Typography>
-                    <Typography variant="body2">
-                      Vendas este mês
-                    </Typography>
-                  </Paper>
-                </Grid>
-
-                <Grid xs={12} sm={6} md={3}>
-                  <Paper sx={{ p: 2, textAlign: 'center' }}>
-                    <Typography variant="h4" color="warning.main">
-                      94%
-                    </Typography>
-                    <Typography variant="body2">
-                      Avaliação positiva
-                    </Typography>
-                  </Paper>
-                </Grid>
-
-                <Grid xs={12} sm={6} md={3}>
-                  <Paper sx={{ p: 2, textAlign: 'center' }}>
-                    <Typography variant="h4" color="error.main">
-                      3
-                    </Typography>
-                    <Typography variant="body2">
-                      Suportes abertos
-                    </Typography>
-                  </Paper>
-                </Grid>
-              </Grid>
+              <Typography variant="body1">
+                <strong>Email:</strong> 
+              </Typography>
+              <Typography variant="body1">
+                <strong>Telefone:</strong> 
+              </Typography>
+              <Typography variant="body1">
+                <strong>Endereço:</strong> 
+              </Typography>
+              <Typography variant="body1">
+                <strong>Estado:</strong>
+              </Typography>
+              <Typography variant="body1">
+                <strong>Nif:</strong> 
+              </Typography>
             </Box>
+            <Button
+              variant="outlined"
+              sx={{
+                mt: 2,
+                borderRadius: '12px'
+              }}
+            >
+              Editar Dados
+            </Button>
           </Paper>
         </Grid>
+
       </Grid>
 
       <Modal open={openModal} onClose={() => setOpenModal(false)}>
