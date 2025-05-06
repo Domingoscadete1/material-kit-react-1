@@ -756,19 +756,39 @@ export function ProductsView() {
         <Box
           sx={{
             position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            width: 500,
-            height: 400,
-            bgcolor: 'background.paper',
-            boxShadow: 24,
-            p: 2,
-            borderRadius: 1,
+                        top: '50%',
+                        left: '50%',
+                        transform: 'translate(-50%, -50%)',
+                        width: {
+                          xs: '90vw', // Para telas muito pequenas (mobile)
+                          sm: '80vw', // Para telas pequenas (tablet)
+                          md: '70vw', // Para telas médias
+                          lg: '60vw', // Para telas grandes
+                          xl: '50vw'  // Para telas extra grandes
+                        },
+                        height: {
+                          xs: '80vh', // Para telas muito pequenas
+                          sm: '70vh', // Para telas pequenas
+                          md: '60vh', // Para telas médias
+                          lg: '50vh', // Para telas grandes
+                          xl: '40vh'  // Para telas extra grandes
+                        },
+                        maxWidth: 800, // Largura máxima
+                        maxHeight: 600, // Altura máxima
+                        bgcolor: 'background.paper',
+                        boxShadow: 24,
+                        p: 2,
+                        borderRadius: 1,
+                        display: 'flex',
+                        flexDirection: 'column'
           }}
         >
           <Typography variant="h6">Escolha a Localização</Typography>
-          <MapContainer center={location} zoom={13} style={{ height: '300px', width: '100%' }}>
+          <MapContainer center={location} zoom={13} style={{ height: '100%', width: '100%',position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0  }}>
             <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
             <LocationMarker />
           </MapContainer>

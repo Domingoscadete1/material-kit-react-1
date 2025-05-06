@@ -7,6 +7,7 @@ import Button from '@mui/material/Button';
 import Grid from '@mui/material/Unstable_Grid2';
 import Typography from '@mui/material/Typography';
 import Pagination from '@mui/material/Pagination';
+import { TextField } from '@mui/material';
 
 import { _posts } from 'src/_mock';
 import { DashboardContent } from 'src/layouts/dashboard';
@@ -37,6 +38,17 @@ export function BlogView() {
   const [anuncios, setAnuncios] = useState<any[]>([]);
   const [categorias, setCategorias] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10, totalPages: 1 });
+  const [searchParams, setSearchParams] = useState({
+    produto_nome_search: '',
+    categoria_id: '',
+    preco_minimo: '',
+    preco_maximo: '',
+    condicao: '',
+    data: ''
+  });
+  
+
   const navigate = useNavigate();
 
   const fetchAnuncios = async () => {
@@ -56,7 +68,7 @@ export function BlogView() {
       const data = await response.json();
       console.log("Anuncios carregados:", data);
 
-      setAnuncios(data);
+      setAnuncios(data || []);
     } catch (error) {
       console.error("Erro ao buscar produtos:", error);
     }
@@ -113,23 +125,27 @@ export function BlogView() {
     }
     try {
       setLoading(true);
-      const response = await fetchWithToken(`api/produtos-search/bussiness/${empresaId}/`, {
+      const response = await fetchWithToken(`api/produtos-search/bussiness/${empresaId}/?page=${pagination.pageIndex + 1}`, {
         method: 'GET',
         headers: {
           "ngrok-skip-browser-warning": "true", // Evita bloqueios do ngrok
         },
       });
       const data = await response.json();
-      console.log('Produtos recebidos:', data.produtos);
+      console.log('Produtos recebidos:', data.results);
 
-      setProducts(data.produtos);
-      setFilteredProducts(data.produtos);
+      setProducts(data.results || []);
+      setFilteredProducts(data.results || []);
+      setPagination((prev) => ({
+        ...prev,
+        totalPages: Math.ceil(data.count / prev.pageSize),
+      }));
     } catch (error) {
       console.error('Erro ao buscar produtos:', error);
     } finally {
       setLoading(false);
     }
-  }, [empresaId]);
+  }, [empresaId,pagination.pageIndex]);
 
   useEffect(() => {
     if (empresaId) {
@@ -161,6 +177,106 @@ export function BlogView() {
       setFilteredProducts(products);
     }
   };
+  const fetchProductsWithFilters = useCallback(async () => {
+    if (!empresaId) {
+      console.error('ID da empresa não definido.');
+      return;
+    }
+  
+    try {
+      setLoading(true);
+      
+      // Construir query string com os parâmetros de busca
+      const queryParams = new URLSearchParams();
+      
+      if (searchParams.produto_nome_search) {
+        queryParams.append('produto_nome_search', searchParams.produto_nome_search);
+      }
+      
+      if (searchParams.categoria_id) {
+        queryParams.append('categoria_id', searchParams.categoria_id);
+      }
+      
+      if (searchParams.preco_minimo) {
+        queryParams.append('preco_minimo', searchParams.preco_minimo);
+      }
+      
+      if (searchParams.preco_maximo) {
+        queryParams.append('preco_maximo', searchParams.preco_maximo);
+      }
+      
+      if (searchParams.condicao) {
+        queryParams.append('condicao', searchParams.condicao);
+      }
+      
+      if (searchParams.data) {
+        queryParams.append('data', searchParams.data);
+      }
+      
+      queryParams.append('page', (pagination.pageIndex + 1).toString());
+  
+      const url = `api/produtos-search/bussiness/${empresaId}/?${queryParams.toString()}`;
+      
+      const response = await fetchWithToken(url, {
+        method: 'GET',
+        headers: {
+          "ngrok-skip-browser-warning": "true",
+        },
+      });
+      
+      const data = await response.json();
+      console.log('Produtos filtrados recebidos:', data.results);
+  
+      setProducts(data.results || []);
+      setFilteredProducts(data.results || []);
+      setPagination(prev => ({
+        ...prev,
+        totalPages: Math.ceil(data.count / prev.pageSize),
+      }));
+    } catch (error) {
+      console.error('Erro ao buscar produtos filtrados:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [empresaId, searchParams, pagination.pageIndex]);
+  
+  // Atualize o useEffect para usar a nova função de busca
+  useEffect(() => {
+    if (empresaId) {
+      fetchProductsWithFilters();
+    }
+  }, [empresaId, fetchProductsWithFilters]);
+  
+  // Função para lidar com mudanças nos filtros
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setSearchParams(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+  
+  // Função para aplicar os filtros
+  const applyFilters = () => {
+    // Resetar para a primeira página quando aplicar novos filtros
+    setPagination(prev => ({ ...prev, pageIndex: 0 }));
+    fetchProductsWithFilters();
+  };
+  
+  // Função para limpar todos os filtros
+  const clearFilters = () => {
+    setSearchParams({
+      produto_nome_search: '',
+      categoria_id: '',
+      preco_minimo: '',
+      preco_maximo: '',
+      condicao: '',
+      data: ''
+    });
+    setSelectedCategory(null);
+    // Resetar para a primeira página quando limpar filtros
+    setPagination(prev => ({ ...prev, pageIndex: 0 }));
+  };
 
   return (
     <DashboardContent>
@@ -169,7 +285,115 @@ export function BlogView() {
           Explore
         </Typography>
       </Box>
-
+      <Box sx={{ mb: 5, p: 3, bgcolor: 'background.paper', borderRadius: 2 }}>
+  <Typography variant="h6" sx={{ mb: 2 }}>Filtrar Produtos</Typography>
+  
+  <Grid container spacing={2}>
+    <Grid xs={12} md={4}>
+      <TextField
+        fullWidth
+        label="Nome do Produto"
+        name="produto_nome_search"
+        value={searchParams.produto_nome_search}
+        onChange={handleSearchChange}
+      />
+    </Grid>
+    
+    <Grid xs={12} md={2}>
+      <TextField
+        fullWidth
+        select
+        label="Categoria"
+        name="categoria_id"
+        value={searchParams.categoria_id}
+        onChange={handleSearchChange}
+        SelectProps={{
+          native: true,
+        }}
+      >
+        <option value="">Todas</option>
+        {categorias.map((categoria: any) => (
+          <option key={categoria.id} value={categoria.id}>
+            {categoria.nome}
+          </option>
+        ))}
+      </TextField>
+    </Grid>
+    
+    <Grid xs={12} sm={6} md={2}>
+      <TextField
+        fullWidth
+        label="Preço Mínimo"
+        name="preco_minimo"
+        type="number"
+        value={searchParams.preco_minimo}
+        onChange={handleSearchChange}
+      />
+    </Grid>
+    
+    <Grid xs={12} sm={6} md={2}>
+      <TextField
+        fullWidth
+        label="Preço Máximo"
+        name="preco_maximo"
+        type="number"
+        value={searchParams.preco_maximo}
+        onChange={handleSearchChange}
+      />
+    </Grid>
+    
+    <Grid xs={12} sm={6} md={2}>
+      <TextField
+        fullWidth
+        select
+        label="Condição"
+        name="condicao"
+        value={searchParams.condicao}
+        onChange={handleSearchChange}
+        SelectProps={{
+          native: true,
+        }}
+      >
+        <option value="">Todas</option>
+        <option value="novo">Novo</option>
+        <option value="usado">Usado</option>
+      </TextField>
+    </Grid>
+    
+    <Grid xs={12} sm={6} md={2}>
+      <TextField
+        fullWidth
+        select
+        label="Ordenar por Data"
+        name="data"
+        value={searchParams.data}
+        onChange={handleSearchChange}
+        SelectProps={{
+          native: true,
+        }}
+      >
+        <option value="">Padrão</option>
+        <option value="recente">Mais Recente</option>
+        <option value="antigo">Mais Antigo</option>
+      </TextField>
+    </Grid>
+    
+    <Grid xs={12} sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
+      <Button
+        variant="outlined"
+        onClick={clearFilters}
+      >
+        Limpar Filtros
+      </Button>
+      <Button
+        variant="contained"
+        onClick={applyFilters}
+      >
+        Aplicar Filtros
+      </Button>
+    </Grid>
+  </Grid>
+</Box>
       <Box sx={{ mb: 5, borderRadius: 1, overflow: 'hidden', position: 'relative', width: '100%', height: '300px' }}>
         {anuncios.map((anuncio: any, index) => (
           <Box
@@ -300,6 +524,26 @@ export function BlogView() {
           )}
         </Grid>
       )}
+
+<Button
+        className="px-4 py-2 text-sm font-medium text-white bg-brand-900 rounded-[20px] hover:bg-brand-800 flex items-center justify-center"
+        onClick={() => setPagination((p) => ({ ...p, pageIndex: p.pageIndex - 1 }))}
+        disabled={pagination.pageIndex === 0}
+      >
+        Anterior
+      </Button>
+
+      <Typography variant="h6" sx={{ width: '100%', textAlign: 'center' }}>
+        Página {pagination.pageIndex + 1} de {pagination.totalPages}
+      </Typography>
+
+      <Button
+        className="px-4 py-2 text-sm font-medium text-white bg-brand-900 rounded-[20px] hover:bg-brand-800 flex items-center justify-center"
+        onClick={() => setPagination((p) => ({ ...p, pageIndex: p.pageIndex + 1 }))}
+        disabled={pagination.pageIndex + 1 >= pagination.totalPages}
+      >
+        Próxima
+      </Button>
 
     </DashboardContent>
   );

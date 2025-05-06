@@ -26,8 +26,8 @@ export interface Produto {
   empresa?: Empresa;
   usuario?: Usuario;
 }
-export interface Imagem{
-  imagem:string;
+export interface Imagem {
+  imagem: string;
 }
 
 // Representação de um usuário
@@ -47,7 +47,7 @@ export interface Usuario {
   created_at: string;
   updated_at?: string;
   deleted?: boolean;
-  imagens:Imagem[];
+  imagens: Imagem[];
 }
 
 // Representação de uma empresa
@@ -66,7 +66,7 @@ export interface Empresa {
   created_at: string;
   updated_at?: string;
   deleted?: boolean;
-  imagens:Imagem[];
+  imagens: Imagem[];
 }
 
 // Representação de uma sala de chat (ChatRoom)
@@ -74,6 +74,7 @@ export interface ChatRoom {
   id: number;
   produto: Produto;
   empresa?: Empresa;
+  empresa_compradora?: Empresa;
   comprador?: Usuario;
   vendedor?: Usuario;
   criado_em: string;
@@ -106,7 +107,7 @@ export function ListaView() {
   const [conversations, setConversations] = useState<ChatRoom[]>([]); // Tipo aplicado
   const [activeConversation, setActiveConversation] = useState<ChatRoom | null>(null); // Tipo aplicado
 
-  const [messages, setMessages] = useState<Mensagem[]>([]);   const [newMessage, setNewMessage] = useState(''); // Nova mensagem
+  const [messages, setMessages] = useState<Mensagem[]>([]); const [newMessage, setNewMessage] = useState(''); // Nova mensagem
   const [empresaId, setEmpresaId] = useState(''); // ID da empresa
   const [loadingMessages, setLoadingMessages] = useState(false); // Estado de carregamento das mensagens
   const socketRef = useRef<WebSocket | null>(null);
@@ -129,15 +130,15 @@ export function ListaView() {
       if (!empresaId) return;
 
       try {
-        const response = await fetchWithToken(`api/chatrooms/empresa-list/${empresaId}/`,{
-          method:'GET',
+        const response = await fetchWithToken(`api/chatrooms/empresa-list/${empresaId}/`, {
+          method: 'GET',
           headers: {
-         
+
             'Content-Type': 'multipart/form-data',
             "ngrok-skip-browser-warning": "true"
           },
         });
-        const data=await response.json();
+        const data = await response.json();
         const { chats } = data;
         setConversations(chats);
 
@@ -153,7 +154,6 @@ export function ListaView() {
     fetchConversations();
   }, [empresaId]);
 
-  // Configuração do WebSocket e mensagens em tempo real
   useEffect(() => {
     if (!activeConversation) return;
 
@@ -166,21 +166,20 @@ export function ListaView() {
 
     socket.onmessage = (event) => {
       const data = JSON.parse(event.data);
-    
-      // Se for um array de mensagens (exemplo: histórico de mensagens)
+
       if (Array.isArray(data.messages)) {
         setMessages((prevMessages) => [
           ...prevMessages,
-          ...data.messages.map((msg:Mensagem) => ({
+          ...data.messages.map((msg: Mensagem) => ({
             id: msg.id,
             conteudo: msg.conteudo,
-            remetente_id: msg.remetente_id, // Corrigindo nome do campo
+            remetente_id: msg.remetente_id,
             created_at: msg.created_at,
-            chat_room: msg.chat_room, // Garantindo que inclui o chat_room
+            chat_room: msg.chat_room,
           })),
         ]);
       }
-    
+
       // Se for uma nova mensagem recebida
       if (data.message) {
         setMessages((prevMessages) => [
@@ -195,16 +194,16 @@ export function ListaView() {
           },
         ]);
       }
-      
-    };
-    
 
-    
-// eslint-disable-next-line consistent-return
+    };
+
+
+
+    // eslint-disable-next-line consistent-return
     return () => {
       socket.close();
     };
-  }, [activeConversation,baseWsUrl]);
+  }, [activeConversation, baseWsUrl]);
 
   // Busca as mensagens do chat ativo
   useEffect(() => {
@@ -212,15 +211,15 @@ export function ListaView() {
       if (!activeConversation) return;
 
       try {
-        const response = await fetchWithToken(`api/chatrooms/messages/${activeConversation.id}/`,{
+        const response = await fetchWithToken(`api/chatrooms/messages/${activeConversation.id}/`, {
           method: 'GET',
-        headers: {
-         
-          'Content-Type': 'multipart/form-data',
-          "ngrok-skip-browser-warning": "true"
-        },
+          headers: {
+
+            'Content-Type': 'multipart/form-data',
+            "ngrok-skip-browser-warning": "true"
+          },
         });
-        const data=await response.json();
+        const data = await response.json();
         const { mensagens } = data;
         setMessages(mensagens);
       } catch (error) {
@@ -231,7 +230,7 @@ export function ListaView() {
     // Chamada inicial
     fetchMessages();
 
-    
+
   }, [activeConversation]);
 
   // Envia uma nova mensagem
@@ -256,7 +255,7 @@ export function ListaView() {
             id: novaMensagem.mensagem_id || prevMessages.length + 1,
             conteudo: novaMensagem.conteudo,
             remetente_id: novaMensagem.remetente_id,
-            empresa_id:novaMensagem.empresa_id,
+            empresa_id: novaMensagem.empresa_id,
             created_at: novaMensagem.created_at || new Date().toISOString(),
             chat_room: activeConversation, // Garante a referência ao chat
             remetente: activeConversation?.comprador || activeConversation?.vendedor, // Evita erros
@@ -297,18 +296,22 @@ export function ListaView() {
               onClick={() => setActiveConversation(conversation)}
             >
               <Avatar
-              src={
-                conversation.comprador?.foto
-                  ? `${mediaUrl}${conversation.comprador.foto}`
-                  : conversation.empresa?.imagens?.[0]?.imagem
-                  ? `${mediaUrl}${conversation.empresa.imagens[0].imagem}`
-                  : "https://via.placeholder.com/50"
-              }                sx={{ width: 48, height: 48, mr: 2 }}
+                src={
+                  conversation.comprador?.foto
+      ? `${mediaUrl}${conversation.comprador.foto}`
+      : conversation.empresa_compradora?.id === Number(empresaId)
+        ? empresaId
+          ? `${mediaUrl}${conversation?.empresa?.imagens[0].imagem}`
+          : `${mediaUrl}/static/DD3-removebg-preview.png`
+        : conversation.empresa_compradora?.imagens?.[0]?.imagem
+          ? `${mediaUrl}${conversation.empresa_compradora.imagens[0].imagem}`
+          : `${mediaUrl}/static/DD3-removebg-preview.png`
+                } sx={{ width: 48, height: 48, mr: 2 }}
               />
               <Box>
                 <Typography variant="body1">{conversation.produto?.nome || 'Produto não definido'}</Typography>
                 <Typography variant="body2" color="gray">
-                  {conversation.comprador?.nome || 'Comprador desconhecido'}
+                  {conversation.comprador?.nome || conversation?.empresa_compradora?.nome}
                 </Typography>
               </Box>
             </Paper>
@@ -330,12 +333,12 @@ export function ListaView() {
             >
               <Box display="flex" alignItems="center">
                 <Avatar
-                   src={
+                  src={
                     activeConversation.comprador?.foto
                       ? `${mediaUrl}${activeConversation.comprador.foto}`
                       : activeConversation.empresa?.imagens?.[0]?.imagem
-                      ? `${mediaUrl}${activeConversation.empresa.imagens[0].imagem}`
-                      : "https://via.placeholder.com/50"
+                        ? `${mediaUrl}${activeConversation.empresa.imagens[0].imagem}`
+                        : "https://via.placeholder.com/50"
                   }
                   sx={{ width: 38, height: 38, mr: 2 }}
                 />
@@ -355,15 +358,15 @@ export function ListaView() {
                     justifyContent={message.empresa?.id === Number(empresaId) ? 'flex-end' : 'flex-start'}
                     mb={2}
                   >
-                     <Box
-    sx={{
-      p: 2,
-      bgcolor: message.empresa?.id === Number(empresaId) ? "#3f51b5" : "#f0f0f0",
-      color: message.empresa?.id === Number(empresaId) ? "white" : "black",
-      borderRadius: "10px",
-      maxWidth: "70%",
-    }}
-  >
+                    <Box
+                      sx={{
+                        p: 2,
+                        bgcolor: message.empresa?.id === Number(empresaId) ? "#3f51b5" : "#f0f0f0",
+                        color: message.empresa?.id === Number(empresaId) ? "white" : "black",
+                        borderRadius: "10px",
+                        maxWidth: "70%",
+                      }}
+                    >
                       <Typography variant="body1">{message.conteudo}</Typography>
                     </Box>
                   </Box>

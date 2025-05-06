@@ -62,6 +62,12 @@ export function NotificationsPopover({ data = [], sx, ...other }: NotificationsP
   const [openPopover, setOpenPopover] = useState<HTMLButtonElement | null>(null);
   const [loading, setLoading] = useState(true);
   const [empresaId, setEmpresaId] = useState<string | null>(null);
+  const [pagination, setPagination] = useState({
+    pageIndex: 0,
+    pageSize: 10,
+    totalPages: 1,
+    totalCount: 0
+});
 
   useEffect(() => {
     const token = localStorage.getItem('userData');
@@ -75,7 +81,7 @@ export function NotificationsPopover({ data = [], sx, ...other }: NotificationsP
     if (!empresaId) return;
     const fetchNotifications = async () => {
       try {
-        const response = await fetchWithToken(`api/notificacoes/empresa-list/${empresaId}/`,{
+        const response = await fetchWithToken(`api/notificacoes/empresa-list/${empresaId}/?page=${pagination.pageIndex +1}`,{
           method:'GET',
           headers: {
             "ngrok-skip-browser-warning": "true", // Evita bloqueios do ngrok
@@ -83,14 +89,18 @@ export function NotificationsPopover({ data = [], sx, ...other }: NotificationsP
         });
         // Pegando os dados corretamente
         const data1 =await response.json();
-      const notificacoes = data1.notificacoes || []; 
+        console.log(data1)
+      const notificacoes = data1.results || [];
+      setPagination((prev) => ({
+        ...prev,
+        totalPages: Math.ceil(data1.count / prev.pageSize),
+      }));
       console.log('notificações',notificacoes);
 
-      // Convertendo os dados para o formato esperado
       const formattedNotifications: NotificationItemProps[] = notificacoes.map((notificacao: any) => ({
         id: notificacao.id,
         tipo: notificacao.tipo,
-        title: notificacao.mensagem, // Ajuste conforme necessário
+        title: notificacao.mensagem,
         isUnRead: !notificacao.lida,
         description: notificacao.mensagem,
         avatarUrl: notificacao.remetente?.foto || null,
@@ -107,7 +117,6 @@ export function NotificationsPopover({ data = [], sx, ...other }: NotificationsP
 
       console.log('Notificações formatadas:', formattedNotifications);
       
-      // Atualiza o estado corretamente
       setNotifications(formattedNotifications);
         
       } catch (error) {
@@ -117,7 +126,7 @@ export function NotificationsPopover({ data = [], sx, ...other }: NotificationsP
       }
     };
     fetchNotifications();
-  }, [empresaId]);
+  }, [empresaId,pagination.pageIndex]);
 
   const totalUnRead = notifications.filter((item) => !item.lida).length;
 
@@ -168,6 +177,27 @@ export function NotificationsPopover({ data = [], sx, ...other }: NotificationsP
           </List>
         </Scrollbar>
 
+
+        <Button
+        className="px-4 py-2 text-sm font-medium text-white bg-brand-900 rounded-[20px] hover:bg-brand-800 flex items-center justify-center"
+        onClick={() => setPagination((p) => ({ ...p, pageIndex: p.pageIndex - 1 }))}
+        disabled={pagination.pageIndex === 0}
+      >
+        Anterior
+      </Button>
+
+      <Typography variant="h6" sx={{ width: '100%', textAlign: 'center' }}>
+        Página {pagination.pageIndex + 1} de {pagination.totalPages}
+      </Typography>
+
+      <Button
+        className="px-4 py-2 text-sm font-medium text-white bg-brand-900 rounded-[20px] hover:bg-brand-800 flex items-center justify-center"
+        onClick={() => setPagination((p) => ({ ...p, pageIndex: p.pageIndex + 1 }))}
+        disabled={pagination.pageIndex + 1 >= pagination.totalPages}
+      >
+        Próxima
+      </Button>
+
         <Divider sx={{ borderStyle: 'dashed' }} />
 
         {/* <Box sx={{ p: 1 }}>
@@ -188,7 +218,7 @@ function NotificationItem({ notification }: { notification: NotificationItemProp
   return (
     <ListItemButton sx={{ py: 1.5, px: 2.5, mt: '1px', bgcolor: notification.lida ? 'transparent' : 'action.selected' }}>
       <ListItemAvatar>
-        <Avatar src={`https://dce9-154-71-159-172.ngrok-free.app${avatarUrl}`} sx={{ bgcolor: 'background.neutral' }} />
+        <Avatar src={`${Config.getApiUrlMedia()}/static/DD3-removebg-preview.png`} sx={{ bgcolor: 'background.neutral' }} />
       </ListItemAvatar>
       <ListItemText
         primary={title}

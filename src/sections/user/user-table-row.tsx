@@ -107,6 +107,7 @@ export function UserTableRow({ row, selected, onSelectRow }: UserTableRowProps) 
       const userData = JSON.parse(token);
       const empresaId2 = userData?.empresa?.id;
       if (empresaId2) setEmpresaId(empresaId2.toString());
+      
     }
   }, []);
 
