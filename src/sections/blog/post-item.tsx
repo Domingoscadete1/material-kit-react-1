@@ -329,8 +329,7 @@ export function PostItem({
       {[
         { icon: 'solar:chat-round-dots-bold', onClick: handleOpenMessageModal },
         { number: post.quantidade, icon: 'mdi:package-variant' },
-        // { number: post.quantidade, icon: 'solar:share-bold' },
-        { icon: 'mdi:credit-card-outline', onClick: handleOpenPaymentModal }, 
+        { icon: 'mdi:credit-card-outline', onClick: handleOpenPaymentModal },
       ].map((info, _index) => (
         <Box
           key={_index}
@@ -374,6 +373,7 @@ export function PostItem({
       sx={{
         mb: 1,
         color: 'text.disabled',
+        cursor: 'pointer',
         ...((latestPostLarge || latestPost) && {
           opacity: 0.48,
           color: 'common.white',
@@ -443,7 +443,11 @@ export function PostItem({
                 height: '100%',
                 position: 'absolute',
                 bgcolor: varAlpha(theme.palette.grey['900Channel'], 0.72),
+                pointerEvents: 'none', 
               },
+              '&:hover': {
+                cursor: 'pointer', 
+              }
             }),
             ...(latestPostLarge && {
               pt: {

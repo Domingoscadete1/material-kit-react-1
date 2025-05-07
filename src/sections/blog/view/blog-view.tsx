@@ -246,12 +246,29 @@ export function BlogView() {
     }
   }, [empresaId, fetchProductsWithFilters]);
 
+  const inputRefs = {
+    produto_nome_search: useRef<HTMLInputElement>(null),
+    categoria_id: useRef<HTMLSelectElement>(null),
+    preco_minimo: useRef<HTMLInputElement>(null),
+    preco_maximo: useRef<HTMLInputElement>(null),
+    condicao: useRef<HTMLSelectElement>(null),
+    data: useRef<HTMLSelectElement>(null)
+  };
+
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setSearchParams(prev => ({
       ...prev,
       [name]: value
     }));
+
+    if (name === 'categoria_id' || name === 'condicao' || name === 'data') {
+      setTimeout(() => {
+        if (inputRefs[name].current) {
+          inputRefs[name].current?.focus();
+        }
+      }, 0);
+    }
   };
 
   const applyFilters = () => {
@@ -274,12 +291,13 @@ export function BlogView() {
 
   return (
     <DashboardContent>
-      <Box display="flex" alignItems="center" mb={5}>
+      <Box display="flex" alignItems="center" mb={3}>
         <Typography variant="h4" flexGrow={1}>
           Explore
         </Typography>
       </Box>
-      <Box sx={{ mb: 5, p: 3, bgcolor: 'background.paper', borderRadius: 2 }}>
+
+      <Box sx={{ mb: 2, p: 3, bgcolor: 'background.paper', borderRadius: 2 }}>
         <Typography variant="h6" sx={{ mb: 2 }}>Filtrar Produtos</Typography>
 
         <Grid container spacing={2}>
@@ -290,6 +308,7 @@ export function BlogView() {
               name="produto_nome_search"
               value={searchParams.produto_nome_search || ''}
               onChange={handleSearchChange}
+              inputRef={inputRefs.produto_nome_search}
             />
           </Grid>
 
@@ -301,6 +320,7 @@ export function BlogView() {
               name="categoria_id"
               value={searchParams.categoria_id || ''}
               onChange={handleSearchChange}
+              inputRef={inputRefs.categoria_id}
             >
               <option value="">Todas</option>
               {categorias.map((categoria: any) => (
@@ -319,6 +339,7 @@ export function BlogView() {
               type="number"
               value={searchParams.preco_minimo || ''}
               onChange={handleSearchChange}
+              inputRef={inputRefs.preco_minimo}
               InputProps={{
                 inputProps: { min: 0 }
               }}
@@ -333,6 +354,7 @@ export function BlogView() {
               type="number"
               value={searchParams.preco_maximo || ''}
               onChange={handleSearchChange}
+              inputRef={inputRefs.preco_maximo}
               InputProps={{
                 inputProps: { min: 0 }
               }}
@@ -347,6 +369,7 @@ export function BlogView() {
               name="condicao"
               value={searchParams.condicao || ''}
               onChange={handleSearchChange}
+              inputRef={inputRefs.condicao}
             >
               <option value="">Todas</option>
               <option value="novo">Novo</option>
@@ -362,6 +385,7 @@ export function BlogView() {
               name="data"
               value={searchParams.data || ''}
               onChange={handleSearchChange}
+              inputRef={inputRefs.data}
             >
               <option value="">Padrão</option>
               <option value="recente">Mais Recente</option>
@@ -388,7 +412,7 @@ export function BlogView() {
         </Grid>
       </Box>
 
-      <Box sx={{ mb: 5, borderRadius: 1, overflow: 'hidden', position: 'relative', width: '100%', height: '300px' }}>
+      <Box sx={{ mb: 3, borderRadius: 1, overflow: 'hidden', position: 'relative', width: '100%', height: '400px' }}>
         {anuncios.map((anuncio: any, index) => (
           <Box
             key={index}
