@@ -450,14 +450,6 @@ export function BlogView() {
             >
               <Typography variant="h6" sx={{ mt: 1 }}>{anuncio?.descricao}</Typography>
               <Typography variant="body2">{anuncio?.desconto}</Typography>
-              <Button
-                variant="contained"
-                color="primary"
-                sx={{ mt: 2 }}
-                onClick={() => handleVerDetalhes(anuncio.id)}
-              >
-                Ver Detalhes
-              </Button>
             </Box>
           </Box>
         ))}
