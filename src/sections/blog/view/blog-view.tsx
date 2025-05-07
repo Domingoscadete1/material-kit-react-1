@@ -47,7 +47,7 @@ export function BlogView() {
     condicao: '',
     data: ''
   });
-  
+
 
   const navigate = useNavigate();
 
@@ -145,7 +145,7 @@ export function BlogView() {
     } finally {
       setLoading(false);
     }
-  }, [empresaId,pagination.pageIndex]);
+  }, [empresaId, pagination.pageIndex]);
 
   useEffect(() => {
     if (empresaId) {
@@ -182,51 +182,51 @@ export function BlogView() {
       console.error('ID da empresa não definido.');
       return;
     }
-  
+
     try {
       setLoading(true);
-      
+
       // Construir query string com os parâmetros de busca
       const queryParams = new URLSearchParams();
-      
+
       if (searchParams.produto_nome_search) {
         queryParams.append('produto_nome_search', searchParams.produto_nome_search);
       }
-      
+
       if (searchParams.categoria_id) {
         queryParams.append('categoria_id', searchParams.categoria_id);
       }
-      
+
       if (searchParams.preco_minimo) {
         queryParams.append('preco_minimo', searchParams.preco_minimo);
       }
-      
+
       if (searchParams.preco_maximo) {
         queryParams.append('preco_maximo', searchParams.preco_maximo);
       }
-      
+
       if (searchParams.condicao) {
         queryParams.append('condicao', searchParams.condicao);
       }
-      
+
       if (searchParams.data) {
         queryParams.append('data', searchParams.data);
       }
-      
+
       queryParams.append('page', (pagination.pageIndex + 1).toString());
-  
+
       const url = `api/produtos-search/bussiness/${empresaId}/?${queryParams.toString()}`;
-      
+
       const response = await fetchWithToken(url, {
         method: 'GET',
         headers: {
           "ngrok-skip-browser-warning": "true",
         },
       });
-      
+
       const data = await response.json();
       console.log('Produtos filtrados recebidos:', data.results);
-  
+
       setProducts(data.results || []);
       setFilteredProducts(data.results || []);
       setPagination(prev => ({
@@ -239,15 +239,13 @@ export function BlogView() {
       setLoading(false);
     }
   }, [empresaId, searchParams, pagination.pageIndex]);
-  
-  // Atualize o useEffect para usar a nova função de busca
+
   useEffect(() => {
     if (empresaId) {
       fetchProductsWithFilters();
     }
   }, [empresaId, fetchProductsWithFilters]);
-  
-  // Função para lidar com mudanças nos filtros
+
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setSearchParams(prev => ({
@@ -255,15 +253,12 @@ export function BlogView() {
       [name]: value
     }));
   };
-  
-  // Função para aplicar os filtros
+
   const applyFilters = () => {
-    // Resetar para a primeira página quando aplicar novos filtros
     setPagination(prev => ({ ...prev, pageIndex: 0 }));
     fetchProductsWithFilters();
   };
-  
-  // Função para limpar todos os filtros
+
   const clearFilters = () => {
     setSearchParams({
       produto_nome_search: '',
@@ -274,7 +269,6 @@ export function BlogView() {
       data: ''
     });
     setSelectedCategory(null);
-    // Resetar para a primeira página quando limpar filtros
     setPagination(prev => ({ ...prev, pageIndex: 0 }));
   };
 
@@ -286,114 +280,114 @@ export function BlogView() {
         </Typography>
       </Box>
       <Box sx={{ mb: 5, p: 3, bgcolor: 'background.paper', borderRadius: 2 }}>
-  <Typography variant="h6" sx={{ mb: 2 }}>Filtrar Produtos</Typography>
-  
-  <Grid container spacing={2}>
-    <Grid xs={12} md={4}>
-      <TextField
-        fullWidth
-        label="Nome do Produto"
-        name="produto_nome_search"
-        value={searchParams.produto_nome_search}
-        onChange={handleSearchChange}
-      />
-    </Grid>
-    
-    <Grid xs={12} md={2}>
-      <TextField
-        fullWidth
-        select
-        label="Categoria"
-        name="categoria_id"
-        value={searchParams.categoria_id}
-        onChange={handleSearchChange}
-        SelectProps={{
-          native: true,
-        }}
-      >
-        <option value="">Todas</option>
-        {categorias.map((categoria: any) => (
-          <option key={categoria.id} value={categoria.id}>
-            {categoria.nome}
-          </option>
-        ))}
-      </TextField>
-    </Grid>
-    
-    <Grid xs={12} sm={6} md={2}>
-      <TextField
-        fullWidth
-        label="Preço Mínimo"
-        name="preco_minimo"
-        type="number"
-        value={searchParams.preco_minimo}
-        onChange={handleSearchChange}
-      />
-    </Grid>
-    
-    <Grid xs={12} sm={6} md={2}>
-      <TextField
-        fullWidth
-        label="Preço Máximo"
-        name="preco_maximo"
-        type="number"
-        value={searchParams.preco_maximo}
-        onChange={handleSearchChange}
-      />
-    </Grid>
-    
-    <Grid xs={12} sm={6} md={2}>
-      <TextField
-        fullWidth
-        select
-        label="Condição"
-        name="condicao"
-        value={searchParams.condicao}
-        onChange={handleSearchChange}
-        SelectProps={{
-          native: true,
-        }}
-      >
-        <option value="">Todas</option>
-        <option value="novo">Novo</option>
-        <option value="usado">Usado</option>
-      </TextField>
-    </Grid>
-    
-    <Grid xs={12} sm={6} md={2}>
-      <TextField
-        fullWidth
-        select
-        label="Ordenar por Data"
-        name="data"
-        value={searchParams.data}
-        onChange={handleSearchChange}
-        SelectProps={{
-          native: true,
-        }}
-      >
-        <option value="">Padrão</option>
-        <option value="recente">Mais Recente</option>
-        <option value="antigo">Mais Antigo</option>
-      </TextField>
-    </Grid>
-    
-    <Grid xs={12} sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
-      <Button
-        variant="outlined"
-        onClick={clearFilters}
-      >
-        Limpar Filtros
-      </Button>
-      <Button
-        variant="contained"
-        onClick={applyFilters}
-      >
-        Aplicar Filtros
-      </Button>
-    </Grid>
-  </Grid>
-</Box>
+        <Typography variant="h6" sx={{ mb: 2 }}>Filtrar Produtos</Typography>
+
+        <Grid container spacing={2}>
+          <Grid md={4}>
+            <TextField
+              fullWidth
+              label="Nome do Produto"
+              name="produto_nome_search"
+              value={searchParams.produto_nome_search || ''}
+              onChange={handleSearchChange}
+            />
+          </Grid>
+
+          <Grid md={2}>
+            <TextField
+              fullWidth
+              select
+              label="Categoria"
+              name="categoria_id"
+              value={searchParams.categoria_id || ''}
+              onChange={handleSearchChange}
+            >
+              <option value="">Todas</option>
+              {categorias.map((categoria: any) => (
+                <option key={categoria.id} value={categoria.id}>
+                  {categoria.nome}
+                </option>
+              ))}
+            </TextField>
+          </Grid>
+
+          <Grid sm={6} md={2}>
+            <TextField
+              fullWidth
+              label="Preço Mínimo"
+              name="preco_minimo"
+              type="number"
+              value={searchParams.preco_minimo || ''}
+              onChange={handleSearchChange}
+              InputProps={{
+                inputProps: { min: 0 }
+              }}
+            />
+          </Grid>
+
+          <Grid sm={6} md={2}>
+            <TextField
+              fullWidth
+              label="Preço Máximo"
+              name="preco_maximo"
+              type="number"
+              value={searchParams.preco_maximo || ''}
+              onChange={handleSearchChange}
+              InputProps={{
+                inputProps: { min: 0 }
+              }}
+            />
+          </Grid>
+
+          <Grid sm={6} md={2}>
+            <TextField
+              fullWidth
+              select
+              label="Condição"
+              name="condicao"
+              value={searchParams.condicao || ''}
+              onChange={handleSearchChange}
+            >
+              <option value="">Todas</option>
+              <option value="novo">Novo</option>
+              <option value="usado">Usado</option>
+            </TextField>
+          </Grid>
+
+          <Grid sm={6} md={2}>
+            <TextField
+              fullWidth
+              select
+              label="Ordenar por Data"
+              name="data"
+              value={searchParams.data || ''}
+              onChange={handleSearchChange}
+            >
+              <option value="">Padrão</option>
+              <option value="recente">Mais Recente</option>
+              <option value="antigo">Mais Antigo</option>
+            </TextField>
+          </Grid>
+
+          <Grid sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 2 }}>
+            <Button
+              variant="outlined"
+              onClick={clearFilters}
+              sx={{ minWidth: 120 }}
+            >
+              Limpar Filtros
+            </Button>
+            <Button
+              variant="contained"
+              onClick={applyFilters}
+              sx={{ minWidth: 120 }}
+            >
+              Aplicar Filtros
+            </Button>
+          </Grid>
+        </Grid>
+      </Box>
+
       <Box sx={{ mb: 5, borderRadius: 1, overflow: 'hidden', position: 'relative', width: '100%', height: '300px' }}>
         {anuncios.map((anuncio: any, index) => (
           <Box
@@ -525,25 +519,27 @@ export function BlogView() {
         </Grid>
       )}
 
-<Button
-        className="px-4 py-2 text-sm font-medium text-white bg-brand-900 rounded-[20px] hover:bg-brand-800 flex items-center justify-center"
-        onClick={() => setPagination((p) => ({ ...p, pageIndex: p.pageIndex - 1 }))}
-        disabled={pagination.pageIndex === 0}
-      >
-        Anterior
-      </Button>
+      <Box display='flex' padding={2} >
+        <Button
+          className="px-4 py-2 text-sm font-medium text-white bg-brand-900 rounded-[20px] hover:bg-brand-800 flex items-center justify-center"
+          onClick={() => setPagination((p) => ({ ...p, pageIndex: p.pageIndex - 1 }))}
+          disabled={pagination.pageIndex === 0}
+        >
+          Anterior
+        </Button>
 
-      <Typography variant="h6" sx={{ width: '100%', textAlign: 'center' }}>
-        Página {pagination.pageIndex + 1} de {pagination.totalPages}
-      </Typography>
+        <Typography variant="h6" sx={{ width: '100%', textAlign: 'center' }}>
+          Página {pagination.pageIndex + 1} de {pagination.totalPages}
+        </Typography>
 
-      <Button
-        className="px-4 py-2 text-sm font-medium text-white bg-brand-900 rounded-[20px] hover:bg-brand-800 flex items-center justify-center"
-        onClick={() => setPagination((p) => ({ ...p, pageIndex: p.pageIndex + 1 }))}
-        disabled={pagination.pageIndex + 1 >= pagination.totalPages}
-      >
-        Próxima
-      </Button>
+        <Button
+          className="px-4 py-2 text-sm font-medium text-white bg-brand-900 rounded-[20px] hover:bg-brand-800 flex items-center justify-center"
+          onClick={() => setPagination((p) => ({ ...p, pageIndex: p.pageIndex + 1 }))}
+          disabled={pagination.pageIndex + 1 >= pagination.totalPages}
+        >
+          Próxima
+        </Button>
+      </Box>
 
     </DashboardContent>
   );
