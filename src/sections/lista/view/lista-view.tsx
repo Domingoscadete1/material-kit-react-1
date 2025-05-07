@@ -4,9 +4,6 @@ import { Box, Typography, Paper, Avatar, TextField, Button, CircularProgress } f
 import { fetchWithToken } from '../../../../authService';
 import Config from '../../../../Config';
 
-
-// Defina o tipo para as mensagens
-// Representação de um produto
 export interface Produto {
   id: number;
   nome: string;
@@ -197,8 +194,6 @@ export function ListaView() {
 
     };
 
-
-
     // eslint-disable-next-line consistent-return
     return () => {
       socket.close();
@@ -229,7 +224,6 @@ export function ListaView() {
 
     // Chamada inicial
     fetchMessages();
-
 
   }, [activeConversation]);
 
@@ -268,10 +262,9 @@ export function ListaView() {
 
   return (
     <Box display="flex" height="90vh" bgcolor="#f4f6f8">
-      {/* Lista de Conversas */}
       <Box
         width="28%"
-        bgcolor="#3f51b5"
+        bgcolor="#000"
         color="white"
         p={2}
         display="flex"
@@ -290,7 +283,7 @@ export function ListaView() {
                 p: 2,
                 display: 'flex',
                 alignItems: 'center',
-                bgcolor: activeConversation?.id === conversation.id ? '#7986cb' : 'transparent',
+                bgcolor: activeConversation?.id === conversation.id ? '#3055c6' : 'transparent',
                 cursor: 'pointer',
               }}
               onClick={() => setActiveConversation(conversation)}
@@ -298,21 +291,21 @@ export function ListaView() {
               <Avatar
                 src={
                   conversation.comprador?.foto
-      ? `${mediaUrl}${conversation.comprador.foto}`
-      : conversation.empresa_compradora?.id === Number(empresaId)
-        ? empresaId
-          ? `${mediaUrl}${conversation?.empresa?.imagens[0].imagem}`
-          : `${mediaUrl}/static/DD3-removebg-preview.png`
-        : conversation.empresa_compradora?.imagens?.[0]?.imagem
-          ? `${mediaUrl}${conversation.empresa_compradora.imagens[0].imagem}`
-          : `${mediaUrl}/static/DD3-removebg-preview.png`
+                    ? `${mediaUrl}${conversation.comprador.foto}`
+                    : conversation.empresa_compradora?.id === Number(empresaId)
+                      ? empresaId
+                        ? `${mediaUrl}${conversation?.empresa?.imagens[0].imagem}`
+                        : `${mediaUrl}/static/DD3-removebg-preview.png`
+                      : conversation.empresa_compradora?.imagens?.[0]?.imagem
+                        ? `${mediaUrl}${conversation.empresa_compradora.imagens[0].imagem}`
+                        : `${mediaUrl}/static/DD3-removebg-preview.png`
                 } sx={{ width: 48, height: 48, mr: 2 }}
               />
               <Box>
-                <Typography variant="body1">{conversation.produto?.nome || 'Produto não definido'}</Typography>
-                <Typography variant="body2" color="gray">
+                <Typography variant="body2" color="white">
                   {conversation.comprador?.nome || conversation?.empresa_compradora?.nome}
                 </Typography>
+                <Typography variant="body1" color="gray">{conversation.produto?.nome || 'Produto não definido'}</Typography>
               </Box>
             </Paper>
           ))}
@@ -323,7 +316,6 @@ export function ListaView() {
       <Box flexGrow={1} display="flex" flexDirection="column" bgcolor="white">
         {activeConversation && (
           <>
-            {/* Cabeçalho do Chat */}
             <Box
               display="flex"
               alignItems="center"
@@ -361,7 +353,7 @@ export function ListaView() {
                     <Box
                       sx={{
                         p: 2,
-                        bgcolor: message.empresa?.id === Number(empresaId) ? "#3f51b5" : "#f0f0f0",
+                        bgcolor: message.empresa?.id === Number(empresaId) ? "#000" : "#f0f0f0",
                         color: message.empresa?.id === Number(empresaId) ? "white" : "black",
                         borderRadius: "10px",
                         maxWidth: "70%",
@@ -383,7 +375,11 @@ export function ListaView() {
                 onChange={(e) => setNewMessage(e.target.value)}
                 sx={{ mr: 2 }}
               />
-              <Button variant="contained" onClick={handleSendMessage}>
+              <Button
+                variant="contained"
+                onClick={handleSendMessage}
+                style={{ backgroundColor: "black" }}
+              >
                 Enviar
               </Button>
             </Box>
