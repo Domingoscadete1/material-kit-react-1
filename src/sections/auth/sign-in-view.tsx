@@ -377,9 +377,9 @@ export function SignInView() {
 
     return (
         <Box gap={1.5} display="flex" flexDirection="column" alignItems="center" sx={{ mb: 5 }}>
-            <Typography variant="h4">Sign in</Typography>
+            <Typography variant="h4">LOGIN</Typography>
             <Typography variant="body2" color="text.secondary">
-                Welcome, again!!
+                Bem-Vindo de Volta!
             </Typography>
 
             <Box component="form" onSubmit={handleSubmit(onSubmit)} display="flex" flexDirection="column">
@@ -405,7 +405,7 @@ export function SignInView() {
                         <TextField
                             {...field}
                             fullWidth
-                            label="Password"
+                            label="Senha"
                             type={showPassword ? 'text' : 'password'}
                             error={!!errors.password}
                             helperText={errors.password?.message}
@@ -431,7 +431,7 @@ export function SignInView() {
                     variant="contained"
                     loading={isPending}
                 >
-                    Sign in
+                    Login
                 </LoadingButton>
             </Box>
 
@@ -454,7 +454,7 @@ export function SignInView() {
                     variant="overline"
                     sx={{ color: 'text.secondary', fontWeight: 'fontWeightMedium' }}
                 >
-                    OR
+                    Ou
                 </Typography>
             </Divider>
 
