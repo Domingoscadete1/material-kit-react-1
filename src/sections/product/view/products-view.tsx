@@ -367,7 +367,7 @@ export function ProductsView() {
         Produtos
       </Typography>
 
-      <Box sx={{ mb: 5, borderRadius: 1, overflow: 'hidden', position: 'relative', width: '100%', height: '300px' }}>
+      <Box sx={{ mb: 5, borderRadius: 1, overflow: 'hidden', position: 'relative', width: '100%', height: '400px' }}>
         {anuncios.map((anuncio: any, index) => (
           <Box
             key={index}

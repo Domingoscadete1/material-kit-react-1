@@ -51,7 +51,8 @@ export function DetalhesView() {
   const [quantidade, setQuantidade] = useState(1);
   const [loading, setLoading] = useState(false);
   const [userData, setUserData] = useState(JSON.parse(localStorage.getItem('userData') || '{}'));
-
+  const [imagemSelecionada, setImagemSelecionada] = useState(null);
+  const [modalImagemOpen, setModalImagemOpen] = useState(false);
 
   const handleOpenPaymentModal = () => setOpenPaymentModal(true);
   const handleClosePaymentModal = () => setOpenPaymentModal(false);
@@ -188,6 +189,11 @@ export function DetalhesView() {
     }
   };
 
+  const handleOpenImagem = (imagemUrl) => {
+    setImagemSelecionada(imagemUrl);
+    setModalImagemOpen(true);
+  };
+
   return (
     <DashboardContent>
       <Typography variant="h4" sx={{ mb: 4 }}>
@@ -196,7 +202,6 @@ export function DetalhesView() {
 
       <Card sx={{ maxWidth: "100%", padding: 2 }}>
       <Grid container spacing={2}>
-          {/* Coluna da mídia principal e miniaturas */}
           <Grid xs={12} md={6}>
             {mediaType === 'image' ? (
               <CardMedia
@@ -204,7 +209,8 @@ export function DetalhesView() {
                 height="400"
                 image={mainMedia}
                 alt={dados?.nome}
-                sx={{ width: '100%', borderRadius: 1, marginBottom: 2 }}
+                sx={{ width: '100%', borderRadius: 1, marginBottom: 2, cursor: 'pointer' }}
+                onClick={() => handleOpenImagem(mainMedia)}
               />
             ) : (
               <Box
@@ -216,7 +222,6 @@ export function DetalhesView() {
             )}
 
             <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', flexWrap: 'wrap' }}>
-              {/* Miniaturas de imagens */}
               {dados?.imagens.map((image, index) => (
                 <CardMedia
                   key={`image-${index}`}
@@ -234,7 +239,6 @@ export function DetalhesView() {
                 />
               ))}
 
-              {/* Miniaturas de vídeos */}
               {dados?.videos.map((video, index) => (
                 <Box
                   key={`video-${index}`}
@@ -311,7 +315,35 @@ export function DetalhesView() {
           </Grid>
         </Grid>
       </Card>
-      {/* modal de pagamento */}
+
+      <Modal open={modalImagemOpen} onClose={() => setModalImagemOpen(false)}>
+        <Box sx={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: { xs: '90%', sm: '80%', md: '70%' },
+          maxWidth: 800,
+          maxHeight: '90vh',
+          p: 1,
+          outline: 'none',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}>
+          {imagemSelecionada && (
+            <Box
+              component="img"
+              src={imagemSelecionada}
+              sx={{
+                maxWidth: '100%',
+                maxHeight: '85vh',
+              }}
+            />
+          )}
+        </Box>
+      </Modal>
+
       <Modal open={openPaymentModal} onClose={handleClosePaymentModal}>
         <Box
           sx={{

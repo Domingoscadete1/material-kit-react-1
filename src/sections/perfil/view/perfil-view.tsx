@@ -84,7 +84,9 @@ export function PerfilView() {
   const [mensagens, setMensagens] = useState<MensagemSuporte[]>([]);
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [mensagem, setMensagem] = useState('');
+  const [modalImagemOpen, setModalImagemOpen] = useState(false);
   const socketRef = useRef<WebSocket | null>(null);
+  const [imagemSelecionada, setImagemSelecionada] = useState<string | null>(null);
   const [openEditModal, setOpenEditModal] = useState(false);
   const [editForm, setEditForm] = useState({
     nome: '',
@@ -457,6 +459,11 @@ export function PerfilView() {
     }
   }, [chatId1, conectarWebSocket]);
 
+  const handleOpenImagem = (imagemUrl: string) => {
+    setImagemSelecionada(imagemUrl);
+    setModalImagemOpen(true);
+  };
+
   return (
     <DashboardContent>
       <Grid container spacing={3}>
@@ -466,7 +473,8 @@ export function PerfilView() {
             <Avatar
               src={`${mediaUrl}${funcionario.foto}`}
               alt="Profile"
-              sx={{ width: 120, height: 120, mx: 'auto', mb: 2 }}
+              sx={{ width: 120, height: 120, mx: 'auto', mb: 2, cursor: 'pointer' }}
+              onClick={() => handleOpenImagem(`${mediaUrl}${funcionario.foto}`)}
             />
             <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
               {funcionario.usuario_username}
@@ -562,9 +570,11 @@ export function PerfilView() {
                     borderRadius: '12px',
                     overflow: 'hidden',
                     position: 'relative',
+                    cursor: 'pointer',
                     mr: 2,
                     mb: 2
                   }}
+                  onClick={() => handleOpenImagem(img.imagem)}
                 >
                   <img
                     src={`${img.imagem}`}
@@ -637,6 +647,34 @@ export function PerfilView() {
         </Grid>
 
       </Grid>
+
+      <Modal open={modalImagemOpen} onClose={() => setModalImagemOpen(false)}>
+        <Box sx={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: { xs: '90%', sm: '80%', md: '70%' },
+          maxWidth: 800,
+          maxHeight: '90vh',
+          p: 1,
+          outline: 'none',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}>
+          {imagemSelecionada && (
+            <Box
+              component="img"
+              src={imagemSelecionada}
+              sx={{
+                maxWidth: '100%',
+                maxHeight: '85vh',
+              }}
+            />
+          )}
+        </Box>
+      </Modal>
 
       <Modal open={openEditFuncionarioModal} onClose={() => setOpenEditFuncionarioModal(false)}>
         <Box sx={{

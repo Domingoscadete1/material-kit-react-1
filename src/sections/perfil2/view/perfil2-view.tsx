@@ -15,7 +15,6 @@ import { DashboardContent } from 'src/layouts/dashboard';
 import Config from '../../../../Config';
 import { fetchWithToken } from '../../../../authService';
 
-
 interface Imagem {
   imagem: string;
 }
@@ -52,6 +51,8 @@ export function Perfil2View() {
   const [produtoSelecionado, setProdutoSelecionado] = useState<Produto | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalDenunciaOpen, setModalDenunciaOpen] = useState(false);
+  const [modalImagemOpen, setModalImagemOpen] = useState(false);
+  const [imagemSelecionada, setImagemSelecionada] = useState<string | null>(null);
   const [motivo, setMotivo] = useState('');
   const [descricao, setDescricao] = useState('');
   const [pagination, setPagination] = useState({
@@ -132,6 +133,11 @@ export function Perfil2View() {
     }
   };
 
+  const handleOpenImagem = (imagemUrl: string) => {
+    setImagemSelecionada(imagemUrl);
+    setModalImagemOpen(true);
+  };
+
   if (!dados) return <Typography>Carregando...</Typography>;
 
   return (
@@ -146,7 +152,17 @@ export function Perfil2View() {
             <Avatar
               src={`${dados.foto || (dados.imagens?.length ? dados.imagens[0].imagem : '')}`}
               alt="Profile"
-              sx={{ width: 120, height: 120, mx: 'auto', mb: 2 }}
+              sx={{ 
+                width: 120, 
+                height: 120, 
+                mx: 'auto', 
+                mb: 2,
+                cursor: 'pointer',
+                '&:hover': {
+                  opacity: 0.8,
+                }
+              }}
+              onClick={() => handleOpenImagem(dados.foto || (dados.imagens?.length ? dados.imagens[0].imagem : ''))}
             />
             <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
               {dados.nome}
@@ -161,7 +177,6 @@ export function Perfil2View() {
               Denunciar empresa
             </Button>
 
-            {/* Modal de Denúncia */}
             <Modal open={modalDenunciaOpen} onClose={() => setModalDenunciaOpen(false)}>
               <Box sx={{
                 position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
@@ -218,7 +233,19 @@ export function Perfil2View() {
                   <Grid container spacing={2}>
                     {dados.imagens.map((imagem, index) => (
                       <Grid key={index} md={4}>
-                        <Box component="img" src={`${imagem.imagem}`} sx={{ width: '100%', borderRadius: 1 }} />
+                        <Box 
+                          component="img" 
+                          src={`${imagem.imagem}`} 
+                          sx={{ 
+                            width: '100%', 
+                            borderRadius: 1,
+                            cursor: 'pointer',
+                            '&:hover': {
+                              opacity: 0.8,
+                            }
+                          }} 
+                          onClick={() => handleOpenImagem(imagem.imagem)}
+                        />
                       </Grid>
                     ))}
                   </Grid>
@@ -304,7 +331,6 @@ export function Perfil2View() {
         </Paper>
       </Grid>
 
-      {/* Modal de Detalhes do Produto */}
       <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
         <Box sx={{
           position: 'absolute',
@@ -340,6 +366,34 @@ export function Perfil2View() {
                 ))}
               </Grid>
             </>
+          )}
+        </Box>
+      </Modal>
+
+      <Modal open={modalImagemOpen} onClose={() => setModalImagemOpen(false)}>
+        <Box sx={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: { xs: '90%', sm: '80%', md: '70%' },
+          maxWidth: 800,
+          maxHeight: '90vh',
+          p: 1,
+          outline: 'none',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}>
+          {imagemSelecionada && (
+            <Box 
+              component="img" 
+              src={imagemSelecionada} 
+              sx={{
+                maxWidth: '100%',
+                maxHeight: '85vh',
+              }}
+            />
           )}
         </Box>
       </Modal>
