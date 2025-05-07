@@ -1,48 +1,89 @@
-import { useState, useCallback, useMemo } from 'react';
-import Box from '@mui/material/Box';
-import Card from '@mui/material/Card';
-import Table from '@mui/material/Table';
-import Button from '@mui/material/Button';
-import TableBody from '@mui/material/TableBody';
-import Typography from '@mui/material/Typography';
-import TableContainer from '@mui/material/TableContainer';
-import TablePagination from '@mui/material/TablePagination';
-import { _users } from 'src/_mock';
+import { useState, useCallback, useEffect } from 'react';
+import {
+  Box,
+  Button,
+  Typography,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  CircularProgress,
+  Avatar,
+  TextField,
+  TablePagination,
+} from '@mui/material';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { Iconify } from 'src/components/iconify';
-import { Scrollbar } from 'src/components/scrollbar';
 import AddFuncionarioModal from './funcionariomodal';
-import { TableNoData } from '../table-no-data';
-import { UserTableRow } from '../user-table-row';
-import { UserTableHead } from '../user-table-head';
-import { TableEmptyRows } from '../table-empty-rows';
-import { UserTableToolbar } from '../user-table-toolbar';
-import { emptyRows, applyFilter, getComparator } from '../utils';
-import type { UserProps } from '../user-table-row';
+import { fetchWithToken } from '../../../../authService';
+
+type Funcionario = {
+  id: string;
+  username: string;
+  email: string;
+  role: string;
+  foto?: string;
+};
 
 export function FuncionarioView() {
-  const table = useTable();
-  const [filterName, setFilterName] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
+  const [funcionarios, setFuncionarios] = useState<Funcionario[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [search, setSearch] = useState('');
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
 
-  const dataFiltered = useMemo(
-    () => applyFilter({
-      inputData: _users,
-      comparator: getComparator(table.order, table.orderBy),
-      filterName,
-    }),
-    [table.order, table.orderBy, filterName]
+  const fetchFuncionarios = useCallback(async () => {
+    setLoading(true);
+    try {
+      const response = await fetchWithToken('api/empresa-users/', {
+        method: 'GET',
+        headers: {
+          'ngrok-skip-browser-warning': 'true',
+        },
+      });
+      const data = await response.json();
+      if (Array.isArray(data)) {
+        setFuncionarios(data);
+      } else {
+        console.error('Dados inválidos');
+      }
+    } catch (error) {
+      console.error('Erro ao buscar funcionários:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchFuncionarios();
+  }, [fetchFuncionarios]);
+
+  const handleCloseModal = () => {
+    setModalOpen(false);
+    fetchFuncionarios();
+  };
+
+  const filteredFuncionarios = funcionarios.filter((func) =>
+    func.username.toLowerCase().includes(search.toLowerCase())
   );
 
-  const paginatedData = useMemo(
-    () => dataFiltered.slice(
-      table.page * table.rowsPerPage,
-      table.page * table.rowsPerPage + table.rowsPerPage
-    ),
-    [dataFiltered, table.page, table.rowsPerPage]
+  const paginatedFuncionarios = filteredFuncionarios.slice(
+    page * rowsPerPage,
+    page * rowsPerPage + rowsPerPage
   );
 
-  const notFound = !dataFiltered.length && !!filterName;
+  const handleChangePage = (_: unknown, newPage: number) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
 
   return (
     <DashboardContent>
@@ -58,141 +99,79 @@ export function FuncionarioView() {
         >
           Adicionar Funcionário
         </Button>
-        <AddFuncionarioModal open={modalOpen} onClose={() => setModalOpen(false)} />
+        <AddFuncionarioModal open={modalOpen} onClose={handleCloseModal} />
       </Box>
 
-      <Card>
-        <UserTableToolbar
-          numSelected={table.selected.length}
-          filterName={filterName}
-          onFilterName={(event: React.ChangeEvent<HTMLInputElement>) => {
-            setFilterName(event.target.value);
-            table.onResetPage();
-          }}
+      <Box mb={2}>
+        <TextField
+          fullWidth
+          label="Pesquisar por nome"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
         />
+      </Box>
 
-        <Scrollbar>
-          <TableContainer sx={{ overflow: 'unset' }}>
-            <Table sx={{ minWidth: 800 }}>
-              <UserTableHead
-                order={table.order}
-                orderBy={table.orderBy}
-                rowCount={dataFiltered.length}
-                numSelected={table.selected.length}
-                onSort={table.onSort}
-                onSelectAllRows={(checked) =>
-                  table.onSelectAllRows(
-                    checked,
-                    dataFiltered.map((user) => user.id)
-                  )
-                }
-                headLabel={[
-                  { id: 'name', label: 'Nome' },
-                  { id: 'email', label: 'Email' },
-                  { id: 'role', label: 'Cargo' },
-                  { id: 'isVerified', label: 'Verificado', align: 'center' },
-                  { id: 'status', label: 'Status' },
-                  { id: '' },
-                ]}
-              />
+      {loading ? (
+        <Box display="flex" justifyContent="center" mt={4}>
+          <CircularProgress />
+        </Box>
+      ) : (
+        <Paper
+          sx={{
+            boxShadow: '0 2px 20px rgba(0, 0, 0, 0.05)',
+            borderRadius: 2,
+            border: '1px solid #e0e0e0',
+            overflow: 'hidden',
+          }}
+        >
+          <TableContainer>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Foto</TableCell>
+                  <TableCell>Nome</TableCell>
+                  <TableCell>Email</TableCell>
+                  <TableCell>Cargo</TableCell>
+                </TableRow>
+              </TableHead>
               <TableBody>
-                {paginatedData.map((row) => (
-                  <UserTableRow
-                    key={row.id}
-                    row={row}
-                    selected={table.selected.includes(row.id)}
-                    onSelectRow={() => table.onSelectRow(row.id)}
-                  />
-                ))}
-
-                <TableEmptyRows
-                  height={68}
-                  emptyRows={emptyRows(table.page, table.rowsPerPage, dataFiltered.length)}
-                />
-
-                {notFound && <TableNoData searchQuery={filterName} />}
+                {paginatedFuncionarios.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={4} align="center">
+                      Nenhum funcionário encontrado.
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  paginatedFuncionarios.map((func) => (
+                    <TableRow key={func.id}>
+                      <TableCell>
+                        {func.foto ? (
+                          <Avatar src={func.foto} alt={func.username} />
+                        ) : (
+                          <Avatar>{func.username[0].toUpperCase()}</Avatar>
+                        )}
+                      </TableCell>
+                      <TableCell>{func.username}</TableCell>
+                      <TableCell>{func.email}</TableCell>
+                      <TableCell>{func.role}</TableCell>
+                    </TableRow>
+                  ))
+                )}
               </TableBody>
             </Table>
           </TableContainer>
-        </Scrollbar>
+        </Paper>
+      )}
 
-        <TablePagination
-          component="div"
-          page={table.page}
-          count={dataFiltered.length}
-          rowsPerPage={table.rowsPerPage}
-          onPageChange={table.onChangePage}
-          rowsPerPageOptions={[5, 10, 25]}
-          onRowsPerPageChange={table.onChangeRowsPerPage}
-        />
-      </Card>
+      <TablePagination
+        component="div"
+        count={filteredFuncionarios.length}
+        page={page}
+        onPageChange={handleChangePage}
+        rowsPerPage={rowsPerPage}
+        onRowsPerPageChange={handleChangeRowsPerPage}
+        labelRowsPerPage="Linhas por página"
+      />
     </DashboardContent>
   );
-}
-
-// Hook useTable permanece igual
-export function useTable() {
-  const [page, setPage] = useState(0);
-  const [orderBy, setOrderBy] = useState('name');
-  const [rowsPerPage, setRowsPerPage] = useState(5);
-  const [selected, setSelected] = useState<string[]>([]);
-  const [order, setOrder] = useState<'asc' | 'desc'>('asc');
-
-  const onSort = useCallback(
-    (id: string) => {
-      const isAsc = orderBy === id && order === 'asc';
-      setOrder(isAsc ? 'desc' : 'asc');
-      setOrderBy(id);
-    },
-    [order, orderBy]
-  );
-
-  const onSelectAllRows = useCallback((checked: boolean, newSelecteds: string[]) => {
-    if (checked) {
-      setSelected(newSelecteds);
-      return;
-    }
-    setSelected([]);
-  }, []);
-
-  const onSelectRow = useCallback(
-    (inputValue: string) => {
-      const newSelected = selected.includes(inputValue)
-        ? selected.filter((value) => value !== inputValue)
-        : [...selected, inputValue];
-
-      setSelected(newSelected);
-    },
-    [selected]
-  );
-
-  const onResetPage = useCallback(() => {
-    setPage(0);
-  }, []);
-
-  const onChangePage = useCallback((event: unknown, newPage: number) => {
-    setPage(newPage);
-  }, []);
-
-  const onChangeRowsPerPage = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      setRowsPerPage(parseInt(event.target.value, 10));
-      onResetPage();
-    },
-    [onResetPage]
-  );
-
-  return {
-    page,
-    order,
-    onSort,
-    orderBy,
-    selected,
-    rowsPerPage,
-    onSelectRow,
-    onResetPage,
-    onChangePage,
-    onSelectAllRows,
-    onChangeRowsPerPage,
-  };
 }

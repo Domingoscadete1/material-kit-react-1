@@ -1,49 +1,99 @@
-import { useState, useCallback } from 'react';
+import { useState, useEffect, useCallback, ChangeEvent } from 'react';
 
-import Box from '@mui/material/Box';
-import Card from '@mui/material/Card';
-import Table from '@mui/material/Table';
-import Button from '@mui/material/Button';
-import TableBody from '@mui/material/TableBody';
-import Typography from '@mui/material/Typography';
-import TableContainer from '@mui/material/TableContainer';
-import TablePagination from '@mui/material/TablePagination';
+import {
+  Box,
+  Button,
+  Typography,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  CircularProgress,
+  TextField,
+  TablePagination,
+} from '@mui/material';
 
-import { _users } from 'src/_mock';
 import { DashboardContent } from 'src/layouts/dashboard';
-
 import { Iconify } from 'src/components/iconify';
-import { Scrollbar } from 'src/components/scrollbar';
+import { fetchWithToken } from '../../../../authService';
 
 import AddPostoModal from './postomodal';
-import { TableNoData } from '../table-no-data';
-import { UserTableRow } from '../user-table-row';
-import { UserTableHead } from '../user-table-head';
-import { TableEmptyRows } from '../table-empty-rows';
-import { UserTableToolbar } from '../user-table-toolbar';
-import { emptyRows, applyFilter, getComparator } from '../utils';
-
-import type { UserProps } from '../user-table-row';
 
 // ----------------------------------------------------------------------
 
+type Posto = {
+  id: string;
+  nome: string;
+  capacidade: number;
+  horario: string;
+  foto: string;
+};
+
 export function UserView() {
-  const table = useTable();
-
-  const [filterName, setFilterName] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
+  const [postos, setPostos] = useState<Posto[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [search, setSearch] = useState('');
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
 
-  const dataFiltered: UserProps[] = applyFilter({
-    inputData: _users,
-    comparator: getComparator(table.order, table.orderBy),
-    filterName,
-  });
+  const fetchPostos = useCallback(async () => {
+    setLoading(true);
+    try {
+      const response = await fetchWithToken('api/postos/', {
+        method: 'GET',
+        headers: {
+          'ngrok-skip-browser-warning': 'true',
+        },
+      });
+      const data = await response.json();
+      if (Array.isArray(data)) {
+        setPostos(data);
+      } else {
+        console.error('Dados inválidos da API');
+        setPostos([]);
+      }
+    } catch (error) {
+      console.error('Erro ao buscar postos:', error);
+      setPostos([]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
-  const notFound = !dataFiltered.length && !!filterName;
+  useEffect(() => {
+    fetchPostos();
+  }, [fetchPostos]);
+
+  const handleCloseModal = () => {
+    setModalOpen(false);
+    fetchPostos();
+  };
+
+  const handleChangePage = (_: unknown, newPage: number) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event: ChangeEvent<HTMLInputElement>) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
+  const filteredPostos = postos.filter((posto) =>
+    posto.nome.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const paginatedPostos = filteredPostos.slice(
+    page * rowsPerPage,
+    page * rowsPerPage + rowsPerPage
+  );
 
   return (
     <DashboardContent>
-      <Box display="flex" alignItems="center" mb={5}>
+      <Box display="flex" alignItems="center" mb={3}>
         <Typography variant="h4" flexGrow={1}>
           Postos
         </Typography>
@@ -53,149 +103,96 @@ export function UserView() {
           startIcon={<Iconify icon="mingcute:add-line" />}
           onClick={() => setModalOpen(true)}
         >
-          Adionar Posto
+          Adicionar Posto
         </Button>
-        <AddPostoModal open={modalOpen} onClose={() => setModalOpen(false)} />
+        <AddPostoModal open={modalOpen} onClose={handleCloseModal} />
       </Box>
 
-      <Card>
-        <UserTableToolbar
-          numSelected={table.selected.length}
-          filterName={filterName}
-          onFilterName={(event: React.ChangeEvent<HTMLInputElement>) => {
-            setFilterName(event.target.value);
-            table.onResetPage();
-          }}
+      <Box mb={2}>
+        <TextField
+          label="Pesquisar..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
         />
+      </Box>
 
-        <Scrollbar>
-          <TableContainer sx={{ overflow: 'unset' }}>
-            <Table sx={{ minWidth: 800 }}>
-              <UserTableHead
-                order={table.order}
-                orderBy={table.orderBy}
-                rowCount={_users.length}
-                numSelected={table.selected.length}
-                onSort={table.onSort}
-                onSelectAllRows={(checked) =>
-                  table.onSelectAllRows(
-                    checked,
-                    _users.map((user) => user.id)
-                  )
-                }
-                headLabel={[
-                  { id: 'name', label: 'Nome' },
-                  { id: 'company', label: 'Capacidade' },
-                  { id: 'role', label: 'Horário' },
-                  { id: 'isVerified', label: 'Verificada', align: 'center' },
-                  { id: 'status', label: 'Status' },
-                  { id: '' },
-                ]}
-              />
+      {loading ? (
+        <Box display="flex" justifyContent="center" mt={5}>
+          <CircularProgress />
+        </Box>
+      ) : (
+        <Paper
+          sx={{
+            boxShadow: '0 2px 20px rgba(0, 0, 0, 0.1)',
+            borderRadius: 2,
+            border: '1px solid #e0e0e0',
+            overflow: 'hidden',
+          }}
+        >
+          <TableContainer>
+            <Table
+              sx={{
+                minWidth: 650,
+              }}
+              aria-label="tabela de postos"
+            >
+              <TableHead>
+                <TableRow>
+                  <TableCell>ID</TableCell>
+                  <TableCell>Foto</TableCell>
+                  <TableCell>Nome</TableCell>
+                  <TableCell>Capacidade</TableCell>
+                  <TableCell>Horário</TableCell>
+                </TableRow>
+              </TableHead>
               <TableBody>
-                {dataFiltered
-                  .slice(
-                    table.page * table.rowsPerPage,
-                    table.page * table.rowsPerPage + table.rowsPerPage
-                  )
-                  .map((row) => (
-                    <UserTableRow
-                      key={row.id}
-                      row={row}
-                      selected={table.selected.includes(row.id)}
-                      onSelectRow={() => table.onSelectRow(row.id)}
-                    />
-                  ))}
-
-                <TableEmptyRows
-                  height={68}
-                  emptyRows={emptyRows(table.page, table.rowsPerPage, _users.length)}
-                />
-
-                {notFound && <TableNoData searchQuery={filterName} />}
+                {paginatedPostos.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={5} align="center">
+                      Nenhum posto encontrado.
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  paginatedPostos.map((posto) => (
+                    <TableRow key={posto.id}>
+                      <TableCell>{posto.id}</TableCell>
+                      <TableCell>
+                        {posto.foto ? (
+                          <img
+                            src={posto.foto}
+                            alt={posto.nome}
+                            style={{
+                              width: 60,
+                              height: 60,
+                              objectFit: 'cover',
+                              borderRadius: 4,
+                            }}
+                          />
+                        ) : (
+                          'Sem foto'
+                        )}
+                      </TableCell>
+                      <TableCell>{posto.nome}</TableCell>
+                      <TableCell>{posto.capacidade}</TableCell>
+                      <TableCell>{posto.horario}</TableCell>
+                    </TableRow>
+                  ))
+                )}
               </TableBody>
             </Table>
           </TableContainer>
-        </Scrollbar>
+        </Paper>
+      )}
 
-        <TablePagination
-          component="div"
-          page={table.page}
-          count={_users.length}
-          rowsPerPage={table.rowsPerPage}
-          onPageChange={table.onChangePage}
-          rowsPerPageOptions={[5, 10, 25]}
-          onRowsPerPageChange={table.onChangeRowsPerPage}
-        />
-      </Card>
+      <TablePagination
+        component="div"
+        count={filteredPostos.length}
+        page={page}
+        onPageChange={handleChangePage}
+        rowsPerPage={rowsPerPage}
+        onRowsPerPageChange={handleChangeRowsPerPage}
+        labelRowsPerPage="Linhas por página"
+      />
     </DashboardContent>
   );
-}
-
-// ----------------------------------------------------------------------
-
-export function useTable() {
-  const [page, setPage] = useState(0);
-  const [orderBy, setOrderBy] = useState('name');
-  const [rowsPerPage, setRowsPerPage] = useState(5);
-  const [selected, setSelected] = useState<string[]>([]);
-  const [order, setOrder] = useState<'asc' | 'desc'>('asc');
-
-  const onSort = useCallback(
-    (id: string) => {
-      const isAsc = orderBy === id && order === 'asc';
-      setOrder(isAsc ? 'desc' : 'asc');
-      setOrderBy(id);
-    },
-    [order, orderBy]
-  );
-
-  const onSelectAllRows = useCallback((checked: boolean, newSelecteds: string[]) => {
-    if (checked) {
-      setSelected(newSelecteds);
-      return;
-    }
-    setSelected([]);
-  }, []);
-
-  const onSelectRow = useCallback(
-    (inputValue: string) => {
-      const newSelected = selected.includes(inputValue)
-        ? selected.filter((value) => value !== inputValue)
-        : [...selected, inputValue];
-
-      setSelected(newSelected);
-    },
-    [selected]
-  );
-
-  const onResetPage = useCallback(() => {
-    setPage(0);
-  }, []);
-
-  const onChangePage = useCallback((event: unknown, newPage: number) => {
-    setPage(newPage);
-  }, []);
-
-  const onChangeRowsPerPage = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      setRowsPerPage(parseInt(event.target.value, 10));
-      onResetPage();
-    },
-    [onResetPage]
-  );
-
-  return {
-    page,
-    order,
-    onSort,
-    orderBy,
-    selected,
-    rowsPerPage,
-    onSelectRow,
-    onResetPage,
-    onChangePage,
-    onSelectAllRows,
-    onChangeRowsPerPage,
-  };
 }
