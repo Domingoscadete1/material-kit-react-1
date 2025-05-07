@@ -343,7 +343,7 @@ export function PostItem({
           }}
           onClick={info.onClick}
         >
-          <Iconify width={16} icon={info.icon} sx={{ mr: 0.5 }} />
+          <Iconify width={16} icon={info.icon} sx={{ mr: 0.5, cursor: 'pointer' }} />
           <Typography variant="caption">{fShortenNumber(info.number)}</Typography>
         </Box>
       ))}
@@ -554,7 +554,7 @@ export function PostItem({
           {renderProductInfo}
 
           <Box component="form" sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 4 }} onSubmit={(event) => {
-            event.preventDefault(); // Evita o reload da página
+            event.preventDefault();
             sendMessage();
           }}>
             <textarea

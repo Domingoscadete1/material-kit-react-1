@@ -38,18 +38,18 @@ export type NotificationItemProps = {
   createdAt: string;
   updatedAt: string | null;
   deleted: boolean;
-  usuario:{
-    foto:string;
-    nome:string;
+  usuario: {
+    foto: string;
+    nome: string;
   };
-  empresa:{
-    imagens:{
-      imagem:string;
+  empresa: {
+    imagens: {
+      imagem: string;
     };
   };
-  remetente:{
-    foto:string;
-    nome:string;
+  remetente: {
+    foto: string;
+    nome: string;
   }
 };
 
@@ -67,7 +67,7 @@ export function NotificationsPopover({ data = [], sx, ...other }: NotificationsP
     pageSize: 10,
     totalPages: 1,
     totalCount: 0
-});
+  });
 
   useEffect(() => {
     const token = localStorage.getItem('userData');
@@ -81,44 +81,44 @@ export function NotificationsPopover({ data = [], sx, ...other }: NotificationsP
     if (!empresaId) return;
     const fetchNotifications = async () => {
       try {
-        const response = await fetchWithToken(`api/notificacoes/empresa-list/${empresaId}/?page=${pagination.pageIndex +1}`,{
-          method:'GET',
+        const response = await fetchWithToken(`api/notificacoes/empresa-list/${empresaId}/?page=${pagination.pageIndex + 1}`, {
+          method: 'GET',
           headers: {
             "ngrok-skip-browser-warning": "true", // Evita bloqueios do ngrok
           },
         });
         // Pegando os dados corretamente
-        const data1 =await response.json();
+        const data1 = await response.json();
         console.log(data1)
-      const notificacoes = data1.results || [];
-      setPagination((prev) => ({
-        ...prev,
-        totalPages: Math.ceil(data1.count / prev.pageSize),
-      }));
-      console.log('notificações',notificacoes);
+        const notificacoes = data1.results || [];
+        setPagination((prev) => ({
+          ...prev,
+          totalPages: Math.ceil(data1.count / prev.pageSize),
+        }));
+        console.log('notificações', notificacoes);
 
-      const formattedNotifications: NotificationItemProps[] = notificacoes.map((notificacao: any) => ({
-        id: notificacao.id,
-        tipo: notificacao.tipo,
-        title: notificacao.mensagem,
-        isUnRead: !notificacao.lida,
-        description: notificacao.mensagem,
-        avatarUrl: notificacao.remetente?.foto || null,
-        postedAt: notificacao.criado_em,
-        chatRoomId: notificacao.chat_room || null,
-        senderName: notificacao.remetente?.nome || "Desconhecido",
-        onesignalPlayerId: notificacao.onesignal_player_id || null,
-        sentAt: notificacao.enviado_em || null,
-        readAt: notificacao.lida_em || null,
-        createdAt: notificacao.created_at,
-        updatedAt: notificacao.updated_at || null,
-        deleted: notificacao.deleted || false,
-      }));
+        const formattedNotifications: NotificationItemProps[] = notificacoes.map((notificacao: any) => ({
+          id: notificacao.id,
+          tipo: notificacao.tipo,
+          title: notificacao.mensagem,
+          isUnRead: !notificacao.lida,
+          description: notificacao.mensagem,
+          avatarUrl: notificacao.remetente?.foto || null,
+          postedAt: notificacao.criado_em,
+          chatRoomId: notificacao.chat_room || null,
+          senderName: notificacao.remetente?.nome || "Desconhecido",
+          onesignalPlayerId: notificacao.onesignal_player_id || null,
+          sentAt: notificacao.enviado_em || null,
+          readAt: notificacao.lida_em || null,
+          createdAt: notificacao.created_at,
+          updatedAt: notificacao.updated_at || null,
+          deleted: notificacao.deleted || false,
+        }));
 
-      console.log('Notificações formatadas:', formattedNotifications);
-      
-      setNotifications(formattedNotifications);
-        
+        console.log('Notificações formatadas:', formattedNotifications);
+
+        setNotifications(formattedNotifications);
+
       } catch (error) {
         console.error('Erro ao buscar notificações:', error);
       } finally {
@@ -126,7 +126,7 @@ export function NotificationsPopover({ data = [], sx, ...other }: NotificationsP
       }
     };
     fetchNotifications();
-  }, [empresaId,pagination.pageIndex]);
+  }, [empresaId, pagination.pageIndex]);
 
   const totalUnRead = notifications.filter((item) => !item.lida).length;
 
@@ -162,7 +162,7 @@ export function NotificationsPopover({ data = [], sx, ...other }: NotificationsP
       >
         <Box display="flex" alignItems="center" justifyContent="space-between" sx={{ py: 2, pl: 1.5, pr: 1.5 }}>
           <Typography variant="subtitle1">Notificações</Typography>
-          <Typography variant="body2" sx={{ color: 'text.secondary'}}>
+          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
             {totalUnRead} mensagens não lidas
           </Typography>
         </Box>
@@ -177,43 +177,39 @@ export function NotificationsPopover({ data = [], sx, ...other }: NotificationsP
           </List>
         </Scrollbar>
 
-
-        <Button
-        className="px-4 py-2 text-sm font-medium text-white bg-brand-900 rounded-[20px] hover:bg-brand-800 flex items-center justify-center"
-        onClick={() => setPagination((p) => ({ ...p, pageIndex: p.pageIndex - 1 }))}
-        disabled={pagination.pageIndex === 0}
-      >
-        Anterior
-      </Button>
-
-      <Typography variant="h6" sx={{ width: '100%', textAlign: 'center' }}>
-        Página {pagination.pageIndex + 1} de {pagination.totalPages}
-      </Typography>
-
-      <Button
-        className="px-4 py-2 text-sm font-medium text-white bg-brand-900 rounded-[20px] hover:bg-brand-800 flex items-center justify-center"
-        onClick={() => setPagination((p) => ({ ...p, pageIndex: p.pageIndex + 1 }))}
-        disabled={pagination.pageIndex + 1 >= pagination.totalPages}
-      >
-        Próxima
-      </Button>
-
         <Divider sx={{ borderStyle: 'dashed' }} />
 
-        {/* <Box sx={{ p: 1 }}>
-          <Button fullWidth disableRipple color="inherit">
-            Ver todas
+        <Box display='flex' padding={2} >
+          <Button
+            className="px-4 py-2 text-sm font-medium text-white bg-brand-900 rounded-[20px] hover:bg-brand-800 flex items-center justify-center"
+            onClick={() => setPagination((p) => ({ ...p, pageIndex: p.pageIndex - 1 }))}
+            disabled={pagination.pageIndex === 0}
+          >
+            Anterior
           </Button>
-        </Box> */}
+
+          <Typography variant="h6" sx={{ width: '100%', textAlign: 'center' }}>
+            Página {pagination.pageIndex + 1} de {pagination.totalPages}
+          </Typography>
+
+          <Button
+            className="px-4 py-2 text-sm font-medium text-white bg-brand-900 rounded-[20px] hover:bg-brand-800 flex items-center justify-center"
+            onClick={() => setPagination((p) => ({ ...p, pageIndex: p.pageIndex + 1 }))}
+            disabled={pagination.pageIndex + 1 >= pagination.totalPages}
+          >
+            Próxima
+          </Button>
+        </Box>
+
       </Popover>
     </>
   );
 }
 
 function NotificationItem({ notification }: { notification: NotificationItemProps }) {
-  const {  title } = renderContent(notification);
-  
-  const avatarUrl='snsn'
+  const { title } = renderContent(notification);
+
+  const avatarUrl = 'snsn'
 
   return (
     <ListItemButton sx={{ py: 1.5, px: 2.5, mt: '1px', bgcolor: notification.lida ? 'transparent' : 'action.selected' }}>
