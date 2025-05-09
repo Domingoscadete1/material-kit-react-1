@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback, ChangeEvent } from 'react';
 
+import { useState, useEffect, useCallback, ChangeEvent } from 'react';
 import {
   Box,
   Button,
@@ -17,7 +17,10 @@ import {
 } from '@mui/material';
 
 import { DashboardContent } from 'src/layouts/dashboard';
+
 import { Iconify } from 'src/components/iconify';
+import Config from '../../../../Config';
+
 import { fetchWithToken } from '../../../../authService';
 
 import AddPostoModal from './postomodal';
@@ -27,14 +30,50 @@ import AddPostoModal from './postomodal';
 type Posto = {
   id: string;
   nome: string;
-  capacidade: number;
+  localizacao: string;
+  imagem: string | null; 
   horario: string;
-  foto: string;
+  responsavel: string;
+  telefone: string;
+  email: string;
+  capacidade: number;
+  status: string;
 };
+type Empresa = {
+  id: string;
+  nome: string;
+  descricao: string;
+  endereco: string;
+  imagens: string[]; 
+  usuario: number; 
+  categoria: number;
+  email: string;
+  telefone1: string;
+  telefone2: string;
+  saldo: number;
+  status: string;
+  nif: string;
+  alvara_comercial: string;
+  certidao_registro_comercial: string;
+  verificada: boolean;
+  created_at: string;
+  quantidade_produtos: number;
+  quantidade_vendas: number;
+  quantidade_comprados: number;
+};
+
+type PostoAceite = {
+  id: string;
+  empresa: Empresa;
+  posto: Posto;
+};
+
 
 export function UserView() {
   const [modalOpen, setModalOpen] = useState(false);
-  const [postos, setPostos] = useState<Posto[]>([]);
+  const [postos, setPostos] = useState<PostoAceite[]>([]);
+  const funcionario = JSON.parse(localStorage.getItem('userData') || '{}');
+
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(0);
@@ -43,15 +82,16 @@ export function UserView() {
   const fetchPostos = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await fetchWithToken('api/postos/', {
+      const response = await fetchWithToken(`api/postos/empresa/${funcionario?.empresa?.id}`, {
         method: 'GET',
         headers: {
           'ngrok-skip-browser-warning': 'true',
         },
       });
       const data = await response.json();
-      if (Array.isArray(data)) {
-        setPostos(data);
+      console.log(data);
+      if (Array.isArray(data.postos)) {
+        setPostos(data.postos);
       } else {
         console.error('Dados inválidos da API');
         setPostos([]);
@@ -62,7 +102,7 @@ export function UserView() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [funcionario?.empresa?.id]);
 
   useEffect(() => {
     fetchPostos();
@@ -83,7 +123,7 @@ export function UserView() {
   };
 
   const filteredPostos = postos.filter((posto) =>
-    posto.nome.toLowerCase().includes(search.toLowerCase())
+    posto?.posto?.nome.toLowerCase().includes(search.toLowerCase())
   );
 
   const paginatedPostos = filteredPostos.slice(
@@ -154,13 +194,13 @@ export function UserView() {
                   </TableRow>
                 ) : (
                   paginatedPostos.map((posto) => (
-                    <TableRow key={posto.id}>
+                    <TableRow key={posto?.id}>
                       <TableCell>{posto.id}</TableCell>
                       <TableCell>
-                        {posto.foto ? (
+                        {posto?.posto.imagem ? (
                           <img
-                            src={posto.foto}
-                            alt={posto.nome}
+                            src={`${Config.getApiUrlMedia()}${posto?.posto.imagem}`}
+                            alt={posto?.posto?.nome}
                             style={{
                               width: 60,
                               height: 60,
@@ -172,9 +212,9 @@ export function UserView() {
                           'Sem foto'
                         )}
                       </TableCell>
-                      <TableCell>{posto.nome}</TableCell>
-                      <TableCell>{posto.capacidade}</TableCell>
-                      <TableCell>{posto.horario}</TableCell>
+                      <TableCell>{posto?.posto?.nome}</TableCell>
+                      <TableCell>{posto?.posto?.capacidade}</TableCell>
+                      <TableCell>{posto.posto?.horario}</TableCell>
                     </TableRow>
                   ))
                 )}

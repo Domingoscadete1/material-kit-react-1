@@ -17,12 +17,13 @@ import {
 } from '@mui/material';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { Iconify } from 'src/components/iconify';
+import Config from '../../../../Config';
 import AddFuncionarioModal from './funcionariomodal';
 import { fetchWithToken } from '../../../../authService';
 
 type Funcionario = {
   id: string;
-  username: string;
+  usuario_username: string;
   email: string;
   role: string;
   foto?: string;
@@ -35,19 +36,22 @@ export function FuncionarioView() {
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
+  const funcionario = JSON.parse(localStorage.getItem('userData') || '{}');
+
 
   const fetchFuncionarios = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await fetchWithToken('api/empresa-users/', {
+      const response = await fetchWithToken(`api/empresa/funcionarios/${funcionario?.empresa?.id}`, {
         method: 'GET',
         headers: {
           'ngrok-skip-browser-warning': 'true',
         },
       });
       const data = await response.json();
-      if (Array.isArray(data)) {
-        setFuncionarios(data);
+      console.log(data);
+      if (Array.isArray(data.funcionarios)) {
+        setFuncionarios(data.funcionarios);
       } else {
         console.error('Dados inválidos');
       }
@@ -56,7 +60,7 @@ export function FuncionarioView() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [funcionario?.empresa?.id]);
 
   useEffect(() => {
     fetchFuncionarios();
@@ -68,7 +72,7 @@ export function FuncionarioView() {
   };
 
   const filteredFuncionarios = funcionarios.filter((func) =>
-    func.username.toLowerCase().includes(search.toLowerCase())
+    func.usuario_username.toLowerCase().includes(search.toLowerCase())
   );
 
   const paginatedFuncionarios = filteredFuncionarios.slice(
@@ -146,12 +150,12 @@ export function FuncionarioView() {
                     <TableRow key={func.id}>
                       <TableCell>
                         {func.foto ? (
-                          <Avatar src={func.foto} alt={func.username} />
+                          <Avatar src={`${Config.getApiUrlMedia()}${func.foto}`} alt={func.usuario_username} />
                         ) : (
-                          <Avatar>{func.username[0].toUpperCase()}</Avatar>
+                          <Avatar>{func.usuario_username[0].toUpperCase()}</Avatar>
                         )}
                       </TableCell>
-                      <TableCell>{func.username}</TableCell>
+                      <TableCell>{func.usuario_username}</TableCell>
                       <TableCell>{func.email}</TableCell>
                       <TableCell>{func.role}</TableCell>
                     </TableRow>
