@@ -5,7 +5,7 @@ import Link from '@mui/material/Link';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import { Button, Modal, TextField } from '@mui/material';
+import { Button, Modal, TextField,CircularProgress } from '@mui/material';
 import { fCurrency } from 'src/utils/format-number';
 import { Label } from 'src/components/label';
 import Config from '../../../Config';
@@ -35,6 +35,8 @@ export function ProductItem({ product }: { product: ProductItemProps }) {
   const [videosParaRemover, setVideosParaRemover] = useState<number[]>([]);
   const [newImages, setNewImages] = useState<File[]>([]);
   const [newVideos, setNewVideos] = useState<File[]>([]);
+  const [loading, setLoading] = useState(false); 
+
   const baseUrl = Config.getApiUrl();
   const mediaUrl = Config.getApiUrlMedia();
 
@@ -49,6 +51,8 @@ export function ProductItem({ product }: { product: ProductItemProps }) {
   };
 
   const handleUpdateProduct = async () => {
+    setLoading(true); // Ativa o loading
+
     const formDataToSend = new FormData();
     formDataToSend.append('nome', formData.nome);
     formDataToSend.append('descricao', formData.descricao);
@@ -63,13 +67,13 @@ export function ProductItem({ product }: { product: ProductItemProps }) {
     });
 
     imagensParaRemover.forEach((imageId) => {
-      formDataToSend.append('imagens_para_remover[]', imageId.toString());
+      formDataToSend.append('imagens_para_remover', imageId.toString());
     });
     newVideos.forEach((video, index) => {
       formDataToSend.append(`video${index + 1}`, video);
     });
     videosParaRemover.forEach((videoId) => {
-      formDataToSend.append('videos_para_remover[]', videoId.toString());
+      formDataToSend.append('videos_para_remover', videoId.toString());
     });
 
 
@@ -91,9 +95,14 @@ export function ProductItem({ product }: { product: ProductItemProps }) {
     } catch (error) {
       console.error('Erro ao atualizar produto', error);
     }
+    finally {
+      setLoading(false); 
+    }
   };
 
   const handleDeleteProduct = async () => {
+    setLoading(true); // Ativa o loading
+
     try {
       const response = await fetchWithToken(
         `api/produto/${product.id}/deletar/`, {
@@ -111,6 +120,9 @@ export function ProductItem({ product }: { product: ProductItemProps }) {
       window.location.reload();
     } catch (error) {
       console.error('Erro ao deletar produto', error);
+    }
+    finally {
+      setLoading(false); 
     }
   };
 
@@ -170,6 +182,28 @@ export function ProductItem({ product }: { product: ProductItemProps }) {
 
   return (
     <>
+    {/* Overlay de Loading */}
+    {loading && (
+        <Box
+          sx={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            zIndex: 9999,
+          }}
+        >
+          <CircularProgress color="primary" size={60} />
+          <Typography variant="h6" color="white" sx={{ ml: 2 }}>
+            Processando...
+          </Typography>
+        </Box>
+      )}
       <Card>
         <Box sx={{ pt: '100%', position: 'relative' }}>
           {product.status && renderStatus}
