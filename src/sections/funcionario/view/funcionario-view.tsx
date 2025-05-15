@@ -108,8 +108,7 @@ export function FuncionarioView() {
 
       <Box mb={2}>
         <TextField
-          fullWidth
-          label="Pesquisar por nome"
+          label="Pesquisar..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />

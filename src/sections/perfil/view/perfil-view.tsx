@@ -553,20 +553,21 @@ export function PerfilView() {
             <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>
               Fotos da Empresa
             </Typography>
+
             <Divider sx={{ mb: 2 }} />
+
             <Box sx={{
               display: 'flex',
               flexWrap: 'wrap',
-              gap: 2,
-              flexGrow: 1
+              gap: 1,
             }}>
 
               {empresaId?.imagens.map((img, index) => (
                 <Box
                   key={img.id || index}
                   sx={{
-                    width: 150,
-                    height: 150,
+                    width: 145,
+                    height: 140,
                     borderRadius: '12px',
                     overflow: 'hidden',
                     position: 'relative',
