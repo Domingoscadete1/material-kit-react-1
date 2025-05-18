@@ -1,4 +1,4 @@
-import React,{ useState,useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 
 import Box from '@mui/material/Box';
@@ -11,7 +11,8 @@ import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import axios from 'axios';
 import { Iconify } from 'src/components/iconify';
-import { CircularProgress,IconButton,Modal } from '@mui/material';
+import ReportIcon from '@mui/icons-material/Report';
+import { Avatar, CardActions, CircularProgress, IconButton, Modal } from '@mui/material';
 
 import { DashboardContent } from 'src/layouts/dashboard';
 
@@ -41,7 +42,7 @@ export function DetalhesView() {
       'https://wallpapersko.com/wp-content/uploads/2018/06/hd-wallpaper-4k.jpg',
       'https://img.freepik.com/fotos-premium/borboletas-coloridas-imagem-gerada-pela-ia_268835-6554.jpg',
     ]
-  }; 
+  };
   const [dados, setDados] = useState();
   const [openPaymentModal, setOpenPaymentModal] = useState(false);
   const [postos, setPostos] = useState();
@@ -61,14 +62,14 @@ export function DetalhesView() {
     const fetchPostos = async () => {
       setLoading(true);
       try {
-        const response = await fetchWithToken(`api/postos/empresa/${dados?.empresa.id}/`,{
-          method:'GET',
+        const response = await fetchWithToken(`api/postos/empresa/${dados?.empresa.id}/`, {
+          method: 'GET',
           headers: {
             "ngrok-skip-browser-warning": "true", // Evita bloqueios do ngrok
           },
-          
+
         });
-        const data =await response.json();
+        const data = await response.json();
         setPostos(data.postos || []);
       } catch (err) {
         alert(err.message);
@@ -85,17 +86,17 @@ export function DetalhesView() {
   const checkPostoAvailability = async (postoId) => {
     try {
       const response = await fetchWithToken(`api/posto/available/${postoId}/`, {
-        method:'GET',
+        method: 'GET',
         headers: {
           "ngrok-skip-browser-warning": "true", // Evita bloqueios do ngrok
         },
         validateStatus: (status) => status === 200 || status === 303,
       });
       setPostoDisponivel(response.status === 200);
-      if (response.status === 303){
+      if (response.status === 303) {
         alert('Não há espaço neste posto.');
         setPostoDisponivel(false);
-        
+
       }
     } catch {
       alert('Erro ao verificar disponibilidade do posto');
@@ -107,32 +108,32 @@ export function DetalhesView() {
       alert('Por favor, selecione um posto antes de prosseguir.');
       return;
     }
-    if(quantidade>dados.quantidade){
+    if (quantidade > dados.quantidade) {
       alert('A quantidade selecionada não pode ser superior à quantidade disponivel do produto.');
       return;
     }
-      
+
     setLoading(true);
     try {
       const response = await fetchWithToken('api/stripe/create-payment/bussiness-bussiness/', {
-        method:'POST',
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
 
           "ngrok-skip-browser-warning": "true", // Evita bloqueios do ngrok
         },
-        body:JSON.stringify(
+        body: JSON.stringify(
           {
-        produto_id: dados.id,
-        empresa_id: userData?.empresa?.id,
-        posto_id: selectedPosto,
-        descricao: dados.descricao,
-        currency: 'AOA',
-        quantidade,
+            produto_id: dados.id,
+            empresa_id: userData?.empresa?.id,
+            posto_id: selectedPosto,
+            descricao: dados.descricao,
+            currency: 'AOA',
+            quantidade,
           }
         ),
       });
-      const data=await response.json();
+      const data = await response.json();
       setCheckoutUrl(data.checkout_url);
     } catch (error) {
       alert('Erro ao iniciar pagamento');
@@ -147,12 +148,12 @@ export function DetalhesView() {
     const fetchData = async () => {
       try {
         const response = await fetchWithToken(`api/produto/${id}/`, {
-          method:'GET',
+          method: 'GET',
           headers: {
             "ngrok-skip-browser-warning": "true",
           },
         });
-        const data=await response.json();
+        const data = await response.json();
 
         setDados(data);
         console.log(data);
@@ -164,7 +165,7 @@ export function DetalhesView() {
           setMainMedia(data.videos[0].video);
           setMediaType('video');
         }
-        
+
       } catch (error) {
         console.error('Erro ao buscar os dados:', error);
       }
@@ -196,12 +197,12 @@ export function DetalhesView() {
 
   return (
     <DashboardContent>
-      <Typography variant="h4" sx={{ mb: 4 }}>
+      <Typography variant="h4" sx={{ mb: 3 }}>
         Detalhes do Produto
       </Typography>
 
       <Card sx={{ maxWidth: "100%", padding: 2 }}>
-      <Grid container spacing={2}>
+        <Grid container spacing={2}>
           <Grid xs={12} md={6}>
             {mediaType === 'image' ? (
               <CardMedia
@@ -264,8 +265,23 @@ export function DetalhesView() {
           </Grid>
 
           <Grid xs={12} md={6}>
+
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, borderBottom: 1, borderBottomColor: 'gray' }}>
+              <Box sx={{ width: 50, height: 50, marginBottom: 2, cursor: 'pointer' }}>
+                <img
+                  src='../../../../public/assets/images/avatar/avatar-14.webp'
+                  alt="..."
+                  style={{ width: 60, height: 50, borderRadius: '50%', objectFit: 'cover' }}
+                />
+              </Box>
+              <Box>
+                <Typography gutterBottom variant="h5" component="Box"> Délcio Paiva </Typography>
+                <Typography variant="body2" color="text.secondary"> Vendedor </Typography>
+              </Box>
+            </Box>
+
             <CardContent>
-              <Typography gutterBottom variant="h5" component="div">
+              <Typography gutterBottom variant="h5" component="Box">
                 {dados?.nome}
               </Typography>
               <Typography variant="body2" color="text.secondary">
@@ -286,13 +302,13 @@ export function DetalhesView() {
 
               <Card variant="outlined" sx={{ padding: 2, border: '1px solid #ddd', borderRadius: 1, }}>
                 <Typography variant="h6" sx={{ mb: 2 }}>
-                {dados?.preco} AOA
+                  {dados?.preco} AOA
                 </Typography>
-                
+
                 <Typography variant="h7">
-                  Quantidade: 
+                  Quantidade:
                 </Typography>
-                
+
                 <Box sx={{ display: "flex", alignItems: "center", gap: 2, mt: 2, mb: 2 }}>
                   <Button variant="outlined" onClick={handleDecrement}>-</Button>
                   <TextField
@@ -306,12 +322,164 @@ export function DetalhesView() {
                 </Box>
 
                 <Box sx={{ display: "flex", gap: 2 }}>
-                  <Button variant="contained" color="primary" onClick={ handleOpenPaymentModal}>
+                  <Button variant="contained" color="primary" onClick={handleOpenPaymentModal}>
                     Comprar
                   </Button>
                 </Box>
+                <IconButton color="error" title="Denunciar produto">
+                  <ReportIcon />
+                </IconButton>
               </Card>
             </CardContent>
+          </Grid>
+        </Grid>
+      </Card>
+
+      <Typography variant="h4" sx={{ mb: 3, mt: 3 }}>
+        Produtos Relacionados
+      </Typography>
+
+      <Card sx={{ maxWidth: "100%", padding: 2 }}>
+        <Grid container spacing={2}>
+
+          <Grid item xs={12} sm={6} md={3}>
+            <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+              <CardMedia
+                component="img"
+                height="300"
+                image="https://upload.wikimedia.org/wikipedia/commons/3/3e/Tennis_Racket_and_Balls.jpg"
+                alt="Raquete de Tênis"
+                style={{ cursor: 'pointer' }}
+              />
+
+              <Box sx={{ display: 'flex', alignItems: 'center', p: 2, borderBottom: '1px solid #eee' }}>
+                <Avatar
+                  src="https://randomuser.me/api/portraits/men/1.jpg"
+                  sx={{ width: 50, height: 50, mr: 1.5, cursor: 'pointer' }}
+                />
+                <Typography variant="body2">Carlos Silva</Typography>
+              </Box>
+
+              <CardContent sx={{ flexGrow: 1 }}>
+                <Typography gutterBottom variant="h6">
+                  Raquete de Tênis Profissional
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                  Raquete carbono 300g, grip confortável
+                </Typography>
+                <Typography variant="caption" display="block" sx={{ mb: 1 }}>
+                  Quantidade: 3 disponíveis
+                </Typography>
+                <Typography variant="h6" color="primary">
+                  R$ 589,90
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+
+          <Grid item xs={12} sm={6} md={3}>
+            <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+              <CardMedia
+                component="img"
+                height="300"
+                image="https://images.tcdn.com.br/img/img_prod/1356993/90_bola_futebol_campo_topper_slick_22_impermeavel_33393_variacao_15143_1_edc6f392017a617e6a88828b9ab45a80.jpg"
+                alt="Bola de Futebol"
+                style={{ cursor: 'pointer' }}
+              />
+
+              <Box sx={{ display: 'flex', alignItems: 'center', p: 2, borderBottom: '1px solid #eee' }}>
+                <Avatar
+                  src="https://randomuser.me/api/portraits/women/2.jpg"
+                  sx={{ width: 50, height: 50, mr: 1.5, cursor: 'pointer' }}
+                />
+                <Typography variant="body2">Ana Oliveira</Typography>
+              </Box>
+
+              <CardContent sx={{ flexGrow: 1 }}>
+                <Typography gutterBottom variant="h6">
+                  Bola de Futebol Topper
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                  Oficial, tamanho 5, impermeável
+                </Typography>
+                <Typography variant="caption" display="block" sx={{ mb: 1 }}>
+                  Quantidade: 12 disponíveis
+                </Typography>
+                <Typography variant="h6" color="primary">
+                  R$ 129,90
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+
+          <Grid item xs={12} sm={6} md={3}>
+            <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+              <CardMedia
+                component="img"
+                height="300"
+                image="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d1/2012_Nissan_GT-R_Egoist.jpg/1200px-2012_Nissan_GT-R_Egoist.jpg"
+                alt="Carro Esportivo"
+                style={{ cursor: 'pointer' }}
+              />
+
+              <Box sx={{ display: 'flex', alignItems: 'center', p: 2, borderBottom: '1px solid #eee' }}>
+                <Avatar
+                  src="https://randomuser.me/api/portraits/men/32.jpg"
+                  sx={{ width: 50, height: 50, mr: 1.5, cursor: 'pointer' }}
+                />
+                <Typography variant="body2">Marcos Andrade</Typography>
+              </Box>
+
+              <CardContent sx={{ flexGrow: 1 }}>
+                <Typography gutterBottom variant="h6">
+                  Nissan GT-R Egoist
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                  3.8L V6 Twin-Turbo, 545HP
+                </Typography>
+                <Typography variant="caption" display="block" sx={{ mb: 1 }}>
+                  Quantidade: 1 disponível
+                </Typography>
+                <Typography variant="h6" color="primary">
+                  R$ 1.250.000
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+
+          <Grid item xs={12} sm={6} md={3}>
+            <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+              <CardMedia
+                component="img"
+                height="300"
+                image="https://images.hgmsites.net/lrg/2020-dodge-challenger-srt-hellcat-rwd-angular-front-exterior-view_100812521_l.jpg"
+                alt="Dodge Challenger"
+                style={{ cursor: 'pointer' }}
+              />
+
+              <Box sx={{ display: 'flex', alignItems: 'center', p: 2, borderBottom: '1px solid #eee' }}>
+                <Avatar
+                  src="https://randomuser.me/api/portraits/women/45.jpg"
+                  sx={{ width: 50, height: 50, mr: 1.5, cursor: 'pointer' }}
+                />
+                <Typography variant="body2">Juliana Costa</Typography>
+              </Box>
+
+              <CardContent sx={{ flexGrow: 1 }}>
+                <Typography gutterBottom variant="h6">
+                  Dodge Challenger SRT
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                  6.2L V8 HEMI, 717HP
+                </Typography>
+                <Typography variant="caption" display="block" sx={{ mb: 1 }}>
+                  Quantidade: 1 disponível
+                </Typography>
+                <Typography variant="h6" color="primary">
+                  R$ 899.000
+                </Typography>
+              </CardContent>
+            </Card>
           </Grid>
         </Grid>
       </Card>
@@ -443,6 +611,8 @@ export function DetalhesView() {
           )}
         </Box>
       </Modal>
+
+
     </DashboardContent>
   );
 }
