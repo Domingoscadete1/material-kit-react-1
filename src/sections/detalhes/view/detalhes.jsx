@@ -25,24 +25,9 @@ import Config from '../../../../Config';
 
 export function DetalhesView() {
   const [mainImage, setMainImage] = useState();
-  const [quantity, setQuantity] = useState(1); // Estado para controlar a quantidade
-  const [mainMedia, setMainMedia] = useState(null); // Estado para controlar a mídia principal (imagem ou vídeo)
+  const [quantity, setQuantity] = useState(1);
+  const [mainMedia, setMainMedia] = useState(null);
   const [mediaType, setMediaType] = useState('image');
-  const product = {
-    name: "Produto Exemplo2",
-    description: "Descrição detalhada do produto.",
-    category: "Tecnologia",
-    quantity: 2,
-    status: "À venda",
-    price: "250.99 AOA",
-    images: [
-      'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEj7o1UqwTqFhZnCHiL_ImyZSCgEgtFvVZoAqRJWs14MSm9w8zINDOEGUO9jvG6HLrmZajOP4asLgwAfX2sz6uvVEa38ELhPsmHdtEUQVNro3PrMlUlqjN65CWzzSmeBtWxHmjs3gGORwcaGRSB8ktJbbJ63bGusEOf7ibX6ttketOLEetfRyzbipr_HHg/s3840/Spirited%20Away%20Studio%20Ghibli%204K%20PC%20Desktop%20Wallpaper.png',
-      'https://www.chromethemer.com/download/hd-wallpapers/minimalist-spiderman-3840x2160.jpg',
-      'https://wallpapercat.com/w/full/b/8/f/6645-3840x2160-desktop-4k-assassins-creed-background-photo.jpg',
-      'https://wallpapersko.com/wp-content/uploads/2018/06/hd-wallpaper-4k.jpg',
-      'https://img.freepik.com/fotos-premium/borboletas-coloridas-imagem-gerada-pela-ia_268835-6554.jpg',
-    ]
-  };
   const [dados, setDados] = useState();
   const [openPaymentModal, setOpenPaymentModal] = useState(false);
   const [postos, setPostos] = useState();
@@ -65,7 +50,7 @@ export function DetalhesView() {
         const response = await fetchWithToken(`api/postos/empresa/${dados?.empresa.id}/`, {
           method: 'GET',
           headers: {
-            "ngrok-skip-browser-warning": "true", // Evita bloqueios do ngrok
+            "ngrok-skip-browser-warning": "true",
           },
 
         });
@@ -88,7 +73,7 @@ export function DetalhesView() {
       const response = await fetchWithToken(`api/posto/available/${postoId}/`, {
         method: 'GET',
         headers: {
-          "ngrok-skip-browser-warning": "true", // Evita bloqueios do ngrok
+          "ngrok-skip-browser-warning": "true",
         },
         validateStatus: (status) => status === 200 || status === 303,
       });
@@ -120,7 +105,7 @@ export function DetalhesView() {
         headers: {
           'Content-Type': 'application/json',
 
-          "ngrok-skip-browser-warning": "true", // Evita bloqueios do ngrok
+          "ngrok-skip-browser-warning": "true",
         },
         body: JSON.stringify(
           {
@@ -157,7 +142,6 @@ export function DetalhesView() {
 
         setDados(data);
         console.log(data);
-        // Define a primeira imagem ou vídeo como mídia principal
         if (data.imagens.length > 0) {
           setMainMedia(data.imagens[0].imagem);
           setMediaType('image');
@@ -278,6 +262,10 @@ export function DetalhesView() {
                 <Typography gutterBottom variant="h5" component="Box"> Délcio Paiva </Typography>
                 <Typography variant="body2" color="text.secondary"> Vendedor </Typography>
               </Box>
+
+              <IconButton color="error" title="Denunciar produto">
+                <ReportIcon />
+              </IconButton>
             </Box>
 
             <CardContent>
@@ -326,9 +314,6 @@ export function DetalhesView() {
                     Comprar
                   </Button>
                 </Box>
-                <IconButton color="error" title="Denunciar produto">
-                  <ReportIcon />
-                </IconButton>
               </Card>
             </CardContent>
           </Grid>
