@@ -310,12 +310,20 @@ export function DetalhesView() {
                 Status: {dados?.status}
               </Typography>
               <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                Preço: {dados?.preco} AOA
+                Preço: {new Intl.NumberFormat('pt-AO', {
+                      style: 'decimal',
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2
+                    }).format(dados?.preco)} AOA
               </Typography>
 
               <Card variant="outlined" sx={{ padding: 2, border: '1px solid #ddd', borderRadius: 1, }}>
                 <Typography variant="h6" sx={{ mb: 2 }}>
-                  {dados?.preco} AOA
+                {new Intl.NumberFormat('pt-AO', {
+                      style: 'decimal',
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2
+                    }).format(dados?.preco)} AOA
                 </Typography>
 
                 <Typography variant="h7">
@@ -382,7 +390,13 @@ export function DetalhesView() {
           Quantidade: {produto.quantidade} disponíveis
         </Typography>
         <Typography variant="h6" color="primary">
-          KZ {produto.preco.toFixed(2).replace('.', ',')}
+          KZ {new Intl.NumberFormat('pt-AO', {
+                      style: 'decimal',
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2
+                    }).format(produto?.preco)}
+
+
         </Typography>
       </CardContent>
     </Card>
