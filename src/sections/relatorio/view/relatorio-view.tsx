@@ -122,8 +122,13 @@ export function RelatorioView() {
         <Typography variant="h5">{empresaData?.nome}</Typography>
         {empresaData ? (
           <>
-            <Typography variant="body1">Saldo: {empresaData.saldo} Kzs</Typography>
-
+            <Typography variant="body1">
+              Saldo: {new Intl.NumberFormat('pt-AO', {
+                style: 'decimal',
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+              }).format(empresaData.saldo)} Kzs
+            </Typography>
           </>
         ) : (
           <Typography variant="body2" color="text.secondary">
@@ -181,8 +186,15 @@ export function RelatorioView() {
                     Quantidade: {report.transacao?.lance?.quantidade}
                   </Typography>
 
-                  <Typography variant="body2" color="text.secondary">
+                  {/* <Typography variant="body2" color="text.secondary">
                     Valor pago: {report.transacao.lance?.preco} Kzs
+                  </Typography> */}
+                  <Typography variant="body2" color="text.secondary">
+                    Saldo: {new Intl.NumberFormat('pt-AO', {
+                      style: 'decimal',
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2
+                    }).format(report.transacao.lance?.preco)} Kzs
                   </Typography>
 
                   <Box mt={2} display="flex" alignItems="center" gap={1}>

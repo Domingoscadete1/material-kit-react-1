@@ -7,7 +7,7 @@ import Button from '@mui/material/Button';
 import Grid from '@mui/material/Unstable_Grid2';
 import Typography from '@mui/material/Typography';
 import Pagination from '@mui/material/Pagination';
-import { TextField } from '@mui/material';
+import { TextField,MenuItem,Grid as grid } from '@mui/material';
 
 import { _posts } from 'src/_mock';
 import { DashboardContent } from 'src/layouts/dashboard';
@@ -36,7 +36,7 @@ export function BlogView() {
   const socketRef = useRef<WebSocket | null>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [anuncios, setAnuncios] = useState<any[]>([]);
-  const [categorias, setCategorias] = useState<string[]>([]);
+  const [categorias, setCategorias] = useState<any[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10, totalPages: 1 });
   const [searchParams, setSearchParams] = useState({
@@ -312,24 +312,26 @@ export function BlogView() {
           </Grid>
           
 
-          <Grid md={2}>
-            <TextField
-              fullWidth
-              select
-              label="Categoria"
-              name="categoria_id"
-              value={searchParams.categoria_id || ''}
-              onChange={handleSearchChange}
-              inputRef={inputRefs.categoria_id}
-            >
-              <option value="">Todas</option>
-              {categorias.map((categoria: any) => (
-                <option key={categoria.id} value={categoria.id}>
-                  {categoria.nome}
-                </option>
-              ))}
-            </TextField>
-          </Grid>
+<Grid >
+  <TextField
+    fullWidth
+    select
+    label="Categoria"
+    name="categoria_id"
+    value={searchParams.categoria_id || ''}
+    onChange={handleSearchChange}
+    inputRef={inputRefs.categoria_id}
+  >
+    <MenuItem value="">
+      <em>Todas</em>
+    </MenuItem>
+    {categorias.map((categoria) => (
+      <MenuItem key={categoria.id} value={categoria.id}>
+        {categoria.nome}
+      </MenuItem>
+    ))}
+  </TextField>
+</Grid>
 
           <Grid sm={6} md={2}>
             <TextField

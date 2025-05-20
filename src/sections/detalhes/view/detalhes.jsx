@@ -392,7 +392,7 @@ export function DetalhesView() {
                 <Box sx={{ display: 'flex', alignItems: 'center', p: 2, borderBottom: '1px solid #eee' }}>
                   <Avatar
                     src={`${Config.getApiUrlMedia()}${produto?.empresa?.imagens[0].imagem}`}
-                    sx={{ width: 50, height: 50, mr: 1.5,}}
+                    sx={{ width: 50, height: 50, mr: 1.5, cursor: 'pointer' }}
                   />
                   <Typography variant="body2">{produto?.empresa.nome}</Typography>
                 </Box>
