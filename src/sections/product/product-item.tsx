@@ -4,8 +4,14 @@ import Box from '@mui/material/Box';
 import Link from '@mui/material/Link';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
+import Grid from '@mui/material/Grid';
+import VideoLibraryIcon from '@mui/icons-material/VideoLibrary';
+import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
+import DeleteIcon from '@mui/icons-material/Delete';
 import Typography from '@mui/material/Typography';
-import { Button, Modal, TextField,CircularProgress } from '@mui/material';
+import { Button, Modal, TextField, CircularProgress, IconButton } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
+import useMediaQuery from '@mui/material/useMediaQuery';
 import { fCurrency } from 'src/utils/format-number';
 import { Label } from 'src/components/label';
 import Config from '../../../Config';
@@ -35,7 +41,10 @@ export function ProductItem({ product }: { product: ProductItemProps }) {
   const [videosParaRemover, setVideosParaRemover] = useState<number[]>([]);
   const [newImages, setNewImages] = useState<File[]>([]);
   const [newVideos, setNewVideos] = useState<File[]>([]);
-  const [loading, setLoading] = useState(false); 
+  const [loading, setLoading] = useState(false);
+
+  const theme = useTheme();
+  const matchesSM = useMediaQuery(theme.breakpoints.up('sm'));
 
   const baseUrl = Config.getApiUrl();
   const mediaUrl = Config.getApiUrlMedia();
@@ -96,7 +105,7 @@ export function ProductItem({ product }: { product: ProductItemProps }) {
       console.error('Erro ao atualizar produto', error);
     }
     finally {
-      setLoading(false); 
+      setLoading(false);
     }
   };
 
@@ -122,7 +131,7 @@ export function ProductItem({ product }: { product: ProductItemProps }) {
       console.error('Erro ao deletar produto', error);
     }
     finally {
-      setLoading(false); 
+      setLoading(false);
     }
   };
 
@@ -182,8 +191,8 @@ export function ProductItem({ product }: { product: ProductItemProps }) {
 
   return (
     <>
-    {/* Overlay de Loading */}
-    {loading && (
+      {/* Overlay de Loading */}
+      {loading && (
         <Box
           sx={{
             position: 'fixed',
@@ -232,7 +241,7 @@ export function ProductItem({ product }: { product: ProductItemProps }) {
 
           <Box display="flex" alignItems="center" justifyContent="space-between">
             {renderPrice}
-            
+
           </Box>
           <Typography variant="body2" color="text.secondary">
             quantidade: {product.quantidade}
@@ -257,128 +266,189 @@ export function ProductItem({ product }: { product: ProductItemProps }) {
       <Modal open={openUpdateModal} onClose={handleCloseUpdateModal}>
         <Box sx={{
           position: 'fixed',
-          right: 0,
+          right: { xs: 0, md: 0 },
           top: 0,
-          width: 500,
+          width: { xs: '100%', sm: '80%', md: 500 },
           height: '100vh',
           bgcolor: 'white',
           boxShadow: 24,
           overflowY: 'auto',
-          p: 3
+          p: { xs: 2, sm: 3 }
         }}>
-          
-          <Typography variant="h6">Atualizar Produto</Typography>
 
-          <TextField
-            name="nome"
-            label="Nome"
-            value={formData.nome}
-            onChange={handleInputChange}
-            fullWidth
-            sx={{ mt: 2 }}
-          />
+          <Typography variant="h6" sx={{ mb: 2 }}>Atualizar Produto</Typography>
 
-          <TextField
-            name="descricao"
-            label="Descrição"
-            value={formData.descricao}
-            onChange={handleInputChange}
-            fullWidth
-            sx={{ mt: 2 }}
-          />
+          <Grid container spacing={2}>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                name="nome"
+                label="Nome"
+                value={formData.nome}
+                onChange={handleInputChange}
+                fullWidth
+                sx={{ mt: 2 }}
+              />
+            </Grid>
 
-          <TextField
-            name="preco"
-            label="Preço"
-            type="number"
-            value={formData.preco}
-            onChange={handleInputChange}
-            fullWidth
-            sx={{ mt: 2 }}
-          />
+            <Grid item xs={12}>
+              <TextField
+                name="descricao"
+                label="Descrição"
+                value={formData.descricao}
+                onChange={handleInputChange}
+                fullWidth
+                multiline
+                rows={3}
+              />
+            </Grid>
 
-          <TextField
-            name="quantidade"
-            label="Quantidade"
-            type="number"
-            value={formData.quantidade}
-            onChange={handleInputChange}
-            fullWidth
-            sx={{ mt: 2 }}
-          />
+            <Grid item xs={12} sm={6}>
+              <TextField
+                name="preco"
+                label="Preço"
+                type="number"
+                value={formData.preco}
+                onChange={handleInputChange}
+                fullWidth
+              />
+            </Grid>
 
-          <TextField
-            name="localizacao"
-            label="Localização"
-            value={formData.localizacao}
-            onChange={handleInputChange}
-            fullWidth
-            sx={{ mt: 2 }}
-          />
+            <Grid item xs={12} sm={6}>
+              <TextField
+                name="quantidade"
+                label="Quantidade"
+                type="number"
+                value={formData.quantidade}
+                onChange={handleInputChange}
+                fullWidth
+              />
+            </Grid>
 
-          <TextField
-            name="categoria"
-            label="Categoria"
-            value={formData.categoria.nome}
-            onChange={handleInputChange}
-            fullWidth
-            sx={{ mt: 2 }}
-          />
+            <Grid item xs={12} sm={6}>
+              <TextField
+                name="localizacao"
+                label="Localização"
+                value={formData.localizacao}
+                onChange={handleInputChange}
+                fullWidth
+              />
+            </Grid>
+
+            <Grid item xs={12}>
+              <TextField
+                name="categoria"
+                label="Categoria"
+                value={formData.categoria.nome}
+                onChange={handleInputChange}
+                fullWidth
+              />
+            </Grid>
+          </Grid>
 
           <Box sx={{ mt: 2 }}>
             <Typography variant="body2">Imagens:</Typography>
-            {selectedImages.map((image) => (
-              <Box key={image.id} sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
-                <Box
-                  component="img"
-                  src={`${mediaUrl}${image.imagem}`}
-                  alt="Produto"
-                  sx={{ width: 50, height: 50, objectFit: 'cover', mr: 2 }}
-                />
-                <Button color="error" onClick={() => handleImageDelete(image.id)}>
-                  Remover
-                </Button>
-              </Box>
-            ))}
+            <Grid container spacing={2}>
+              {selectedImages.map((image) => (
+                <Grid item xs={6} sm={4} md={3} key={image.id}>
+                  <Box sx={{ position: 'relative' }}>
+                    <Box
+                      component="img"
+                      src={`${mediaUrl}${image.imagem}`}
+                      alt="Produto"
+                      sx={{
+                        width: '100%',
+                        height: 100,
+                        objectFit: 'cover',
+                        borderRadius: 1
+                      }}
+                    />
+                    <IconButton
+                      size="small"
+                      color="error"
+                      onClick={() => handleImageDelete(image.id)}
+                      sx={{
+                        position: 'absolute',
+                        top: 4,
+                        right: 4,
+                        backgroundColor: 'rgba(255,255,255,0.8)'
+                      }}
+                    >
+                      <DeleteIcon fontSize="small" />
+                    </IconButton>
+                  </Box>
+                </Grid>
+              ))}
+            </Grid>
 
-            <Button variant="contained" component="label" sx={{ mt: 2 }}>
+            <Button
+              variant="outlined"
+              component="label"
+              fullWidth
+              sx={{ mt: 2 }}
+              startIcon={<AddPhotoAlternateIcon />}
+            >
               Adicionar Imagens
               <input
                 type="file"
                 multiple
                 hidden
+                accept="image/*"
                 onChange={handleImageUpload}
               />
             </Button>
 
             {newImages.length > 0 && (
               <Box sx={{ mt: 2 }}>
-                <Typography variant="body2">Novas Imagens Selecionadas:</Typography>
+                <Typography variant="body2" color="text.secondary">Novas Imagens Selecionadas:</Typography>
                 {newImages.map((image, index) => (
                   <Typography key={index}>{image.name}</Typography>
                 ))}
               </Box>
             )}
-          </Box>
 
-          <Box sx={{ mt: 2 }}>
-            <Typography variant="body2">Vídeos:</Typography>
-            {selectedVideos.map((video) => (
-              <Box key={video.id} sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
-                <video
-                  src={`${mediaUrl}${video.video}`}
-                  controls
-                  style={{ width: 100, height: 100, marginRight: 10 }}
-                >
-                  <track kind="captions" src="" label="Legendas" />
-                </video>
-                <Button color="error" onClick={() => handleVideoDelete(video.id)}>
-                  Remover
-                </Button>
-              </Box>
-            ))}
+            <Box sx={{ mt: 3 }}>
+              <Typography variant="subtitle1" gutterBottom>Vídeos</Typography>
+              <Grid container spacing={2}>
+                {selectedVideos.map((video) => (
+                  <Grid item xs={12} sm={6} key={video.id}>
+                    <Box sx={{ position: 'relative' }}>
+                      <video
+                        src={`${mediaUrl}${video.video}`}
+                        controls
+                        style={{
+                          width: '100%',
+                          borderRadius: 1
+                        }}
+                      >
+                        <track kind="captions" src="" label="Legendas" />
+                      </video>
+                      <IconButton
+                        size="small"
+                        color="error"
+                        onClick={() => handleVideoDelete(video.id)}
+                        sx={{
+                          position: 'absolute',
+                          top: 4,
+                          right: 4,
+                          backgroundColor: 'rgba(255,255,255,0.8)'
+                        }}
+                      >
+                        <DeleteIcon fontSize="small" />
+                      </IconButton>
+                    </Box>
+                  </Grid>
+                ))}
+              </Grid>
+            </Box>
 
-            <Button variant="contained" component="label" sx={{ mt: 2 }}>
+
+            <Button
+              variant="outlined"
+              component="label"
+              fullWidth
+              sx={{ mt: 2 }}
+              startIcon={<VideoLibraryIcon />}
+            >
               Adicionar Vídeos
               <input
                 type="file"
@@ -391,7 +461,7 @@ export function ProductItem({ product }: { product: ProductItemProps }) {
 
             {newVideos.length > 0 && (
               <Box sx={{ mt: 2 }}>
-                <Typography variant="body2">Novos Vídeos Selecionados:</Typography>
+                <Typography variant="body2" color="text.secondary">Novos Vídeos Selecionados:</Typography>
                 {newVideos.map((video, index) => (
                   <Typography key={index}>{video.name}</Typography>
                 ))}
@@ -399,17 +469,34 @@ export function ProductItem({ product }: { product: ProductItemProps }) {
             )}
           </Box>
 
-          <Button onClick={handleUpdateProduct} sx={{ mt: 2 }} variant="contained">
-            Atualizar
-          </Button>
-          <Button onClick={handleCloseUpdateModal} sx={{ mt: 2, ml: 2 }} variant="outlined">
-            Fechar
-          </Button>
+          <Box sx={{
+            display: 'flex',
+            justifyContent: 'flex-end',
+            gap: 2,
+            mt: 3,
+            flexDirection: { xs: 'column', sm: 'row' }
+          }}>
+            <Button
+              onClick={handleCloseUpdateModal}
+              variant="outlined"
+              fullWidth={!matchesSM}
+            >
+              Cancelar
+            </Button>
+            <Button
+              onClick={handleUpdateProduct}
+              variant="contained"
+              color="primary"
+              fullWidth={!matchesSM}
+            >
+              Atualizar Produto
+            </Button>
+          </Box>
         </Box>
-      </Modal>
+      </Modal >
 
       {/* Modal de Confirmação de Apagar */}
-      <Modal open={openDeleteModal} onClose={handleCloseDeleteModal}>
+      < Modal open={openDeleteModal} onClose={handleCloseDeleteModal} >
         <Box sx={{
           padding: 3,
           position: 'absolute',
@@ -428,7 +515,7 @@ export function ProductItem({ product }: { product: ProductItemProps }) {
             Tem certeza que deseja apagar o produto?
           </Typography>
 
-          <Box display="flex" justifyContent="space-between" mt={2} sx={{marginTop: '1px'}}>
+          <Box display="flex" justifyContent="space-between" mt={2} sx={{ marginTop: '1px' }}>
             <Button onClick={handleCloseDeleteModal} variant="contained" >
               Cancelar
             </Button>
@@ -437,7 +524,7 @@ export function ProductItem({ product }: { product: ProductItemProps }) {
             </Button>
           </Box>
         </Box>
-      </Modal>
+      </Modal >
     </>
   );
 }

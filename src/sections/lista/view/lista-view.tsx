@@ -264,15 +264,15 @@ export function ListaView() {
     <Box display="flex" height="90vh" bgcolor="#f4f6f8">
       <Box
         width="28%"
-        bgcolor="#000"
-        color="white"
+        bgcolor="#f1731f"
+        color="black"
         p={2}
         display="flex"
         flexDirection="column"
         justifyContent="space-between"
       >
         <Box mb={2}>
-          <Typography variant="h5">Mensagens</Typography>
+          <Typography variant="h4">Mensagens</Typography>
         </Box>
         <Box flexGrow={1} overflow="auto">
           {conversations.map((conversation) => (
@@ -283,7 +283,7 @@ export function ListaView() {
                 p: 2,
                 display: 'flex',
                 alignItems: 'center',
-                bgcolor: activeConversation?.id === conversation.id ? '#3055c6' : 'transparent',
+                bgcolor: activeConversation?.id === conversation.id ? '#b34c1c' : 'transparent',
                 cursor: 'pointer',
               }}
               onClick={() => setActiveConversation(conversation)}
@@ -302,10 +302,10 @@ export function ListaView() {
                 } sx={{ width: 48, height: 48, mr: 2 }}
               />
               <Box>
-                <Typography variant="body2" color="white">
+                <Typography variant="h6" color="black">
                   {conversation.comprador?.nome || conversation?.empresa_compradora?.nome}
                 </Typography>
-                <Typography variant="body1" color="gray">{conversation.produto?.nome || 'Produto não definido'}</Typography>
+                <Typography variant="body1" color="black">{conversation.produto?.nome || 'Produto não definido'}</Typography>
               </Box>
             </Paper>
           ))}
@@ -353,7 +353,7 @@ export function ListaView() {
                     <Box
                       sx={{
                         p: 2,
-                        bgcolor: message.empresa?.id === Number(empresaId) ? "#000" : "#f0f0f0",
+                        bgcolor: message.empresa?.id === Number(empresaId) ? "#f1731f" : "#f0f0f0",
                         color: message.empresa?.id === Number(empresaId) ? "white" : "black",
                         borderRadius: "10px",
                         maxWidth: "70%",
@@ -378,7 +378,7 @@ export function ListaView() {
               <Button
                 variant="contained"
                 onClick={handleSendMessage}
-                style={{ backgroundColor: "black" }}
+                style={{ backgroundColor: "#f1731f" }}
               >
                 Enviar
               </Button>

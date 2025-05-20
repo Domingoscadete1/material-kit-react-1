@@ -752,21 +752,21 @@ export function ProductsView() {
             left: '50%',
             transform: 'translate(-50%, -50%)',
             width: {
-              xs: '90vw', // Para telas muito pequenas (mobile)
-              sm: '80vw', // Para telas pequenas (tablet)
-              md: '70vw', // Para telas médias
-              lg: '60vw', // Para telas grandes
-              xl: '50vw'  // Para telas extra grandes
+              xs: '90vw',
+              sm: '80vw', 
+              md: '70vw', 
+              lg: '60vw', 
+              xl: '50vw'  
             },
             height: {
-              xs: '80vh', // Para telas muito pequenas
-              sm: '70vh', // Para telas pequenas
-              md: '60vh', // Para telas médias
-              lg: '50vh', // Para telas grandes
-              xl: '40vh'  // Para telas extra grandes
+              xs: '80vh', 
+              sm: '70vh', 
+              md: '60vh', 
+              lg: '50vh', 
+              xl: '40vh'  
             },
-            maxWidth: 800, // Largura máxima
-            maxHeight: 600, // Altura máxima
+            maxWidth: 800,
+            maxHeight: 600, 
             bgcolor: 'background.paper',
             boxShadow: 24,
             p: 2,
