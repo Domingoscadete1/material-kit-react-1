@@ -41,7 +41,7 @@ export type PostItemProps = {
   localizacao: string;
   imagens: { id: number; imagem: string }[];
   precoVenda: number | null;
-  categoria: { nome: string }; // Adicionando categoria
+  categoria: { nome: string };
   usuario: {
     nome: string;
     foto: string;
@@ -101,6 +101,7 @@ export function PostItem({
   const handleAvatarClick = () => {
     navigate(`/perfil2/${post.empresa.id}/empresa`);
   };
+
   const handleProdutoClick = (id: any) => {
     navigate(`/detalhes/${id}/`);
   };
@@ -125,7 +126,6 @@ export function PostItem({
     }
   };
 
-  // Abre a conexão WebSocket quando o modal de mensagens é aberto
   // Abre a conexão WebSocket quando o modal de mensagens é aberto
   useEffect(() => {
     if (!openMessageModal) {

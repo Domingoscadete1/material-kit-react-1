@@ -186,7 +186,6 @@ export function BlogView() {
     try {
       setLoading(true);
 
-      // Construir query string com os parâmetros de busca
       const queryParams = new URLSearchParams();
 
       if (searchParams.produto_nome_search) {

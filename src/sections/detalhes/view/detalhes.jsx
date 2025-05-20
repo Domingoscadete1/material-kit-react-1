@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
@@ -26,9 +26,9 @@ import Config from '../../../../Config';
 export function DetalhesView() {
   const [mainImage, setMainImage] = useState();
   const [quantity, setQuantity] = useState(1);
-  const [mainMedia, setMainMedia] = useState(null);
+  const [mainMedia, setMainMedia] = useState('');
   const [mediaType, setMediaType] = useState('image');
-  const [dados, setDados] = useState();
+  const [dados, setDados] = useState(null);
   const [openPaymentModal, setOpenPaymentModal] = useState(false);
   const [postos, setPostos] = useState();
   const [selectedPosto, setSelectedPosto] = useState();
@@ -40,6 +40,7 @@ export function DetalhesView() {
   const [imagemSelecionada, setImagemSelecionada] = useState(null);
   const [modalImagemOpen, setModalImagemOpen] = useState(false);
   const [produtosemelhantes, setProdutoSemelhantes] = useState([]);
+  const navigate = useNavigate();
 
   const handleOpenPaymentModal = () => setOpenPaymentModal(true);
   const handleClosePaymentModal = () => setOpenPaymentModal(false);
@@ -128,7 +129,6 @@ export function DetalhesView() {
     }
   };
 
-
   const { id } = useParams();
   useEffect(() => {
     const fetchData = async () => {
@@ -155,39 +155,41 @@ export function DetalhesView() {
         console.error('Erro ao buscar os dados:', error);
       }
     };
-    
-
     fetchData();
   }, [id]);
 
   useEffect(() => {
-    
     const fetchProdutoSemelhantes = async () => {
-      if (!dados || !dados.categoria) return; 
+      if (!dados || !dados.categoria) return;
       try {
-          const response = await fetchWithToken(`api/produtos/categoria/${dados?.categoria?.id}/${id}`, {
-              method: "GET",
-              headers: {
-                  "Content-Type": "application/json",
-                  "ngrok-skip-browser-warning": "true",
-              },
-          });
-          const data = await response.json();
-          console.log(data);
-          setProdutoSemelhantes(data.results || []);
+        const response = await fetchWithToken(`api/produtos/categoria/${dados.categoria.id}/${id}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "ngrok-skip-browser-warning": "true",
+          },
+        });
+        const data = await response.json();
+        setProdutoSemelhantes(data.results || []);
       } catch (error) {
-          console.error('Erro ao buscar empresa:', error);
+        console.error('Erro ao buscar empresa:', error);
       }
-  };
+    };
 
     fetchProdutoSemelhantes();
-  }, [id,dados?.categoria?.id]);
-  const handleThumbnailClick = (media, type) => {
-    setMainMedia(media);
-    setMediaType(type);
+  }, [id, dados]);
+
+
+  const handleThumbnailClick = (media, type, produto) => {
+    if (produto) {
+      setDados(produto);
+      setMainMedia(`${Config.getApiUrlMedia()}${produto?.imagens[0].imagem}`);
+      setMediaType('image');
+    } else {
+      setMainMedia(media);
+      setMediaType(type);
+    }
   };
-
-
 
   const handleIncrement = () => {
     setQuantidade(prevQuantity => prevQuantity + 1);
@@ -202,6 +204,10 @@ export function DetalhesView() {
   const handleOpenImagem = (imagemUrl) => {
     setImagemSelecionada(imagemUrl);
     setModalImagemOpen(true);
+  };
+
+  const handleImageClick = () => {
+    navigate(`/perfil2/${dados?.empresa?.id}/empresa`);
   };
 
   return (
@@ -270,17 +276,31 @@ export function DetalhesView() {
                   </Typography>
                 </Box>
               ))}
+
             </Box>
           </Grid>
 
           <Grid xs={12} md={6}>
 
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, borderBottom: 1, borderBottomColor: 'gray' }}>
-              <Box sx={{ width: 50, height: 50, marginBottom: 2, cursor: 'pointer' }}>
+              <Box
+                sx={{
+                  width: 50,
+                  height: 50,
+                  marginBottom: 2,
+                  cursor: 'pointer'
+                }}
+                onClick={handleImageClick}
+              >
                 <img
                   src={dados?.empresa?.imagens[0]?.imagem}
                   alt="..."
-                  style={{ width: 60, height: 50, borderRadius: '50%', objectFit: 'cover' }}
+                  style={{
+                    width: 60,
+                    height: 50,
+                    borderRadius: '50%',
+                    objectFit: 'cover'
+                  }}
                 />
               </Box>
               <Box>
@@ -351,49 +371,49 @@ export function DetalhesView() {
 
       <Card sx={{ maxWidth: "100%", padding: 2 }}>
         <Grid container spacing={2}>
+          {produtosemelhantes.map((produto) => (
+            <Grid item xs={12} sm={6} md={3} key={produto.id}>
+              <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+                <CardMedia
+                  component="img"
+                  height="300"
+                  image={`${Config.getApiUrlMedia()}${produto?.imagens[0].imagem}`}
+                  alt={produto.nome}
+                  style={{ cursor: 'pointer' }}
+                  onClick={() =>
+                    handleThumbnailClick(
+                      `${Config.getApiUrlMedia()}${produto?.imagens[0].imagem}`,
+                      'image',
+                      produto
+                    )
+                  }
+                />
 
-        {produtosemelhantes.map((produto) => (
-  <Grid item xs={12} sm={6} md={3} key={produto.id}>
-    <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-      <CardMedia
-        component="img"
-        height="300"
-        image={`${Config.getApiUrlMedia()}${produto?.imagens[0].imagem}`}
-        alt={produto.nome}
-        style={{ cursor: 'pointer' }}
-      />
+                <Box sx={{ display: 'flex', alignItems: 'center', p: 2, borderBottom: '1px solid #eee' }}>
+                  <Avatar
+                    src={`${Config.getApiUrlMedia()}${produto?.empresa?.imagens[0].imagem}`}
+                    sx={{ width: 50, height: 50, mr: 1.5,}}
+                  />
+                  <Typography variant="body2">{produto?.empresa.nome}</Typography>
+                </Box>
 
-      <Box sx={{ display: 'flex', alignItems: 'center', p: 2, borderBottom: '1px solid #eee' }}>
-        <Avatar
-          src={`${Config.getApiUrlMedia()}${produto?.empresa?.imagens[0].imagem}`}
-          sx={{ width: 50, height: 50, mr: 1.5, cursor: 'pointer' }}
-        />
-        <Typography variant="body2">{produto?.empresa.nome}</Typography>
-      </Box>
-
-      <CardContent sx={{ flexGrow: 1 }}>
-        <Typography gutterBottom variant="h6">
-          {produto.nome}
-        </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-          {produto.descricao}
-        </Typography>
-        <Typography variant="caption" display="block" sx={{ mb: 1 }}>
-          Quantidade: {produto.quantidade} disponíveis
-        </Typography>
-        <Typography variant="h6" color="primary">
-          KZ {produto.preco.toFixed(2).replace('.', ',')}
-        </Typography>
-      </CardContent>
-    </Card>
-  </Grid>
-))}
-
-          
-
-          
-
-          
+                <CardContent sx={{ flexGrow: 1 }}>
+                  <Typography gutterBottom variant="h6">
+                    {produto.nome}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                    {produto.descricao}
+                  </Typography>
+                  <Typography variant="caption" display="block" sx={{ mb: 1 }}>
+                    Quantidade: {produto.quantidade} disponíveis
+                  </Typography>
+                  <Typography variant="h6" color="primary">
+                    KZ {produto.preco.toFixed(2).replace('.', ',')}
+                  </Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+          ))}
         </Grid>
       </Card>
 
