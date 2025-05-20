@@ -12,7 +12,7 @@ import TextField from '@mui/material/TextField';
 import axios from 'axios';
 import { Iconify } from 'src/components/iconify';
 import ReportIcon from '@mui/icons-material/Report';
-import { Avatar, CardActions, CircularProgress, IconButton, Modal } from '@mui/material';
+import { Avatar, CardActions, CircularProgress, IconButton, Modal, MenuItem } from '@mui/material';
 
 import { DashboardContent } from 'src/layouts/dashboard';
 
@@ -22,6 +22,17 @@ import Config from '../../../../Config';
 
 // ----------------------------------------------------------------------
 
+const style = {
+  position: 'absolute',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+  width: 400,
+  bgcolor: 'background.paper',
+  boxShadow: 24,
+  p: 4,
+  borderRadius: 2
+};
 
 export function DetalhesView() {
   const [mainImage, setMainImage] = useState();
@@ -41,9 +52,11 @@ export function DetalhesView() {
   const [modalImagemOpen, setModalImagemOpen] = useState(false);
   const [produtosemelhantes, setProdutoSemelhantes] = useState([]);
   const navigate = useNavigate();
-
   const handleOpenPaymentModal = () => setOpenPaymentModal(true);
   const handleClosePaymentModal = () => setOpenPaymentModal(false);
+  const [open, setOpen] = useState(false);
+  const [motivo, setMotivo] = useState('');
+  const [descricao, setDescricao] = useState('');
 
   useEffect(() => {
     const fetchPostos = async () => {
@@ -210,6 +223,21 @@ export function DetalhesView() {
     navigate(`/perfil2/${dados?.empresa?.id}/empresa`);
   };
 
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
+
+  const handleSubmit = async () => {
+    try {
+      alert('Denúncia enviada com sucesso!');
+      setMotivo('');
+      setDescricao('');
+      handleClose();
+    } catch (error) {
+      console.error('Erro ao enviar denúncia:', error);
+      alert('Erro ao enviar denúncia');
+    }
+  };
+
   return (
     <DashboardContent>
       <Typography variant="h4" sx={{ mb: 3 }}>
@@ -308,7 +336,11 @@ export function DetalhesView() {
                 <Typography variant="body2" color="text.secondary"> Vendedor </Typography>
               </Box>
 
-              <IconButton color="error" title="Denunciar produto">
+              <IconButton
+                color="error"
+                title="Denunciar produto"
+                onClick={handleOpen}
+              >
                 <ReportIcon />
               </IconButton>
             </Box>
@@ -545,6 +577,56 @@ export function DetalhesView() {
         </Box>
       </Modal>
 
+      <Modal
+        open={open}
+        onClose={handleClose}
+        aria-labelledby="modal-denuncia"
+        aria-describedby="modal-denuncia-produto"
+      >
+        <Box sx={style}>
+          <Typography variant="h6" gutterBottom>
+            Denunciar Produto
+          </Typography>
+
+          <TextField
+            select
+            fullWidth
+            label="Motivo da denúncia"
+            value={motivo}
+            onChange={(e) => setMotivo(e.target.value)}
+            sx={{ mb: 2 }}
+          >
+            <MenuItem value="conteudo_impropio">Conteúdo impróprio</MenuItem>
+            <MenuItem value="informacao_falsa">Informação falsa</MenuItem>
+            <MenuItem value="produto_ilegal">Produto ilegal</MenuItem>
+            <MenuItem value="outro">Outro</MenuItem>
+          </TextField>
+
+          <TextField
+            fullWidth
+            multiline
+            rows={4}
+            label="Descrição detalhada"
+            value={descricao}
+            onChange={(e) => setDescricao(e.target.value)}
+            sx={{ mb: 3 }}
+          />
+
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
+            <Button variant="outlined" onClick={handleClose}>
+              Cancelar
+            </Button>
+            <Button
+              variant="contained"
+              color="error"
+              onClick={handleSubmit}
+              disabled={!motivo || !descricao}
+            >
+              Enviar Denúncia
+            </Button>
+          </Box>
+        </Box>
+      </Modal>
 
     </DashboardContent>
   );

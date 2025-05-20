@@ -7,7 +7,7 @@ import Button from '@mui/material/Button';
 import Grid from '@mui/material/Unstable_Grid2';
 import Typography from '@mui/material/Typography';
 import Pagination from '@mui/material/Pagination';
-import { TextField,MenuItem,Grid as grid } from '@mui/material';
+import { TextField, MenuItem, Grid as grid } from '@mui/material';
 
 import { _posts } from 'src/_mock';
 import { DashboardContent } from 'src/layouts/dashboard';
@@ -310,28 +310,27 @@ export function BlogView() {
               inputRef={inputRefs.produto_nome_search}
             />
           </Grid>
-          
 
-<Grid >
-  <TextField
-    fullWidth
-    select
-    label="Categoria"
-    name="categoria_id"
-    value={searchParams.categoria_id || ''}
-    onChange={handleSearchChange}
-    inputRef={inputRefs.categoria_id}
-  >
-    <MenuItem value="">
-      <em>Todas</em>
-    </MenuItem>
-    {categorias.map((categoria) => (
-      <MenuItem key={categoria.id} value={categoria.id}>
-        {categoria.nome}
-      </MenuItem>
-    ))}
-  </TextField>
-</Grid>
+          <Grid md={2}>
+            <TextField
+              fullWidth
+              select
+              label="Categoria"
+              name="categoria_id"
+              value={searchParams.categoria_id || ''}
+              onChange={handleSearchChange}
+              inputRef={inputRefs.categoria_id}
+            >
+              <MenuItem value="">
+                Todas
+              </MenuItem>
+              {categorias.map((categoria) => (
+                <MenuItem key={categoria.id} value={categoria.id}>
+                  {categoria.nome}
+                </MenuItem>
+              ))}
+            </TextField>
+          </Grid>
 
           <Grid sm={6} md={2}>
             <TextField
@@ -363,7 +362,7 @@ export function BlogView() {
             />
           </Grid>
 
-          <Grid sm={6} md={2}>
+          <Grid md={2}>
             <TextField
               fullWidth
               select
@@ -371,11 +370,18 @@ export function BlogView() {
               name="condicao"
               value={searchParams.condicao || ''}
               onChange={handleSearchChange}
+              variant="outlined"
               inputRef={inputRefs.condicao}
             >
-              <option value="">Todas</option>
-              <option value="novo">Novo</option>
-              <option value="usado">Usado</option>
+              <MenuItem value="">
+                Todas
+              </MenuItem>
+              <MenuItem value="novo">
+                Novo
+              </MenuItem>
+              <MenuItem value="usado">
+                Usado
+              </MenuItem>
             </TextField>
           </Grid>
 
@@ -389,9 +395,15 @@ export function BlogView() {
               onChange={handleSearchChange}
               inputRef={inputRefs.data}
             >
-              <option value="">Padrão</option>
-              <option value="recente">Mais Recente</option>
-              <option value="antigo">Mais Antigo</option>
+              <MenuItem value="">
+                Padrão
+              </MenuItem>
+              <MenuItem value="recente">
+                Mais Recente
+              </MenuItem>
+              <MenuItem value="antigo">
+                Mais Antigo
+              </MenuItem>
             </TextField>
           </Grid>
 
