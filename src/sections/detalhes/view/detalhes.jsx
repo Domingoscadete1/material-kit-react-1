@@ -56,6 +56,9 @@ export function DetalhesView() {
   const [open, setOpen] = useState(false);
   const [motivo, setMotivo] = useState('');
   const [descricao, setDescricao] = useState('');
+  const handleProdutoClick = (id) => {
+    navigate(`/detalhes/${id}/`);
+  };
 
   useEffect(() => {
     const fetchPostos = async () => {
@@ -312,7 +315,7 @@ export function DetalhesView() {
             <Box sx={{
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'space-between',  
+              justifyContent: 'space-between',
               gap: 2,
               borderBottom: 1,
               borderBottomColor: 'gray'
@@ -323,8 +326,8 @@ export function DetalhesView() {
                   height: 50,
                   marginBottom: 2,
                   cursor: 'pointer',
-                  display: 'flex',  
-                  alignItems: 'center'  
+                  display: 'flex',
+                  alignItems: 'center'
                 }}
                 onClick={handleImageClick}
               >
@@ -340,8 +343,8 @@ export function DetalhesView() {
                 />
               </Box>
 
-              <Box sx={{ flex: 1, marginLeft: 2 }}>  
-                <Typography gutterBottom variant="h5" component="div"> 
+              <Box sx={{ flex: 1, marginLeft: 2 }}>
+                <Typography gutterBottom variant="h5" component="div">
                   {dados?.empresa.nome}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
@@ -375,12 +378,20 @@ export function DetalhesView() {
                 Status: {dados?.status}
               </Typography>
               <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                Preço: {dados?.preco} AOA
+                Preço: {new Intl.NumberFormat('pt-AO', {
+                  style: 'decimal',
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2
+                }).format(dados?.preco | 0)} AOA
               </Typography>
 
               <Card variant="outlined" sx={{ padding: 2, border: '1px solid #ddd', borderRadius: 1, }}>
                 <Typography variant="h6" sx={{ mb: 2 }}>
-                  {dados?.preco} AOA
+                  {new Intl.NumberFormat('pt-AO', {
+                    style: 'decimal',
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                  }).format(dados?.preco | 0)}AOA
                 </Typography>
 
                 <Typography variant="h7">
@@ -425,12 +436,8 @@ export function DetalhesView() {
                   image={`${Config.getApiUrlMedia()}${produto?.imagens[0].imagem}`}
                   alt={produto.nome}
                   style={{ cursor: 'pointer' }}
-                  onClick={() =>
-                    handleThumbnailClick(
-                      `${Config.getApiUrlMedia()}${produto?.imagens[0].imagem}`,
-                      'image',
-                      produto
-                    )
+                  onClick={() =>handleProdutoClick(produto?.id)
+                    
                   }
                 />
 
@@ -453,7 +460,11 @@ export function DetalhesView() {
                     Quantidade: {produto.quantidade} disponíveis
                   </Typography>
                   <Typography variant="h6" color="primary">
-                    KZ {produto.preco.toFixed(2).replace('.', ',')}
+                    KZ {new Intl.NumberFormat('pt-AO', {
+                                    style: 'decimal',
+                                    minimumFractionDigits: 2,
+                                    maximumFractionDigits: 2
+                                }).format(produto?.preco | 0)}
                   </Typography>
                 </CardContent>
               </Card>
