@@ -231,9 +231,9 @@ export function ProductItem({ product }: { product: ProductItemProps }) {
         </Box>
 
         <Stack spacing={2} sx={{ p: 3 }}>
-          <Link color="inherit" underline="hover" variant="subtitle2" noWrap>
+          <Typography color="inherit" variant="subtitle2" noWrap>
             {product.nome}
-          </Link>
+          </Typography>
 
           <Typography variant="body2" color="text.secondary" noWrap>
             {product.descricao}
@@ -241,7 +241,6 @@ export function ProductItem({ product }: { product: ProductItemProps }) {
 
           <Box display="flex" alignItems="center" justifyContent="space-between">
             {renderPrice}
-
           </Box>
           <Typography variant="body2" color="text.secondary">
             quantidade: {product.quantidade}

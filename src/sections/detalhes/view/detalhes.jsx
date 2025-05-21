@@ -309,13 +309,22 @@ export function DetalhesView() {
 
           <Grid xs={12} md={6}>
 
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, borderBottom: 1, borderBottomColor: 'gray' }}>
+            <Box sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',  
+              gap: 2,
+              borderBottom: 1,
+              borderBottomColor: 'gray'
+            }}>
               <Box
                 sx={{
                   width: 50,
                   height: 50,
                   marginBottom: 2,
-                  cursor: 'pointer'
+                  cursor: 'pointer',
+                  display: 'flex',  
+                  alignItems: 'center'  
                 }}
                 onClick={handleImageClick}
               >
@@ -330,9 +339,14 @@ export function DetalhesView() {
                   }}
                 />
               </Box>
-              <Box>
-                <Typography gutterBottom variant="h5" component="Box"> {dados?.empresa.nome} </Typography>
-                <Typography variant="body2" color="text.secondary"> Vendedor </Typography>
+
+              <Box sx={{ flex: 1, marginLeft: 2 }}>  
+                <Typography gutterBottom variant="h5" component="div"> 
+                  {dados?.empresa.nome}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Vendedor
+                </Typography>
               </Box>
 
               <IconButton
