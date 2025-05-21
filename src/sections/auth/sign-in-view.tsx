@@ -207,7 +207,7 @@ export function SignInView() {
             try {
                 const decodedToken = jwtDecode<CustomJwtPayload>(accessToken);
                 if (decodedToken?.is_funcionario_emppresa) {
-                    router.push('/'); // Redireciona para a página inicial caso o token seja válido
+                    router.push('/');
                 }
             } catch (error) {
                 console.error('Erro ao decodificar o token', error);
@@ -448,28 +448,6 @@ export function SignInView() {
                 </Link>
             </Typography>
 
-
-            <Divider sx={{ my: 1, '&::before, &::after': { borderTopStyle: 'dashed' } }}>
-                <Typography
-                    variant="overline"
-                    sx={{ color: 'text.secondary', fontWeight: 'fontWeightMedium' }}
-                >
-                    Ou
-                </Typography>
-            </Divider>
-
-            <Box gap={1} display="flex" justifyContent="center">
-                <IconButton color="inherit">
-                    <Iconify icon="logos:google-icon" />
-                </IconButton>
-                <IconButton color="inherit">
-                    <Iconify icon="eva:github-fill" />
-                </IconButton>
-                <IconButton color="inherit">
-                    <Iconify icon="ri:twitter-x-fill" />
-                </IconButton>
-            </Box>
-
             {/* Modal de Cadastro de Empresa */}
             <Dialog open={open} onClose={handleClose}>
                 <DialogTitle>Cadastrar Empresa</DialogTitle>
@@ -546,18 +524,18 @@ export function SignInView() {
                         left: '50%',
                         transform: 'translate(-50%, -50%)',
                         width: {
-                          xs: '90vw', // Para telas muito pequenas (mobile)
-                          sm: '80vw', // Para telas pequenas (tablet)
-                          md: '70vw', // Para telas médias
-                          lg: '60vw', // Para telas grandes
-                          xl: '50vw'  // Para telas extra grandes
+                            xs: '90vw', // Para telas muito pequenas (mobile)
+                            sm: '80vw', // Para telas pequenas (tablet)
+                            md: '70vw', // Para telas médias
+                            lg: '60vw', // Para telas grandes
+                            xl: '50vw'  // Para telas extra grandes
                         },
                         height: {
-                          xs: '80vh', // Para telas muito pequenas
-                          sm: '70vh', // Para telas pequenas
-                          md: '60vh', // Para telas médias
-                          lg: '50vh', // Para telas grandes
-                          xl: '40vh'  // Para telas extra grandes
+                            xs: '80vh', // Para telas muito pequenas
+                            sm: '70vh', // Para telas pequenas
+                            md: '60vh', // Para telas médias
+                            lg: '50vh', // Para telas grandes
+                            xl: '40vh'  // Para telas extra grandes
                         },
                         maxWidth: 800, // Largura máxima
                         maxHeight: 600, // Altura máxima
@@ -570,11 +548,13 @@ export function SignInView() {
                     }}
                 >
                     <Typography variant="h6">Escolha a Localização</Typography>
-                    <MapContainer center={location} zoom={13} style={{ height: '100%', width: '100%', position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0 }}>
+                    <MapContainer center={location} zoom={13} style={{
+                        height: '100%', width: '100%', position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0
+                    }}>
                         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
                         <LocationMarker />
                     </MapContainer>
