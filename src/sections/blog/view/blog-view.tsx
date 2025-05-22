@@ -498,7 +498,7 @@ export function BlogView() {
         </Box>
       </Box>
 
-      <Box sx={{ mb: 5, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2 }}>
+      {/* <Box sx={{ mb: 5, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2 }}>
         <Typography variant="h6">Categorias</Typography>
         <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
           {categorias.map((categoria: any, index) => (
@@ -522,7 +522,7 @@ export function BlogView() {
             </Button>
           ))}
         </Box>
-      </Box>
+      </Box> */}
 
       {loading ? (
         <Box display="flex" justifyContent="center" alignItems="center" height="200px">
