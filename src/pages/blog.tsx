@@ -10,7 +10,7 @@ export default function Page() {
   return (
     <>
       <Helmet>
-        <title>Explore</title>
+        <title>Explorar</title>
       </Helmet>
 
       <BlogView />
