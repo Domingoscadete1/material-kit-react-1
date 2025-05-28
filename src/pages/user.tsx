@@ -10,7 +10,7 @@ export default function Page() {
   return (
     <>
       <Helmet>
-        <title> {`Users `}</title>
+        <title> {`Posto `}</title>
       </Helmet>
 
       <UserView />

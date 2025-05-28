@@ -10,7 +10,7 @@ export default function Page() {
   return (
     <>
       <Helmet>
-        <title> {`Sign in `}</title>
+        <title> {`Login `}</title>
       </Helmet>
 
       <SignInView />

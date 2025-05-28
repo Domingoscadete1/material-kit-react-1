@@ -38,7 +38,6 @@ export function FuncionarioView() {
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const funcionario = JSON.parse(localStorage.getItem('userData') || '{}');
 
-
   const fetchFuncionarios = useCallback(async () => {
     setLoading(true);
     try {

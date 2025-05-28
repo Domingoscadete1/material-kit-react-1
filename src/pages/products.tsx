@@ -10,7 +10,7 @@ export default function Page() {
   return (
     <>
       <Helmet>
-        <title> {`Products `}</title>
+        <title> {`Meus Produtos `}</title>
       </Helmet>
 
       <ProductsView />
