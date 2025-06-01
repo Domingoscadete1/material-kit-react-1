@@ -84,6 +84,49 @@ export function DetalhesView() {
       fetchPostos();
     }
   }, [openPaymentModal, dados?.empresa?.id]);
+  const handleEnviarDenunciaProduto = async () => {
+    if (!motivo) {
+      setErrorMessage('Por favor, selecione um motivo para a denúncia');
+      setErrorModalVisible(true);
+      return;
+    }
+
+    try {
+      const formData = new FormData();
+      formData.append('empresa_denunciante_id', userData?.empresa?.id ?? '');
+      formData.append('produto_id', dados.id ?? '');
+      formData.append('tipo', 'produto');
+      formData.append('motivo', motivo);
+      formData.append('descricao', descricao);
+
+      const response = await fetchWithToken(`api/reportes/create/`, {
+        method: 'POST',
+        headers: {
+          "ngrok-skip-browser-warning": "true",
+        },
+        body: formData
+      });
+
+      if (response.ok) {
+        
+        setErrorMessage('Denúncia enviada com sucesso!');
+        setErrorModalVisible(true);
+        setDenunciaModalVisible(false);
+        setMotivoDenuncia('');
+        setDescricaoDenuncia('');
+        alert('Denúncia enviada com sucesso!');
+
+      } else {
+        const errorData = await response.json();
+        setErrorMessage(errorData.detail || 'Erro ao enviar denúncia');
+        setErrorModalVisible(true);
+      }
+    } catch (error) {
+      setErrorMessage('Erro ao enviar denúncia. Por favor, tente novamente.');
+      setErrorModalVisible(true);
+      console.error('Erro ao enviar denúncia:', error);
+    }
+  };
 
   const checkPostoAvailability = async (postoId) => {
     try {
@@ -230,7 +273,7 @@ export function DetalhesView() {
 
   const handleSubmit = async () => {
     try {
-      alert('Denúncia enviada com sucesso!');
+      handleEnviarDenunciaProduto();
       setMotivo('');
       setDescricao('');
       handleClose();
