@@ -92,10 +92,14 @@ export interface Mensagem {
   updated_at?: string;
   deleted?: boolean;
   remetente_id: number;
+  imagens?: Imagem[];
 
 }
 
 export function ListaView() {
+  const generateWaveformHeights = () => {
+    return Array.from({ length: 10 }, () => Math.random() * 50 + 10);
+  };
   const baseUrl = Config.getApiUrl();
   const mediaUrl = Config.getApiUrlMedia();
 
@@ -108,7 +112,11 @@ export function ListaView() {
   const [empresaId, setEmpresaId] = useState(''); // ID da empresa
   const [loadingMessages, setLoadingMessages] = useState(false); // Estado de carregamento das mensagens
   const socketRef = useRef<WebSocket | null>(null);
-
+  const [isRecording, setIsRecording] = useState(false);
+  
+  // Estados para envio de imagens
+  const [images, setImages] = useState<any[]>([]);
+  const [modalVisible, setModalVisible] = useState(false);
   // Recupera o ID da empresa do localStorage
   useEffect(() => {
     const token = localStorage.getItem('userData');
@@ -156,6 +164,8 @@ export function ListaView() {
 
     const socket = new WebSocket(`wss://${baseWsUrl}/ws/chat/${activeConversation.id}/`);
     socketRef.current = socket;
+    
+
 
     socket.onopen = () => {
       console.log('Conectado ao WebSocket');
@@ -163,6 +173,7 @@ export function ListaView() {
 
     socket.onmessage = (event) => {
       const data = JSON.parse(event.data);
+      console.log(data);
 
       if (Array.isArray(data.messages)) {
         setMessages((prevMessages) => [
@@ -178,16 +189,17 @@ export function ListaView() {
       }
 
       // Se for uma nova mensagem recebida
-      if (data.message) {
+      if (data.conteudo) {
         setMessages((prevMessages) => [
           ...prevMessages,
           {
             id: data.mensagem_id || prevMessages.length + 1,
-            conteudo: data.message,
+            conteudo: data.conteudo,
             remetente_id: data.remetente_id || data.remetente,
             created_at: data.created_at || new Date().toISOString(),
             chat_room: activeConversation, // Garante a referência ao chat
             remetente: activeConversation?.comprador || activeConversation?.vendedor, // Evita erros
+            
           },
         ]);
       }
@@ -202,6 +214,8 @@ export function ListaView() {
 
   // Busca as mensagens do chat ativo
   useEffect(() => {
+    let intervalId:any;
+
     const fetchMessages = async () => {
       if (!activeConversation) return;
 
@@ -222,8 +236,14 @@ export function ListaView() {
       }
     };
 
-    // Chamada inicial
-    fetchMessages();
+    if (activeConversation) {
+      fetchMessages(); // chamada inicial
+      intervalId = setInterval(fetchMessages, 7000); // chamada a cada 7 segundos
+    }
+  
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
 
   }, [activeConversation]);
 
@@ -258,6 +278,99 @@ export function ListaView() {
       }
       setNewMessage('');
     }
+  };
+  const sendAudio = async (audioBlob: Blob) => {
+    const formData = new FormData();
+    formData.append('chatroom_id', String(activeConversation?.id));
+    formData.append('remetente_id', empresaId);
+    formData.append('audio', new File([audioBlob], 'audio.mp3', { type: 'audio/mp3' }));
+  
+    try {
+      const response = await fetchWithToken('api/audio-mensagem/create/', {
+        method: 'POST',
+        body: formData,
+      });
+  
+      if (!response.ok) {
+        const error = await response.json();
+        console.error('Erro ao enviar áudio:', error);
+      }
+    } catch (error) {
+      console.error('Erro ao enviar áudio:', error);
+    }
+  };
+  const startRecording = async () => {
+    const mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    const mediaRecorder = new MediaRecorder(mediaStream);
+    const chunks: BlobPart[] = [];
+  
+    mediaRecorder.ondataavailable = (e) => {
+      chunks.push(e.data);
+    };
+  
+    mediaRecorder.onstop = () => {
+      const audioBlob = new Blob(chunks, { type: 'audio/mp3' });
+      sendAudio(audioBlob);
+    };
+  
+    mediaRecorder.start();
+    setIsRecording(true);
+  
+    setTimeout(() => {
+      mediaRecorder.stop();
+      setIsRecording(false);
+    }, 5000); // grava por 5 segundos (ajustável)
+  };
+  const sendImages = async () => {
+    if (!images.length || !activeConversation) return;
+  
+    const formData = new FormData();
+    formData.append('chat_id', String(activeConversation.id));
+    formData.append('empresa_id', empresaId);
+  
+    images.forEach((image, index) => {
+      formData.append(`imagem${index + 1}`, image);
+    });
+  
+    try {
+      const response = await fetchWithToken('api/imagem-mensagem/create/', {
+        method: 'POST',
+        body: formData,
+      });
+  
+      if (!response.ok) {
+        const error = await response.json();
+        console.error('Erro ao enviar imagens:', error);
+      }
+    } catch (error) {
+      console.error('Erro ao enviar imagens:', error);
+    }
+  };
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const selected = Array.from(e.target.files);
+      setImages(selected);
+    }
+  };
+  
+  
+  
+  const renderWaveform = () => {
+    const heights = generateWaveformHeights();
+
+    return (
+      <Box display="flex" alignItems="flex-end" height={50} gap={1}>
+        {heights.map((height, index) => (
+          <Box
+            key={index}
+            bgcolor="#f1731f"
+            width={3}
+            height={`${height}px`}
+            borderRadius={2}
+          />
+        ))}
+      </Box>
+    );
   };
 
   return (
@@ -340,34 +453,90 @@ export function ListaView() {
 
             {/* Mensagens */}
             <Box flexGrow={1} p={2} overflow="auto">
-              {loadingMessages ? (
-                <CircularProgress />
-              ) : (
-                messages.map((message, index) => (
-                  <Box
-                    key={index}
-                    display="flex"
-                    justifyContent={message.empresa?.id === Number(empresaId) ? 'flex-end' : 'flex-start'}
-                    mb={2}
-                  >
-                    <Box
-                      sx={{
-                        p: 2,
-                        bgcolor: message.empresa?.id === Number(empresaId) ? "#f1731f" : "#f0f0f0",
-                        color: message.empresa?.id === Number(empresaId) ? "white" : "black",
-                        borderRadius: "10px",
-                        maxWidth: "70%",
-                      }}
-                    >
-                      <Typography variant="body1">{message.conteudo}</Typography>
+  {loadingMessages ? (
+    <CircularProgress />
+  ) : (
+    messages.map((message, index) => (
+      <Box
+        key={index}
+        display="flex"
+        justifyContent={message.empresa?.id === Number(empresaId) ? 'flex-end' : 'flex-start'}
+        mb={2}
+      >
+        <Box
+          sx={{
+            p: 2,
+            bgcolor: message.empresa?.id === Number(empresaId) ? "#f1731f" : "#f0f0f0",
+            color: message.empresa?.id === Number(empresaId) ? "white" : "black",
+            borderRadius: "10px",
+            maxWidth: "70%",
+          }}
+        >
+          <Typography variant="body1" mb={1}>
+            {message.conteudo}
+          </Typography>
+
+          {/* Imagens */}
+          {message.imagens && Array.isArray(message.imagens) && message.imagens.length > 0 && (
+                        <Box display="flex" flexWrap="wrap" gap={1} mb={1}>
+                          {message?.imagens?.map((img, index) => (
+                            <img
+                              key={index}
+                              src={`${mediaUrl}${img.imagem}`}
+                              alt={`imagem-${index}`}
+                              style={{ 
+                                width: 100, 
+                                height: 100, 
+                                objectFit: "cover", 
+                                borderRadius: 8, 
+                                cursor: "pointer" 
+                              }}
+                            />
+                          ))}
+                        </Box>
+                      )}
+
+          {/* Áudio */}
+          {message.audio && (
+                        <Box display="flex" alignItems="center" gap={1}>
+                          {renderWaveform()}
+                          <audio controls>
+                            <source src={`${mediaUrl}${message.audio}`} type="audio/mpeg" />
+                            Seu navegador não suporta o elemento de áudio.
+                          </audio>
+                        </Box>
+                      )}
                     </Box>
                   </Box>
                 ))
               )}
-            </Box>
+</Box>
+
 
             {/* Campo de Nova Mensagem */}
-            <Box display="flex" p={2} borderTop="1px solid #e0e0e0">
+            <Box display="flex" alignItems="center" gap={1} p={2} borderTop="1px solid #e0e0e0">
+            <input
+    accept="image/*"
+    type="file"
+    multiple
+    style={{ display: 'none' }}
+    id="image-upload"
+    onChange={handleImageSelect}
+  />
+  <label htmlFor="image-upload">
+    <Button variant="outlined" component="span">Imagens</Button>
+  </label>
+
+  <Button variant="outlined" onClick={sendImages}>Enviar Imagens</Button>
+
+  <Button
+    variant="outlined"
+    onClick={startRecording}
+    color={isRecording ? "error" : "primary"}
+  >
+    {isRecording ? "Gravando..." : "Áudio"}
+  </Button>
+
               <TextField
                 fullWidth
                 placeholder="Escreva uma mensagem..."
