@@ -154,7 +154,7 @@ export function ListaView() {
   useEffect(() => {
     if (!activeConversation) return;
 
-    const socket = new WebSocket(`${baseWsUrl}/ws/chat/${activeConversation.id}/`);
+    const socket = new WebSocket(`wss://${baseWsUrl}/ws/chat/${activeConversation.id}/`);
     socketRef.current = socket;
 
     socket.onopen = () => {
