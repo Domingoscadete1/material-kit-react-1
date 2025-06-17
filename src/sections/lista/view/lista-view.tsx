@@ -113,6 +113,8 @@ export function ListaView() {
   const [loadingMessages, setLoadingMessages] = useState(false); // Estado de carregamento das mensagens
   const socketRef = useRef<WebSocket | null>(null);
   const [isRecording, setIsRecording] = useState(false);
+  const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null); // Adicionado estado para o MediaRecorder
+
   
   // Estados para envio de imagens
   const [images, setImages] = useState<any[]>([]);
@@ -299,28 +301,40 @@ export function ListaView() {
       console.error('Erro ao enviar áudio:', error);
     }
   };
-  const startRecording = async () => {
-    const mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    const mediaRecorder = new MediaRecorder(mediaStream);
-    const chunks: BlobPart[] = [];
   
-    mediaRecorder.ondataavailable = (e) => {
+const startRecording = async () => {
+  try {
+    const mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    const recorder = new MediaRecorder(mediaStream);
+    const chunks: BlobPart[] = [];
+
+    recorder.ondataavailable = (e) => {
       chunks.push(e.data);
     };
-  
-    mediaRecorder.onstop = () => {
+
+    recorder.onstop = () => {
       const audioBlob = new Blob(chunks, { type: 'audio/mp3' });
       sendAudio(audioBlob);
+      // Encerra todas as tracks do stream
+      mediaStream.getTracks().forEach(track => track.stop());
     };
-  
-    mediaRecorder.start();
+
+    recorder.start();
     setIsRecording(true);
-  
-    setTimeout(() => {
-      mediaRecorder.stop();
-      setIsRecording(false);
-    }, 5000); // grava por 5 segundos (ajustável)
-  };
+    setMediaRecorder(recorder);
+
+  } catch (error) {
+    console.error('Erro ao iniciar gravação:', error);
+  }
+};
+const stopRecording = () => {
+  if (mediaRecorder && isRecording) {
+    mediaRecorder.stop();
+    setIsRecording(false);
+    setMediaRecorder(null);
+  }
+};
+
   const sendImages = async () => {
     if (!images.length || !activeConversation) return;
   
@@ -352,7 +366,17 @@ export function ListaView() {
       setImages(selected);
     }
   };
-  
+  const renderAudioButton = () => {
+    return (
+      <Button
+        variant="outlined"
+        onClick={isRecording ? stopRecording : startRecording}
+        color={isRecording ? "error" : "primary"}
+      >
+        {isRecording ? "Parar Gravação" : "Áudio"}
+      </Button>
+    );
+  };
   
   
   const renderWaveform = () => {
@@ -529,13 +553,8 @@ export function ListaView() {
 
   <Button variant="outlined" onClick={sendImages}>Enviar Imagens</Button>
 
-  <Button
-    variant="outlined"
-    onClick={startRecording}
-    color={isRecording ? "error" : "primary"}
-  >
-    {isRecording ? "Gravando..." : "Áudio"}
-  </Button>
+  {renderAudioButton()}
+
 
               <TextField
                 fullWidth
