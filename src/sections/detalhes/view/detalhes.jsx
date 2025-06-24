@@ -86,8 +86,7 @@ export function DetalhesView() {
   }, [openPaymentModal, dados?.empresa?.id]);
   const handleEnviarDenunciaProduto = async () => {
     if (!motivo) {
-      setErrorMessage('Por favor, selecione um motivo para a denúncia');
-      setErrorModalVisible(true);
+      
       return;
     }
 
@@ -109,21 +108,15 @@ export function DetalhesView() {
 
       if (response.ok) {
         
-        setErrorMessage('Denúncia enviada com sucesso!');
-        setErrorModalVisible(true);
-        setDenunciaModalVisible(false);
-        setMotivoDenuncia('');
-        setDescricaoDenuncia('');
+     
         alert('Denúncia enviada com sucesso!');
 
       } else {
         const errorData = await response.json();
-        setErrorMessage(errorData.detail || 'Erro ao enviar denúncia');
-        setErrorModalVisible(true);
+        
       }
     } catch (error) {
-      setErrorMessage('Erro ao enviar denúncia. Por favor, tente novamente.');
-      setErrorModalVisible(true);
+      
       console.error('Erro ao enviar denúncia:', error);
     }
   };
@@ -425,7 +418,7 @@ export function DetalhesView() {
                   style: 'decimal',
                   minimumFractionDigits: 2,
                   maximumFractionDigits: 2
-                }).format(dados?.preco | 0)} AOA
+                }).format(dados?.preco || 0)} AOA
               </Typography>
 
               <Card variant="outlined" sx={{ padding: 2, border: '1px solid #ddd', borderRadius: 1, }}>
@@ -434,7 +427,7 @@ export function DetalhesView() {
                     style: 'decimal',
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2
-                  }).format(dados?.preco | 0)}AOA
+                  }).format(dados?.preco || 0)}AOA
                 </Typography>
 
                 <Typography variant="h7">
@@ -507,7 +500,7 @@ export function DetalhesView() {
                                     style: 'decimal',
                                     minimumFractionDigits: 2,
                                     maximumFractionDigits: 2
-                                }).format(produto?.preco | 0)}
+                                }).format(produto?.preco || 0)}
                   </Typography>
                 </CardContent>
               </Card>

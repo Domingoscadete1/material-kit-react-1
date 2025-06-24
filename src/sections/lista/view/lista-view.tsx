@@ -97,9 +97,9 @@ export interface Mensagem {
 }
 
 export function ListaView() {
-  const generateWaveformHeights = () => {
-    return Array.from({ length: 10 }, () => Math.random() * 50 + 10);
-  };
+  const generateWaveformHeights = () =>
+    Array.from({ length: 10 }, () => Math.random() * 50 + 10);
+  
   const baseUrl = Config.getApiUrl();
   const mediaUrl = Config.getApiUrlMedia();
 
@@ -366,6 +366,7 @@ const stopRecording = () => {
       setImages(selected);
     }
   };
+  // eslint-disable-next-line arrow-body-style
   const renderAudioButton = () => {
     return (
       <Button
@@ -503,11 +504,11 @@ const stopRecording = () => {
           {/* Imagens */}
           {message.imagens && Array.isArray(message.imagens) && message.imagens.length > 0 && (
                         <Box display="flex" flexWrap="wrap" gap={1} mb={1}>
-                          {message?.imagens?.map((img, index) => (
+                          {message?.imagens?.map((img, imgindex) => (
                             <img
-                              key={index}
+                              key={imgindex}
                               src={`${mediaUrl}${img.imagem}`}
-                              alt={`imagem-${index}`}
+                              alt={`imagem-${imgindex}`}
                               style={{ 
                                 width: 100, 
                                 height: 100, 
@@ -524,6 +525,7 @@ const stopRecording = () => {
           {message.audio && (
                         <Box display="flex" alignItems="center" gap={1}>
                           {renderWaveform()}
+                          {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
                           <audio controls>
                             <source src={`${mediaUrl}${message.audio}`} type="audio/mpeg" />
                             Seu navegador não suporta o elemento de áudio.
@@ -539,17 +541,27 @@ const stopRecording = () => {
 
             {/* Campo de Nova Mensagem */}
             <Box display="flex" alignItems="center" gap={1} p={2} borderTop="1px solid #e0e0e0">
-            <input
+            {/* <input
     accept="image/*"
     type="file"
     multiple
     style={{ display: 'none' }}
     id="image-upload"
     onChange={handleImageSelect}
-  />
-  <label htmlFor="image-upload">
+  /> */}
+
+<label htmlFor="image-upload">
+    <input
+      id="image-upload"
+      type="file"
+      accept="image/*"
+      multiple
+      hidden
+      onChange={handleImageSelect}
+    />
     <Button variant="outlined" component="span">Imagens</Button>
   </label>
+
 
   <Button variant="outlined" onClick={sendImages}>Enviar Imagens</Button>
 
