@@ -219,7 +219,7 @@ export function RelatorioView() {
                     open={Boolean(menuAnchor[report.id])}
                     onClose={() => handleMenuClose(report.id)}
                   >
-                    <MenuItem onClick={() => { downloadInvoice(report.id); handleMenuClose(report.id); }}>
+                    <MenuItem onClick={() => { downloadInvoice(report.transacao.id); handleMenuClose(report.id); }}>
                       Baixar Fatura
                     </MenuItem>
                   </Menu>
