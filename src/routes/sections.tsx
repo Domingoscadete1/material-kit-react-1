@@ -21,6 +21,7 @@ import { DetalhesView } from 'src/sections/detalhes/view';
 export const HomePage = lazy(() => import('src/pages/home'));
 export const BlogPage = lazy(() => import('src/pages/blog'));
 export const UserPage = lazy(() => import('src/pages/user'));
+export const PedidosPage = lazy(() => import('src/pages/pedidos'));
 export const Funcionário = lazy(() => import('src/pages/funcionario'));
 export const SignInPage = lazy(() => import('src/pages/sign-in'));
 export const ProductsPage = lazy(() => import('src/pages/products'));
@@ -61,6 +62,7 @@ export function Router() {
         { path: 'user', element: <UserPage /> },
         { path: 'funcionario', element: <FuncionarioView /> },
         { path: 'products', element: <ProductsPage /> },
+        { path: 'pedidos', element: <PedidosPage /> },
         { path: 'blog', element: <BlogPage /> },
         { path: 'listasms', element: <Lista /> },
         { path: 'chat', element: <ChatView  /> },

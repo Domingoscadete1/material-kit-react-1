@@ -1,0 +1,134 @@
+import React, { useState, useEffect, useCallback } from 'react';
+import { Modal, Box, Button, Typography, MenuItem, TextField, CircularProgress } from '@mui/material';
+import axios from 'axios';
+import { fetchWithToken } from '../../../../authService';
+
+type Posto = {
+  id: string;
+  nome: string;
+};
+
+type AddPostoModalProps = {
+  open: boolean;
+  onClose: () => void;
+};
+
+const AddPostoModal: React.FC<AddPostoModalProps> = ({ open, onClose }) => {
+  const [postos, setPostos] = useState<Posto[]>([]);
+  const [selectedPosto, setSelectedPosto] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const fetchPostos = useCallback(async () => {
+    setLoading(true);
+    try {
+      const response = await fetchWithToken('api/postos/', {
+        method: 'GET',
+        headers: {
+
+          'Content-Type': 'multipart/form-data',
+          "ngrok-skip-browser-warning": "true"
+        },
+      });
+      const data = await response.json();
+      setPostos(data);
+    } catch (error) {
+      console.error('Erro ao buscar postos:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const handleAddPosto = async () => {
+    const token = localStorage.getItem('userData');
+    if (!token) {
+      alert('Usuário não autenticado.');
+      return;
+    }
+
+    const userData = JSON.parse(token);
+    const empresaId = userData.empresa.id;
+
+    if (!selectedPosto) {
+      alert('Selecione um posto.');
+      return;
+    }
+    const formData = new FormData();
+    formData.append('empresa_id', empresaId);
+    formData.append('posto_id', selectedPosto);
+
+
+    try {
+      const response = await fetchWithToken('api/empresa-posto/create/', {
+        method: 'POST',
+        headers: {
+          "ngrok-skip-browser-warning": "true",
+        },
+        body: formData
+      });
+
+      alert('Posto adicionado com sucesso!');
+      onClose();
+    } catch (error) {
+      console.error('Erro ao adicionar posto:', error);
+      alert('Ocorreu um erro ao adicionar o posto.');
+    }
+  };
+
+  useEffect(() => {
+    if (open) {
+      fetchPostos();
+    }
+  }, [open, fetchPostos]);
+
+  return (
+    <Modal open={open} onClose={onClose}>
+      <Box
+        sx={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: 400,
+          bgcolor: 'background.paper',
+          boxShadow: 24,
+          p: 4,
+          borderRadius: 2,
+        }}
+      >
+        <Typography variant="h6" component="h2">
+          Adicionar Posto
+        </Typography>
+
+        {loading ? (
+          <CircularProgress />
+        ) : (
+          <TextField
+            fullWidth
+            select
+            label="Selecione um posto"
+            value={selectedPosto}
+            onChange={(e) => setSelectedPosto(e.target.value)}
+            sx={{ mt: 2 }}
+          >
+            {postos.map((posto) => (
+              <MenuItem key={posto.id} value={posto.id}>
+                {posto.nome}
+              </MenuItem>
+            ))}
+          </TextField>
+        )}
+
+        <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
+          <Button onClick={onClose} variant="outlined">
+            Cancelar
+          </Button>
+          <Button onClick={handleAddPosto} variant="contained" color="primary">
+            Adicionar
+          </Button>
+        </Box>
+      </Box>
+    </Modal>
+  );
+};
+
+export default AddPostoModal;
