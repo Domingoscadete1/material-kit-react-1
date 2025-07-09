@@ -352,8 +352,24 @@ export function PerfilView() {
       socketRef.current.onopen = () => console.log("WebSocket conectado para novo chat");
       socketRef.current.onmessage = (event) => {
         const novaMensagem = JSON.parse(event.data);
-        setMensagens((prev) => [...prev, novaMensagem]);
-      };
+        console.log("Nova mensagem recebida:", novaMensagem);
+      
+        const mensagemFormatada: MensagemSuporte = {
+          id: novaMensagem.id,
+          chat_room: novaMensagem.chat_room,
+          usuario: novaMensagem.usuario ?? null,
+          empresa: novaMensagem.empresa ?? null,
+          funcionario: novaMensagem.funcionario ?? null,
+          conteudo: novaMensagem.message || novaMensagem.conteudo || '', 
+          created_at: novaMensagem.created_at || new Date().toISOString(),
+          updated_at: novaMensagem.updated_at ?? null,
+          deleted: novaMensagem.deleted ?? false,
+          expires_at: novaMensagem.expires_at ?? '',
+          remetente: novaMensagem.remetente || '',
+        };
+      
+        setMensagens((prev) => [...prev, mensagemFormatada]);
+      }
       socketRef.current.onerror = (error) => console.error("Erro no WebSocket:", error);
       socketRef.current.onclose = () => console.log("WebSocket fechado");
     }
